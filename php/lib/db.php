@@ -296,4 +296,17 @@ function db_toggle_bool($table, $pri, $col, $id)
 {
     return db_query("UPDATE {$table} SET {$col} = IF({$col} = '1', '0', '1') WHERE {$pri} = {$id}");
 }
+
+/**
+ *  Sets enum booleans to their opposite
+ *  @param string $table
+ *  @param string $pri
+ *  @param string $col
+ *  @param array $id
+ *  @return int
+ */
+function db_toggle_int($table, $pri, $col, $id)
+{
+    return db_query("UPDATE {$table} SET {$col} = IF({$col} = 1, 0, 1) WHERE {$pri} = {$id}");
+}
 ?>

@@ -35,7 +35,13 @@ my $email = '';
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
-$location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.product_id WHERE product_active='1'};
+if (defined($ARGV[0]) and $ARGV[0] eq 'checknow') {
+    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
+    ON mirror_locations.product_id = mirror_products.product_id WHERE
+    product_active='1' AND product_checknow=1};
+} else {
+    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.product_id WHERE product_active='1'};
+}
 $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' ORDER BY mirror_name};
 $update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=?,location_active=?};
 $failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET location_active='0' WHERE mirror_id=?};

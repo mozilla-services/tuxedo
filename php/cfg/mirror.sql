@@ -93,12 +93,19 @@ CREATE TABLE `mirror_os` (
 -- 
 
 DROP TABLE IF EXISTS `mirror_products`;
+
 CREATE TABLE `mirror_products` (
   `product_id` int(10) unsigned NOT NULL auto_increment,
-  `product_name` varchar(32) NOT NULL default '',
+  `product_name` varchar(255) NOT NULL default '',
   `product_priority` int(11) NOT NULL default '0',
+  `product_count` bigint(20) unsigned NOT NULL default '0',
+  `product_active` enum('0','1') NOT NULL default '1',
+  `product_checknow` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`product_id`),
-  UNIQUE KEY `product_name` (`product_name`)
+  UNIQUE KEY `product_name` (`product_name`),
+  KEY `product_count` (`product_count`),
+  KEY `product_active` (`product_active`),
+  KEY `product_checknow` (`product_checknow`)
 ) TYPE=InnoDB AUTO_INCREMENT=6 ;
 
 -- --------------------------------------------------------

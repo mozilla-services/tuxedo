@@ -226,7 +226,8 @@ function mirror_get_products()
 {
     return db_get("
         SELECT 
-            *
+            *,
+            IF(mirror_products.product_checknow='0','no','YES') as product_checknow
         FROM 
             mirror_products
     ",MYSQL_ASSOC);
@@ -527,5 +528,14 @@ function mirror_get_product_stats()
         GROUP BY
             mirror_locations.product_id
     ");
+}
+
+/**
+ * Toggle product checking.
+ * @param int $product product id
+ */
+function product_toggle($id)
+{
+    return (db_toggle_int('mirror_products','product_id','product_checknow',$id));
 }
 ?>

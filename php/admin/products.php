@@ -55,6 +55,13 @@ if (!empty($_POST['submit'])) {
                     set_error('Product cannot be deleted because it is being used by a file location.');
                 }
                 break;
+            case 'check':
+                if (product_toggle($_POST['product_id'])) {
+                    set_msg('Product flagged for immediate checking..');
+                } else {
+                    set_error('Product could not be flagged for immediate checking.');
+                }
+                break;
         }
     } else {
         set_error('You must select a product to continue.');
@@ -78,11 +85,12 @@ $products=array_order_by($products,$_GET['sort'],$_GET['order']);
 $headers = array(
     'product_id'=>'',
     'product_name'=>'Product Name',
-    'product_priority'=>'Priority',
-    'product_count'=>'Downloads'
+    'product_count'=>'Downloads',
+    'product_checknow'=>'Check Now?'
 );
 
 $actions = array(
+    'check'=>'Check Now!',
     'edit'=>'Edit',
     'delete'=>'Delete'
 );
