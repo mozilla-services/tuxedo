@@ -40,7 +40,7 @@ if (!empty($_GET['csv'])) {
     foreach ($stats as $row) {
     	$csv[] = $row;
     }
-    csv_send_csv($csv);
+    send_csv($csv);
     exit;
 }
 
