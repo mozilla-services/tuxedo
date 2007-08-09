@@ -104,6 +104,10 @@ class SDO {
      */
     function get($query,$args,$type=MYSQL_BOTH,$col_id=null)
     {
+
+        // trim our query
+        $query = trim($query);
+
         // set cachekey
         $cachekey = $this->flatten_query($query,$args).$type.$col_id;
 
