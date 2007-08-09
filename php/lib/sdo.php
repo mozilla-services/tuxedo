@@ -65,6 +65,9 @@ class SDO {
     function query($q,$args=null)
     {
         $dbh =& $this->connect();
+        echo '<pre>';
+        echo $this->build_query($q,$args);
+        echo '</pre>';
         return @mysql_query($this->build_query($q,$args),$dbh);
     }
 
@@ -109,7 +112,7 @@ class SDO {
         $query = trim($query);
 
         // set cachekey
-        $cachekey = $this->flatten_query($query,$args).$type.$col_id;
+        $cachekey = md5($this->flatten_query($query,$args).$type.$col_id);
 
         // only return cached results if we have a valid cache object and the
         // current query is a select query 
