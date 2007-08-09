@@ -35,7 +35,7 @@ function set_msg($str=null)
  */
 function show_msg($class='msg')
 {
-	if (is_array($_SESSION['messages']) && count($_SESSION['messages']) > 0)
+	if (!empty($_SESSION['messages']) && is_array($_SESSION['messages']) && count($_SESSION['messages']) > 0)
 	{
 		echo ($class !== NULL) ? '<div class="'.$class.'">' : '';
 		echo '<ul>';

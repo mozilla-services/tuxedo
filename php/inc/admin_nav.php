@@ -21,6 +21,7 @@
         <li><a href="<?=WEBPATH?>/admin/os.php" title="Operating systems.">Operating Systems</a></li>
         <li><a href="<?=WEBPATH?>/admin/lstats.php" title="View location statuses.">Location Statuses</a></li>
         <li><a href="<?=WEBPATH?>/admin/monitor.php" title="View product uptake.">Product Uptake</a></li>
+        <li><a href="<?=WEBPATH?>/admin/status.php" title="View Memcache server status.">Server Status</a></li>
     </ul>
 </li>
 <li><a href="<?=WEBPATH?>/admin/users.php" title="Manage administrator accounts.">Users</a></li>

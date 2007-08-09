@@ -119,6 +119,8 @@ function show_list($list,$headers,$type='checkbox',$actions=null,$form_id=null,$
 		echo "\n".'<table class="list">';
 		show_headers($headers,$type,$sortable);
 		echo "\n".'<tbody>';
+
+        $count = 0;
 		foreach ($list as $row)
 		{
 			show_row($headers,$row,$type,$count++,$selected);
@@ -215,7 +217,6 @@ function show_headers($headers,$type,$sortable=true)
 		if ($type!='simple'&&$count==0)	
 		{
 			echo "\n".'<th> </th>';
-			next;
 		}
 		elseif($sortable)
 		{
