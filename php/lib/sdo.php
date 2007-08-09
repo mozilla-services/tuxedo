@@ -64,7 +64,8 @@ class SDO {
      */
     function query($q,$args=null)
     {
-        return @mysql_query($this->build_query($q,$args),$this->connect());
+        $dbh =& $this->connect();
+        return @mysql_query($this->build_query($q,$args),$dbh);
     }
 
     /**
