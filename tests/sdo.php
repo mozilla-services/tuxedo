@@ -1,4 +1,12 @@
 <?php
+/**
+ * To run this test from this directory:
+ *  [morgamic@khan-vm tests]$ php -q sdo.php
+ *  sdotest
+ *  OK
+ *  Test cases run: 1/1, Passes: 29, Failures: 0, Exceptions: 0
+ */
+
 if (! defined('SIMPLE_TEST')) {
     define('SIMPLE_TEST', 'simpletest/');
 }

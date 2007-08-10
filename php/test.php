@@ -78,7 +78,7 @@ global $results;
 
         $_memcache->close();
 
-        testo("At least 2 memcache servers? ({$total})", ($total>=2));
+        testo("At least 1 memcache server? ({$total})", ($total>=1));
     }
 
 // Print out all our results
@@ -93,7 +93,7 @@ global $results;
     }
 
     echo '<hr />';
-    echo '<p>What are we actually testing? <a href="https://svn.osuosl.org/public/bouncer/tags/1.0-production/php/status.php">Check the source</a>';
+    echo '<p>What are we actually testing? <a href="https://svn.mozilla.org/projects/bouncer/1.0/trunk/php/status.php">Check the source</a>';
 
 // Functions
     /**
