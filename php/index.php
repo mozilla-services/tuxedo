@@ -122,10 +122,21 @@ if (!empty($_GET['product'])) {
     }
 }
 
-// if we get here, the request was invalid; redirect to mozilla home and make
-// sure we pass a 404 response header
-header('HTTP/1.0 404 Not Found');
-show_no_cache_headers();
-require_once('./error.php');
-exit;
+/**
+ * If there are non-empty parameters, it is an unsuccessful request and the user
+ * should get a 404 header response code.
+ *
+ * If they are all empty, we should redirect them to www.mozilla.org because
+ * they are likely a user trying to access download.mozilla.org directly.
+ */
+if (!empty($_GET['product']) || !empty($_GET['lang'])) {
+    header('HTTP/1.0 404 Not Found');
+    show_no_cache_headers();
+    require_once('./error.php');
+    exit;
+} else {
+    show_no_cache_headers();
+    header('Location: http://www.mozilla.com/');
+    exit;
+}
 ?>
