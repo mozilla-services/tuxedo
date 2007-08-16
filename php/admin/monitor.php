@@ -35,7 +35,7 @@ if (!empty($product)) {
     JOIN mirror_os o ON o.os_id = l.os_id
     WHERE lmm.location_active = '1'
     AND p.product_name LIKE '%{$product}%'
-    GROUP BY p.product_id, o.os_id
+    GROUP BY lmm.location_id
     ",MYSQL_ASSOC);
 
     $_GET['sort']=(!empty($_GET['sort']))?$_GET['sort']:'product_name';
