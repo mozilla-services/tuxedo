@@ -19,7 +19,7 @@ if (!empty($_POST['flush'])) {
 $title = 'Memcache Server Status';
 $nav = INC.'/admin_nav.php';
 require_once(HEADER);
-echo '<h2>Memcache Server Status</h1>';
+echo '<h2>Memcache Server Status</h2>';
 
 $data['memcache'] = $memcache->getExtendedStats();
 
