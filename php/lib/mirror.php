@@ -109,6 +109,7 @@ function mirror_get_regions()
     ",MYSQL_ASSOC);
 }
 
+/***** MIRRORS *****/
 /**
  *  Insert mirror.
  *  @param string $name
@@ -175,6 +176,7 @@ function mirror_get_mirrors()
     ",MYSQL_ASSOC);
 }
 
+/***** PRODUCTS *****/
 /**
  *  Insert product.
  *  @param string $name
@@ -233,6 +235,7 @@ function mirror_get_products()
     ",MYSQL_ASSOC);
 }
 
+/***** OPERATING SYSTEMS *****/
 /**
  *  Insert os.
  *  @param string $name
@@ -342,6 +345,7 @@ function mirror_get_products_select_priority()
     return $retval;
 }
 
+/***** LOCATIONS *****/
 /**
  *  Insert a new location.
  *  @param int $product
@@ -359,12 +363,13 @@ function mirror_insert_location($product,$os,$path)
  *  @param int $location
  *  @param int $product
  *  @param int $os
+ *  @param int $language
  *  @param string $path
  *  @return bool
  */
-function mirror_update_location($location,$product,$os,$path)
+function mirror_update_location($location,$product,$os,$lang,$path)
 {
-    return db_query("UPDATE mirror_locations SET product_id={$product},os_id={$os},location_path='{$path}' WHERE location_id={$location}");
+    return db_query("UPDATE mirror_locations SET product_id={$product},os_id={$os},lang_id={$lang},location_path='{$path}' WHERE location_id={$location}");
 }
 
 /**
@@ -388,14 +393,17 @@ function mirror_get_locations()
             location_id,
             product_name,
             os_name,
-            location_path 
+            location_path,
+            lang
         FROM 
             mirror_locations,
             mirror_products,
-            mirror_os
+            mirror_os,
+            mirror_langs
         WHERE
             mirror_locations.product_id = mirror_products.product_id AND
-            mirror_locations.os_id = mirror_os.os_id
+            mirror_locations.os_id = mirror_os.os_id AND
+            mirror_locations.lang_id = mirror_langs.lang_id
     "); 
 }
 
@@ -408,6 +416,84 @@ function mirror_get_one_location($id)
 {
     return db_get_one("SELECT * FROM mirror_locations WHERE location_id = {$id}");
 }
+
+/***** LANGUAGES *****/
+
+/**
+ *  Insert a new language.
+ *  @param string $lang
+ *  @return bool
+ */
+function mirror_insert_lang($lang)
+{
+    $lang = addslashes($lang);
+    return db_query("INSERT INTO mirror_langs (lang) VALUES('{$lang}')");
+}
+
+/**
+ *  Update a language.
+ *  @param int $lang_id
+ *  @param int $lang
+ *  @return bool
+ */
+function mirror_update_lang($lang_id, $lang)
+{
+    $lang_id = addslashes($lang_id);
+    $lang = addslashes($lang);
+    return db_query("UPDATE mirror_langs SET lang='{$lang}' WHERE lang_id={$lang_id}");
+}
+
+/**
+ *  Delete a language.
+ *  @param int $id
+ *  @return bool
+ */
+function mirror_delete_lang($id)
+{
+    $id = addslashes($id);
+    return db_query("DELETE FROM mirror_langs WHERE lang_id={$id}");
+}
+
+/**
+ *  Get languages.
+ *  @return array $angs array containing all language information.
+ */
+function mirror_get_langs()
+{
+    return db_get("
+        SELECT 
+            lang_id,
+            lang
+        FROM 
+            mirror_langs
+    "); 
+}
+
+/**
+ *  Get one language.
+ *  @param int $id
+ *  @return array
+ */
+function mirror_get_one_lang($id)
+{
+    $id = addslashes($id);
+    return db_get_one("SELECT * FROM mirror_langs WHERE lang_id = {$id}");
+}
+
+/**
+ *  Get an alpha-list of languages for select list.
+ *  @return array $langs
+ */
+function mirror_get_langs_select()
+{
+    $langs = db_get("SELECT lang_id,lang FROM mirror_langs ORDER BY lang ASC",MYSQL_ASSOC); 
+    foreach ($langs as $lang) {
+        $retval[$lang['lang_id']]=$lang['lang'];
+    }
+    return $retval;
+}
+
+/***** USERS *****/
 
 /**
  *  Insert a new user.

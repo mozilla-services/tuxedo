@@ -17,7 +17,8 @@
 <li>
     <a href="<?=WEBPATH?>/admin/products.php" title="Products (firefox, thunderbird, etc.)">Products</a>
     <ul>
-        <li><a href="<?=WEBPATH?>/admin/locations.php" title="Product file locations based on OS.">File Locations</a></li>
+        <li><a href="<?=WEBPATH?>/admin/locations.php" title="Product file locations based on OS and language.">File Locations</a></li>
+        <li><a href="<?=WEBPATH?>/admin/langs.php" title="Available Product Languages.">Languages</a></li>
         <li><a href="<?=WEBPATH?>/admin/os.php" title="Operating systems.">Operating Systems</a></li>
         <li><a href="<?=WEBPATH?>/admin/lstats.php" title="View location statuses.">Location Statuses</a></li>
         <li><a href="<?=WEBPATH?>/admin/monitor.php" title="View product uptake.">Product Uptake</a></li>

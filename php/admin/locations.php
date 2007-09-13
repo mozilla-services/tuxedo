@@ -24,7 +24,7 @@ if (!empty($_POST['submit'])) {
         switch($_POST['action']) {
             case 'edit':
                 if (!empty($_POST['doit'])) {
-                    if (mirror_update_location($_POST['location_id'],$_POST['product_id'],$_POST['os_id'],$_POST['location_path'])) {
+                    if (mirror_update_location($_POST['location_id'],$_POST['product_id'],$_POST['os_id'],$_POST['lang_id'],$_POST['location_path'])) {
                         set_msg('Location updated successfully.');
                         header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/locations.php');
                         exit;
@@ -38,7 +38,7 @@ if (!empty($_POST['submit'])) {
                     echo '<h2>Edit Location</h2>';
                     $posts = mirror_get_one_location($_POST['location_id']);
                     form_start();
-                    include_once(INC.'/forms/location.php');
+                    include_once(INC.'/forms/location-edit.php');
                     form_hidden('doit','1');
                     form_hidden('action','edit');
                     form_hidden('location_id',$_POST['location_id']);
@@ -78,6 +78,7 @@ $headers = array(
     'location_id'=>'',
     'product_name'=>'Product',
     'os_name'=>'OS',
+    'lang'=>'Language',
     'location_path'=>'Path'
 );
 
