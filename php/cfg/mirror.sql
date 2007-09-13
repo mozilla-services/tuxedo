@@ -30,6 +30,32 @@ CREATE TABLE `mirror_ip_to_country` (
 -- --------------------------------------------------------
 
 -- 
+-- Table structure for table `mirror_langs`
+-- 
+
+CREATE TABLE `mirror_langs` (
+  `lang_id` int(10) unsigned NOT NULL auto_increment,
+  `lang` varchar(10) NOT NULL default '',
+  PRIMARY KEY  (`lang_id`),
+  UNIQUE KEY `lang` (`lang`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Locales' ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `mirror_location_mirror_map`
+-- 
+
+CREATE TABLE `mirror_location_mirror_map` (
+  `location_id` int(10) unsigned NOT NULL default '0',
+  `mirror_id` int(10) unsigned NOT NULL default '0',
+  `location_active` enum('0','1') NOT NULL default '0',
+  PRIMARY KEY  (`location_id`,`mirror_id`)
+) TYPE=InnoDB;
+
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `mirror_locations`
 -- 
 
@@ -39,7 +65,9 @@ CREATE TABLE `mirror_locations` (
   `product_id` int(10) unsigned NOT NULL default '0',
   `os_id` int(10) unsigned NOT NULL default '0',
   `location_path` varchar(255) NOT NULL default '',
+  `lang_id` int(10) default NULL,
   PRIMARY KEY  (`location_id`,`product_id`,`os_id`)
+  UNIQUE KEY `query` (`location_id`,`product_id`,`os_id`,`lang_id`)
 ) TYPE=InnoDB AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
