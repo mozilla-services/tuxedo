@@ -43,6 +43,57 @@ CREATE TABLE `mirror_langs` (
 -- --------------------------------------------------------
 
 -- 
+-- Dumping data for table `mirror_langs`
+-- 
+
+INSERT INTO `mirror_langs` (`lang_id`, `lang`) VALUES 
+(1, 'ar'),
+(3, 'be'),
+(2, 'bg'),
+(4, 'ca'),
+(5, 'cs'),
+(6, 'da'),
+(7, 'de'),
+(8, 'el'),
+(9, 'en-GB'),
+(10, 'en-US'),
+(11, 'es-AR'),
+(12, 'es-ES'),
+(13, 'eu'),
+(14, 'fi'),
+(15, 'fr'),
+(16, 'fy-NL'),
+(17, 'ga-IE'),
+(18, 'gu-IN'),
+(19, 'he'),
+(20, 'hu'),
+(21, 'hy-AM'),
+(22, 'it'),
+(23, 'ja'),
+(24, 'ja-JP-mac'),
+(25, 'ka'),
+(26, 'ko'),
+(27, 'ku'),
+(28, 'lt'),
+(29, 'mk'),
+(30, 'mn'),
+(31, 'nb-NO'),
+(32, 'nl'),
+(33, 'nn-NO'),
+(34, 'pa-IN'),
+(35, 'pl'),
+(36, 'pt-BR'),
+(37, 'ro'),
+(38, 'ru'),
+(39, 'sk'),
+(40, 'sl'),
+(41, 'sq'),
+(42, 'sv-SE'),
+(43, 'tr'),
+(44, 'zh-CN'),
+(45, 'zh-TW');
+
+-- 
 -- Table structure for table `mirror_location_mirror_map`
 -- 
 
