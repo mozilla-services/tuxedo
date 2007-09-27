@@ -54,15 +54,24 @@ if (!empty($_GET['product'])) {
 
     // do we have a valid os and product?
     if (!empty($os_id)&&!empty($product_id)) {
+        // if we got a language, query for it, otherwise get US English
+        if (!empty($_GET['lang']))
+            $where_lang = $_GET['lang'];
+        else
+            $where_lang = 'en-US';
+
         $location = $sdo->get_one("
             SELECT
                 location_id,
                 location_path
             FROM
                 mirror_locations
+            LEFT JOIN
+                mirror_langs ON (mirror_locations.lang_id = mirror_langs.lang_id)
             WHERE
                 product_id = %d AND 
-                os_id = %d",array($product_id,$os_id));
+                os_id = %d AND
+                mirror_langs.lang = '%s'",array($product_id, $os_id, $where_lang));
 
         // did we get a valid location?
         if (!empty($location)) {
@@ -99,11 +108,6 @@ if (!empty($_GET['product'])) {
                 if (LOGGING) {
                     $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']));
                     $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id));
-                }
-
-                // LANGUAGE HACK
-                if (!empty($_GET['lang'])) {
-                    $location['location_path'] = str_replace('en-US',$_GET['lang'],$location['location_path']);
                 }
 
                 // if we are just testing, then just print and exit.
