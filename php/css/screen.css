@@ -81,4 +81,15 @@ ul#nav li ul li a {
 .sort-asc {
     background:#ccf url(../img/down.gif) no-repeat right;
 }
-
+/* locations: language list */
+.form-indent {
+    padding-left: 8em;
+    margin-left: 1ex;
+}
+/* javascript functions */
+.jslink {
+    text-decoration: underline;
+}
+.jslink:hover {
+    cursor: pointer;
+}

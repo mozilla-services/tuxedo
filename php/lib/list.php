@@ -129,31 +129,14 @@ function show_list($list,$headers,$type='checkbox',$actions=null,$form_id=null,$
 		echo "\n".'</table>';
 		if ($type=='checkbox')
 		{
-echo <<<js
-<script type="text/javascript">
-//<!--
-function list_select(formObj,invert)
-{
-	for (var i=0;i < formObj.elements.length;i++)
-	{
-		fldObj = formObj.elements[i];
-		if (fldObj.type == 'checkbox')
-		{
-			if (invert==1)
-			{
-				fldObj.checked = (fldObj.checked) ? false : true;
-			}
-			else
-			{
-				fldObj.checked = true;
-			}
-		}
-	}
-}
-//-->
-</script>
-js;
-			echo "\n".'<p><input type="button" name="selectall" onclick="list_select(this.form,0);" class="button2" value="Select All"/> <input type="button" name="selectall" onclick="list_select(this.form,1);" class="button2" value="Invert"/></p>';
+            // get checkbox array's name
+            reset($headers);
+            $checkboxname = key($headers).'[]';
+            echo "\n".'<div>Select: ';
+            echo '<span class="jslink" onClick="selectAll(\''.$checkboxname.'\');">all</span> | ';
+            echo '<span class="jslink" onClick="selectNone(\''.$checkboxname.'\');">none</span> | ';
+            echo '<span class="jslink" onClick="selectInvert(\''.$checkboxname.'\');">invert</span>';
+            echo '</div>';
 		}
 		if ($type=='radio'||$type='checkbox-small')
 		{

@@ -350,12 +350,14 @@ function mirror_get_products_select_priority()
  *  Insert a new location.
  *  @param int $product
  *  @param int $os
+ *  @param int $lang
  *  @param string $path
  *  @return bool
  */
-function mirror_insert_location($product,$os,$path)
+function mirror_insert_location($product,$os,$lang,$path)
 {
-    return db_query("INSERT INTO mirror_locations(product_id,os_id,location_path) VALUES({$product},{$os},'{$path}')");
+    if (is_null($lang)) $lang = 'NULL';
+    return db_query("INSERT INTO mirror_locations(product_id,os_id,lang_id,location_path) VALUES({$product},{$os},{$lang},'{$path}')");
 }
 
 /**
@@ -396,14 +398,14 @@ function mirror_get_locations()
             location_path,
             lang
         FROM 
-            mirror_locations,
-            mirror_products,
-            mirror_os,
-            mirror_langs
+            mirror_locations AS loc,
+            mirror_products AS prod,
+            mirror_os AS os
+        LEFT JOIN
+            mirror_langs AS langs ON (loc.lang_id = langs.lang_id)
         WHERE
-            mirror_locations.product_id = mirror_products.product_id AND
-            mirror_locations.os_id = mirror_os.os_id AND
-            mirror_locations.lang_id = mirror_langs.lang_id
+            loc.product_id = prod.product_id AND
+            loc.os_id = os.os_id
     "); 
 }
 
