@@ -2,12 +2,8 @@
 -- version 2.6.0-pl2
 -- http://www.phpmyadmin.net
 -- 
--- Host: db1.osuosl.org
--- Generation Time: Nov 03, 2004 at 11:26 PM
 -- Server version: 4.0.20
 -- PHP Version: 4.3.4
--- 
--- Database: `mozilla-mirror`
 -- 
 
 -- --------------------------------------------------------
@@ -147,8 +143,10 @@ CREATE TABLE `mirror_mirrors` (
   `mirror_baseurl` varchar(255) NOT NULL default '',
   `mirror_rating` int(11) NOT NULL default '0',
   `mirror_active` enum('0','1') NOT NULL default '0',
+  `mirror_count` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`mirror_id`),
-  UNIQUE KEY `mirror_name` (`mirror_name`)
+  UNIQUE KEY `mirror_name` (`mirror_name`),
+  KEY `mirror_count` (`mirror_count`)
 ) TYPE=InnoDB AUTO_INCREMENT=40 ;
 
 -- --------------------------------------------------------
