@@ -23,10 +23,13 @@ my %products = ();
 my %oss = ();
 
 # Some db credentials
-$host = '';
-$user = '';
-$pass = '';
-$db = $user;
+my $configfile = 'db.cfg';
+eval('require "$configfile"');
+die "*** Failed to eval() file $configfile:\n$@\n" if ($@);
+#$host = '';
+#$user = '';
+#$pass = '';
+#$db = $user;
 
 # email address to notify of mirror failures
 my $email = '';
@@ -56,6 +59,7 @@ my $failed_mirror_sth = $dbh->prepare($failed_mirror_sql);
 if ( $DEBUG ) {
 	my $product_sql = qq{SELECT * FROM mirror_products};
 	my $oss_sql = qq{SELECT * FROM mirror_os};
+	my $lang_sql = qq{SELECT * FROM mirror_langs};
 
 	my $product_sth = $dbh->prepare($product_sql);
 	$product_sth->execute();
@@ -70,6 +74,12 @@ if ( $DEBUG ) {
         while ( my $os = $oss_sth->fetchrow_hashref() ) {
                 $oss{$os->{os_id}} = $os->{os_name};
         }
+
+    $lang_sth = $dbh->prepare($lang_sql);
+    $lang_sth->execute();
+    while ( my $lang = $lang_sth->fetchrow_hashref() ) {
+        $langs{$lang->{lang_id}} = $lang->{lang};
+    }
 }
 
 # let's build the location information
@@ -135,11 +145,11 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 		my $res = $ua->simple_request($req);
 
 		if ( $res->{_rc} == 200 ) {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} is okay.\n" if $DEBUG;
+			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) is okay.\n" if $DEBUG;
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '1');
 		}
 		else {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED.\n" if $DEBUG;
+			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED.\n" if $DEBUG;
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 		}
 
@@ -148,7 +158,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 			print "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " .
                 $res->{_headers}->{'content-type'} . "\n" if $DEBUG;
 			if ( $location->{location_path} =~ m/.*\.dmg$/ && $res->{_headers}->{'content-type'} !~ /application\/x-apple-diskimage/ ) {
-				print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED due to content-type mis-match.\n" if $DEBUG;
+				print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED due to content-type mis-match.\n" if $DEBUG;
 	            $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 			}
 		}
