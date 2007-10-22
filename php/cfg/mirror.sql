@@ -15,6 +15,8 @@
 CREATE TABLE `mirror_country_to_region` (
   `country_code` char(2) NOT NULL default '' COMMENT 'ISO 3166 alpha2',
   `region_id` int(10) unsigned NOT NULL default '0',
+  `country_name` varchar(255) NOT NULL default '',
+  `continent` varchar(2) NOT NULL default '',
   PRIMARY KEY  (`country_code`),
   KEY `region_id` (`region_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Mapping country codes to regions';
