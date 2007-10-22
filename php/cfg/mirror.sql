@@ -211,7 +211,7 @@ CREATE TABLE `mirror_regions` (
   `region_priority` int(11) NOT NULL default '0',
   PRIMARY KEY  (`region_id`),
   UNIQUE KEY `region_name` (`region_name`)
-) TYPE=InnoDB AUTO_INCREMENT=14 ;
+) TYPE=InnoDB AUTO_INCREMENT=13 ;
 
 -- 
 -- Dumping data for table `mirror_regions`
@@ -223,8 +223,7 @@ INSERT INTO `mirror_regions` (`region_id`, `region_name`, `region_priority`) VAL
 (9, 'Australia', 3),
 (10, 'Asia', 3),
 (11, 'South America', 3),
-(12, 'Africa', 3),
-(13, 'Oceania', 3);
+(12, 'Africa', 3);
 
 -- --------------------------------------------------------
 
