@@ -36,8 +36,6 @@ CREATE TABLE `mirror_langs` (
   UNIQUE KEY `lang` (`lang`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Locales' ;
 
--- --------------------------------------------------------
-
 -- 
 -- Dumping data for table `mirror_langs`
 -- 
@@ -88,6 +86,8 @@ INSERT INTO `mirror_langs` (`lang_id`, `lang`) VALUES
 (43, 'tr'),
 (44, 'zh-CN'),
 (45, 'zh-TW');
+
+-- --------------------------------------------------------
 
 -- 
 -- Table structure for table `mirror_location_mirror_map`
@@ -198,7 +198,18 @@ CREATE TABLE `mirror_regions` (
   `region_priority` int(11) NOT NULL default '0',
   PRIMARY KEY  (`region_id`),
   UNIQUE KEY `region_name` (`region_name`)
-) TYPE=InnoDB AUTO_INCREMENT=11 ;
+) TYPE=InnoDB AUTO_INCREMENT=12 ;
+
+-- 
+-- Dumping data for table `mirror_regions`
+-- 
+
+INSERT INTO `mirror_regions` (`region_id`, `region_name`, `region_priority`) VALUES 
+(3, 'Europe', 2),
+(4, 'North America', 1),
+(9, 'Australia', 3),
+(10, 'Asia', 3),
+(11, 'South America', 3);
 
 -- --------------------------------------------------------
 
