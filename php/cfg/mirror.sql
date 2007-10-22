@@ -9,6 +9,19 @@
 -- --------------------------------------------------------
 
 -- 
+-- Table structure for table `mirror_country_to_region`
+-- 
+
+CREATE TABLE `mirror_country_to_region` (
+  `country_code` char(2) NOT NULL default '' COMMENT 'ISO 3166 alpha2',
+  `region_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`country_code`),
+  KEY `region_id` (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Mapping country codes to regions';
+
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `mirror_ip_to_country`
 -- 
 
@@ -198,7 +211,7 @@ CREATE TABLE `mirror_regions` (
   `region_priority` int(11) NOT NULL default '0',
   PRIMARY KEY  (`region_id`),
   UNIQUE KEY `region_name` (`region_name`)
-) TYPE=InnoDB AUTO_INCREMENT=12 ;
+) TYPE=InnoDB AUTO_INCREMENT=14 ;
 
 -- 
 -- Dumping data for table `mirror_regions`
@@ -209,7 +222,9 @@ INSERT INTO `mirror_regions` (`region_id`, `region_name`, `region_priority`) VAL
 (4, 'North America', 1),
 (9, 'Australia', 3),
 (10, 'Asia', 3),
-(11, 'South America', 3);
+(11, 'South America', 3),
+(12, 'Africa', 3),
+(13, 'Oceania', 3);
 
 -- --------------------------------------------------------
 
