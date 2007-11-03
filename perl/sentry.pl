@@ -10,29 +10,24 @@ use LWP;
 use LWP::UserAgent;
 use Net::DNS;
 use URI;
+use URI::Escape;
+use Digest::MD5 qw(md5_hex);
+
+# Some config options
+my $configfile = 'sentry.cfg';
+eval('require "$configfile"');
+die "*** Failed to eval() file $configfile:\n$@\n" if ($@);
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(4);
-$ua->agent("Mozilla Mirror Monitor/1.0");
+$ua->agent("Mozilla Mirror Monitor/1.1");
 
 my $netres = Net::DNS::Resolver->new();
 $netres->tcp_timeout(5);
 
-my $DEBUG = 1;
-my %products = ();
-my %oss = ();
+my %products = (); my %oss = (); my %langs = ();
 
-# Some db credentials
-my $configfile = 'db.cfg';
-eval('require "$configfile"');
-die "*** Failed to eval() file $configfile:\n$@\n" if ($@);
-#$host = '';
-#$user = '';
-#$pass = '';
-#$db = $user;
-
-# email address to notify of mirror failures
-my $email = '';
+srand; # seed the random no. generator for random file chunks to be checked
 
 # IP address regex
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};
@@ -124,7 +119,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     my $mirrorRes = $ua->request($mirrorReq);
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
-    if ( $mirrorRes->{_rc}>=500 ) {
+    if ( $mirrorRes->code >= 500 ) {
         print "$mirror->{mirror_name} sent no response!  Moving on to next mirror.\n" if $DEBUG;
         $failed_mirror_sth->execute($mirror->{mirror_id});
 
@@ -137,30 +132,90 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         close(SENDMAIL);
 
         next;
+    } elsif ( $hashcheck && $mirrorRes->header('Accept-Ranges') != 'bytes' ) {
+        # hash checking enabled but mirror not capable of it
+        print "$mirror->{mirror_name} is not capable of byte range requests!  Moving on to next mirror.\n" if $DEBUG;
+        $failed_mirror_sth->execute($mirror->{mirror_id});
+
+        # send email to infra
+        open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
+        print SENDMAIL "Subject: [bouncer] " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") does not support byte range requests\n";
+        print SENDMAIL "To: $email\n";
+        print SENDMAIL "Content-type: text/plain\n\n";
+        print SENDMAIL "$mirror->{mirror_name} does not support byte range requests: $mirror->{mirror_baseurl}.  File integrity can not be checked.  All files for this mirror will be disabled until the next check.";
+        close(SENDMAIL);
+
+        next;
+
     }
 
 	foreach my $location (@locations) {
+        my $loc_ok = '0';
 
-		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $location->{location_path});
-		my $res = $ua->simple_request($req);
+        my $location_uri = $mirror->{mirror_baseurl} . $location->{location_path};
+        my $res = HTTP::Response->new();
 
-		if ( $res->{_rc} == 200 ) {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) is okay.\n" if $DEBUG;
-			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '1');
-		}
-		else {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED.\n" if $DEBUG;
-			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
-		}
+        if ($hashcheck) {
+            # hash check files
+
+            # grab local file copy
+            my $localfile = $localdir . uri_unescape($location->{location_path});
+            if (!open (FILE, "< $localfile")) {
+                print "Couldn't open local file $localfile: $!\n";
+                next;
+            }
+            binmode(FILE);
+            my $filesize = -s $localfile;
+
+            # get random chunk from file and MD5-hash it
+            my $chunkstart = int(rand($filesize - $chunksize + 1));
+            #print "Checking chunk starting with byte $chunkstart...\n";
+            seek(FILE, $chunkstart, 0);
+            read(FILE, $chunk, $chunksize);
+            close(FILE);
+            my $localhash = md5_hex($chunk);
+            #print "local: $localhash (".length($chunk).")\n";
+
+            # get the same chunk from remote file
+            my $rangeheader = HTTP::Headers->new('Range' => "bytes=$chunkstart-".($chunkstart+$chunksize-1));
+            my $req = HTTP::Request->new('GET', $location_uri, $rangeheader);
+            my $res = $ua->request($req);
+            my $remotehash = md5_hex($res->content);
+            #print "remote: $remotehash (".$res->content_length.")\n";
+            
+            if ( $localhash == $remotehash ) {
+                print "Hash check on $mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) is okay.\n" if $DEBUG;
+                $loc_ok = '1';
+            } else {
+                print "Hash check on $mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED.\n" if $DEBUG;
+                $loc_ok = '0';
+            }
+
+        } else {
+            # just check the HTTP response code
+            my $req = HTTP::Request->new(HEAD => $location_uri);
+            my $res = $ua->simple_request($req);
+
+            if ( $res->code == 200 ) {
+                print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) is okay.\n" if $DEBUG;
+                $loc_ok = '1';
+            } else {
+                print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED.\n" if $DEBUG;
+                $loc_ok = '0';
+            }
+        }
 
 		# content-type == text/plain hack here for Mac dmg's
-		if ( ($res->{_rc} == 200) && ($location->{os_id} == 4) ) {
-			print "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " .
-                $res->{_headers}->{'content-type'} . "\n" if $DEBUG;
+		if ( ($res->code >= 200) && ($res->code < 300) && ($location->{os_id} == 4) ) {
+			print "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " 
+                . $res->{_headers}->{'content-type'} . "\n" if $DEBUG;
 			if ( $location->{location_path} =~ m/.*\.dmg$/ && $res->{_headers}->{'content-type'} !~ /application\/x-apple-diskimage/ ) {
 				print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} ($langs{$location->{lang_id}}) FAILED due to content-type mis-match.\n" if $DEBUG;
-	            $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
+                $loc_ok = '0';
 			}
 		}
+		
+        # mark location as ok or not
+        $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, $loc_ok);
 	}
 }
