@@ -6,7 +6,7 @@
  */
 
 require_once('../cfg/config.php');  // config file
-require_once(LIB.'/db.php');  // core mysql wrappers
+require_once(LIB.'/sdo.php');  // core mysql wrappers with caching
 
 db_connect(DBHOST,DBUSER,DBPASS);  // open persistent connection to db
 db_select(DBNAME);  // select db
@@ -29,7 +29,7 @@ echo '    xmlns="http://purl.org/rss/1.0/">'."\n\n";
 // channel details
 echo '<channel rdf:about="http://download.mozilla.org/rss/download-counts.php">'."\n";
 echo '    <title>Mozilla Download Counts</title>'."\n";  
-echo '    <link>http://mozilla.org/</link>'."\n";  
+echo '    <link>http://www.mozilla.org/</link>'."\n";  
 echo '    <description>Mozilla product download counts pulled from Bouncer database.</description> '."\n";
 
 // item listing
