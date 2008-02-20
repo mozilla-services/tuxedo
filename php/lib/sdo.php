@@ -182,7 +182,8 @@ class SDO {
         }
 
         array_walk($args, array($this, 'escape_string'));
-        return call_user_func_array('sprintf', array_merge($base, $args));
+        // array_merge now requires a type-cast to handle strings (changed in PHP5)
+        return call_user_func_array('sprintf', array_merge((array)$base, $args));
     }
 
     /**

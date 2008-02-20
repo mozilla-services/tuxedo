@@ -17,6 +17,7 @@ define('DBPASS', '');  // db pass
 define('LOGGING',1);  // enable logging? 1=on 0=off
 define('CACHE',true);  // enable memcache?  true=on false=off (admin pages never cached)
 define('CACHE_EXPIRE',60);  // how long to cache entries?
+define('ALLOW_TEST_IP', false); // allow GeoIP testing by adding GET parameter &ip=11.22.33.44 ?
 
 /**
  * Memcache configuration.
