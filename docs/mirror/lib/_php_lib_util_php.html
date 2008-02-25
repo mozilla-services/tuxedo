@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<!-- template designed by Marco Von Ballmoos -->
+			<title>Docs for page util.php</title>
+			<link rel="stylesheet" href="../../media/stylesheet.css" />
+			<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'/>
+		</head>
+		<body>
+			<div class="page-body">			
+<h2 class="file-name">/php/lib/util.php</h2>
+
+<a name="sec-description"></a>
+<div class="info-box">
+	<div class="info-box-title">Description</div>
+	<div class="nav-bar">
+					<span class="disabled">Description</span> |
+															<a href="#sec-functions">Functions</a>
+			</div>
+	<div class="info-box-body">	
+		<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Utility funcs.</p>
+		
+			</div>
+</div>
+		
+
+	
+	
+	
+	<a name="sec-functions"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Functions</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+															<span class="disabled">Functions</span>
+		</div>
+		<div class="info-box-body">	
+			<a name="functionarray_order_by" id="functionarray_order_by"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">array_order_by</span> (line <span class="line-number">198</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Sort a two dimensional array based on a 'column' key</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> the original array on argument errors, the sorted array on success</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">array</span>
+		<span class="method-name">
+			array_order_by
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">&$array</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$key</span> = <span class="var-default">null</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$order</span> = <span class="var-default">null</span>], [<span class="var-type">bool</span>&nbsp;<span class="var-name">$retain_keys</span> = <span class="var-default">TRUE</span>], [<span class="var-type">bool</span>&nbsp;<span class="var-name">$case_sensitive</span> = <span class="var-default">FALSE</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$array</span><span class="var-description">: the array to be sorted</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$key</span><span class="var-description">: the column key to be used for sorting, an array of keys are also acceptable</span>			</li>
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$order</span><span class="var-description">: the order of the sort, either 'asc' (ascending) or 'desc' (descending), can also be an array (with matching array keys to the $key param)</span>			</li>
+					<li>
+				<span class="var-type">bool</span>
+				<span class="var-name">$retain_keys</span><span class="var-description">: option to retain the original keys; default to true</span>			</li>
+					<li>
+				<span class="var-type">bool</span>
+				<span class="var-name">$case_sensitive</span><span class="var-description">: option for a case sensitive sort; default to false</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functiondebug_r" id="functiondebug_r"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">debug_r</span> (line <span class="line-number">98</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Print out an varible enclosed by &amp;lt;pre&amp;gt; tags</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			debug_r
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">&$var</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$var</span><span class="var-description">: the variable to print by print_r</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionemptify_in_array" id="functionemptify_in_array"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">emptify_in_array</span> (line <span class="line-number">131</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">This recursive function empty values in an 'multi-dimensional' array.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> false if an empty needle passed in, else a copy of the array with needle values replaced with empty strings</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			emptify_in_array
+		</span>
+					(<span class="var-type">mixed</span>&nbsp;<span class="var-name">$array</span>, <span class="var-type">mixed</span>&nbsp;<span class="var-name">$needle</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">mixed</span>
+				<span class="var-name">$needle</span><span class="var-description">: it accepts just one value or an array of values</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionmicrotime_float" id="functionmicrotime_float"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">microtime_float</span> (line <span class="line-number">12</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">determine float value of now</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> value of current time in seconds</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">float</span>
+		<span class="method-name">
+			microtime_float
+		</span>
+				()
+			</div>
+
+		
+	
+</div>
+<a name="functionpassword_gen" id="functionpassword_gen"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">password_gen</span> (line <span class="line-number">110</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Generate a random string good for passwords</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> password</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">string</span>
+		<span class="method-name">
+			password_gen
+		</span>
+					([<span class="var-type">in</span>&nbsp;<span class="var-name">$len</span> = <span class="var-default">6</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">in</span>
+				<span class="var-name">$len</span><span class="var-description">: the length of the password string</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionrecord_exists" id="functionrecord_exists"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">record_exists</span> (line <span class="line-number">158</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">This function checks for the existence of a particular row in a particular table matching a value.</p>
+<p class="description"><p>Use this with libdb, unless you want lots of problems.  :)</p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			record_exists
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$table</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$column</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$val</span>, [<span class="var-type">string</span>&nbsp;<span class="var-name">$extra</span> = <span class="var-default">NULL</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$table</span><span class="var-description">: name of table</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$column</span><span class="var-description">: name of column containing value to match</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$val</span><span class="var-description">: value to match against database (goes in WHERE clause)</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$extra</span><span class="var-description">: (optional) any AND or ORDER BY or LIMIT or anything you want to add.</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionset_error" id="functionset_error"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">set_error</span> (line <span class="line-number">61</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Add an error message to SESSION['errors'] array.</p>
+<p class="description"><p>The $_SESSION['errors'] array stores error messages.</p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			set_error
+		</span>
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$str</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$str</span><span class="var-description">: message to add (optional)</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionset_msg" id="functionset_msg"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">set_msg</span> (line <span class="line-number">23</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Add a message to SESSION['messages'] array.</p>
+<p class="description"><p>The $_SESSION['messages'] array stores general or success messages.</p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			set_msg
+		</span>
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$str</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$str</span><span class="var-description">: message to add (optional)</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_error" id="functionshow_error"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">show_error</span> (line <span class="line-number">74</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show errors messages.</p>
+<p class="description"><p>Iterates through $_SESSION['errors'] and displays them in a ul.</p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_error
+		</span>
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$class</span> = <span class="var-default">'error'</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$class</span><span class="var-description">: css class for message style</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_msg" id="functionshow_msg"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">show_msg</span> (line <span class="line-number">36</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show messages.</p>
+<p class="description"><p>Iterates through $_SESSION['messages'] and displays them in a ul.</p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_msg
+		</span>
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$class</span> = <span class="var-default">'msg'</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$class</span><span class="var-description">: css class for message style</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_tabs" id="functionshow_tabs"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">show_tabs</span> (line <span class="line-number">173</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show user tabs, based on an array.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_tabs
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$tabs</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$current</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$tabs</span><span class="var-description">: array of tabs (name=&gt;href)</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$current</span><span class="var-description">: name of tab to highlight</span>			</li>
+				</ul>
+		
+	
+</div>
+		</div>
+	</div>
+	
+	<p class="notes" id="credit">
+		Documentation generated on Mon,  8 Nov 2004 13:43:06 -0800 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.3.0RC3</a>
+	</p>
+	</div></body>
+</html>
