@@ -44,7 +44,9 @@ class SDOTest extends UnitTestCase {
     }
 
     function testConnect() {
-        $this->assertTrue(is_resource($this->sdo->connect()),'SDO connected to the database successfully.');
+        $this->assertTrue(is_resource($this->sdo->connect()),'SDO connected to the default database successfully.');
+        $this->assertTrue(is_resource($this->sdo->connect('db_write')),'SDO connected to the write database successfully.');
+        $this->assertTrue(is_resource($this->sdo->connect('db_read')),'SDO connected to the read-only database successfully.');
     }
 
     function doGet() {
@@ -64,6 +66,26 @@ class SDOTest extends UnitTestCase {
         $this->assertTrue(is_numeric($buf),'Result is an integer.');
     }
 
+    function doUpdateCount() {
+        $res = $this->sdo->query('SELECT MIN(mirror_id) FROM mirror_mirrors'); 
+        $row = mysql_fetch_row($res);
+        $id = $row[0];
+
+        $res = $this->sdo->query('SELECT mirror_count FROM mirror_mirrors WHERE mirror_id = ' . $id); 
+        $row = mysql_fetch_row($res);
+        $initial_count = $row[0];
+
+        $res = $this->sdo->query('UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = ' . $id,false);
+
+        $res = $this->sdo->query('SELECT mirror_count FROM mirror_mirrors WHERE mirror_id = ' . $id); 
+        $row = mysql_fetch_row($res);
+        $update_count = $row[0];
+
+        $res = $this->sdo->query('UPDATE mirror_mirrors SET mirror_count=mirror_count-1 WHERE mirror_id = ' . $id,false);
+
+        $this->assertEqual($initial_count + 1,$update_count,'SDO updated a mirror count.');
+    }
+
     function testCacheEntries() {
 
         $before = $this->sdo->mc->getExtendedStats();
@@ -72,6 +94,9 @@ class SDOTest extends UnitTestCase {
         $this->doGet();
         $this->doGetOne();
         $this->doNameToId();
+
+        // Try to update
+        $this->doUpdateCount();
 
         // Second try, hits the cache.
         $this->doGet();

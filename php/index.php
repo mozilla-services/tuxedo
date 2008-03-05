@@ -167,8 +167,8 @@ if (!empty($_GET['product'])) {
 
                 // if logging is enabled, insert log
                 if (LOGGING) {
-                    $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']));
-                    $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id));
+                    $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']),false);
+                    $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id),false);
                 }
 
                 // if we are just testing, then just print and exit.
