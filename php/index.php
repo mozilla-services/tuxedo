@@ -49,7 +49,9 @@ function getRegionFromIP($ip) {
             mirror_ip_to_country AS ip
             ON 
             ip.country_code = cty.country_code AND
-            ip_end = ( SELECT MIN(ip_end) FROM mirror_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 )",array($ip, $ip));
+            ip_end = ( SELECT MIN(ip_end) FROM mirror_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
+            ip_start <= INET_ATON('%s')
+        ",array($ip, $ip));
     
     if ($region)
         return $region['region_id'];
