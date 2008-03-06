@@ -32,6 +32,34 @@ function getRandElement( $array, $sum ) {
     return 0;
 }
 
+/**
+ * GeoIP: For a given IP address, get the associated region ID it is in.
+ * @param string $ip IP address in dotted quad format
+ * @return mixed region ID (int) or false if no region assigned or error
+ */
+function getRegionFromIP($ip) {
+    global $sdo;
+
+    $region = $sdo->get_one("
+        SELECT
+            cty.region_id
+        FROM
+            mirror_country_to_region AS cty
+        INNER JOIN
+            mirror_ip_to_country AS ip
+            ON 
+            ip.country_code = cty.country_code AND
+            ip_end = ( SELECT MIN(ip_end) FROM mirror_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
+            ip_start <= INET_ATON('%s')
+        ",array($ip, $ip));
+    
+    if ($region)
+        return $region['region_id'];
+    else
+        return false;
+}
+
+
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
     $_GET['os'] = 'win';
@@ -66,20 +94,55 @@ if (!empty($_GET['product'])) {
 
         // did we get a valid location?
         if (!empty($location)) {
-            $mirrors = $sdo->get("
-                SELECT
-                    mirror_mirrors.mirror_id,
-                    mirror_baseurl,
-                    mirror_rating
-                FROM 
-                    mirror_mirrors,
-                    mirror_location_mirror_map
-                WHERE
-                    mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
-                    mirror_location_mirror_map.location_id = %d AND
-                    mirror_active='1' AND 
-                    location_active ='1' 
-                ORDER BY mirror_rating",array($location['location_id']),MYSQL_ASSOC,'mirror_id');
+            
+            // determine the querying user's geographical region
+            if (defined('ALLOW_TEST_IP') && ALLOW_TEST_IP && isset($_GET['ip']))
+                $client_ip = $_GET['ip'];
+            elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+                $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            else
+                $client_ip = $_SERVER['REMOTE_ADDR'];
+            $client_region = getRegionFromIP($client_ip);
+            
+            if ($client_region) {
+                $mirrors = $sdo->get("
+                    SELECT
+                        mirror_mirrors.mirror_id,
+                        mirror_baseurl,
+                        mirror_rating
+                    FROM 
+                        mirror_mirrors,
+                        mirror_location_mirror_map
+                    INNER JOIN
+                        mirror_mirror_region_map ON (mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id)
+                    WHERE
+                        mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
+                        mirror_location_mirror_map.location_id = %d AND
+                        mirror_mirror_region_map.region_id = %d AND
+                        mirror_active='1' AND 
+                        location_active ='1' 
+                    ORDER BY mirror_rating",array($location['location_id'], $client_region),MYSQL_ASSOC,'mirror_id');
+            } else {
+                $mirrors = false;
+            }
+
+            if (empty($mirrors)) {
+                // either no region chosen or no mirror found in the given region
+                $mirrors = $sdo->get("
+                    SELECT
+                        mirror_mirrors.mirror_id,
+                        mirror_baseurl,
+                        mirror_rating
+                    FROM 
+                        mirror_mirrors,
+                        mirror_location_mirror_map
+                    WHERE
+                        mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
+                        mirror_location_mirror_map.location_id = %d AND
+                        mirror_active='1' AND 
+                        location_active ='1' 
+                    ORDER BY mirror_rating",array($location['location_id']),MYSQL_ASSOC,'mirror_id');
+            }
 
             $mirrors_rand = array();
             $sum = 0;
@@ -97,8 +160,8 @@ if (!empty($_GET['product'])) {
 
                 // if logging is enabled, insert log
                 if (LOGGING) {
-                    $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']));
-                    $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id));
+                    $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']),false);
+                    $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id),false);
                 }
 
                 // LANGUAGE HACK

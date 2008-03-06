@@ -13,6 +13,21 @@
 -- --------------------------------------------------------
 
 -- 
+-- Table structure for table `mirror_country_to_region`
+-- 
+
+CREATE TABLE `mirror_country_to_region` (
+  `country_code` char(2) NOT NULL default '' COMMENT 'ISO 3166 alpha2',
+  `region_id` int(10) unsigned NOT NULL default '0',
+  `country_name` varchar(255) NOT NULL default '',
+  `continent` varchar(2) NOT NULL default '',
+  PRIMARY KEY  (`country_code`),
+  KEY `region_id` (`region_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Mapping country codes to regions';
+
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `mirror_ip_to_country`
 -- 
 
@@ -21,10 +36,21 @@ CREATE TABLE `mirror_ip_to_country` (
   `ip_start` int(12) NOT NULL default '0',
   `ip_end` int(12) NOT NULL default '0',
   `country_code` char(2) NOT NULL default '',
-  `country_abbrev` char(3) NOT NULL default '',
-  `country_name` varchar(64) NOT NULL default '',
   KEY `ip_start` (`ip_start`),
   KEY `ip_end` (`ip_end`)
+) TYPE=InnoDB;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `mirror_location_mirror_map`
+-- 
+
+CREATE TABLE `mirror_location_mirror_map` (
+  `location_id` int(10) unsigned NOT NULL default '0',
+  `mirror_id` int(10) unsigned NOT NULL default '0',
+  `location_active` enum('0','1') NOT NULL default '0',
+  PRIMARY KEY  (`location_id`,`mirror_id`)
 ) TYPE=InnoDB;
 
 -- --------------------------------------------------------
@@ -68,8 +94,10 @@ CREATE TABLE `mirror_mirrors` (
   `mirror_baseurl` varchar(255) NOT NULL default '',
   `mirror_rating` int(11) NOT NULL default '0',
   `mirror_active` enum('0','1') NOT NULL default '0',
+  `mirror_count` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`mirror_id`),
-  UNIQUE KEY `mirror_name` (`mirror_name`)
+  UNIQUE KEY `mirror_name` (`mirror_name`),
+  KEY `mirror_count` (`mirror_count`)
 ) TYPE=InnoDB AUTO_INCREMENT=40 ;
 
 -- --------------------------------------------------------
@@ -121,7 +149,19 @@ CREATE TABLE `mirror_regions` (
   `region_priority` int(11) NOT NULL default '0',
   PRIMARY KEY  (`region_id`),
   UNIQUE KEY `region_name` (`region_name`)
-) TYPE=InnoDB AUTO_INCREMENT=11 ;
+) TYPE=InnoDB AUTO_INCREMENT=13 ;
+
+-- 
+-- Dumping data for table `mirror_regions`
+-- 
+
+INSERT INTO `mirror_regions` (`region_id`, `region_name`, `region_priority`) VALUES 
+(3, 'Europe', 2),
+(4, 'North America', 1),
+(9, 'Australia', 3),
+(10, 'Asia', 3),
+(11, 'South America', 3),
+(12, 'Africa', 3);
 
 -- --------------------------------------------------------
 

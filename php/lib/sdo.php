@@ -23,29 +23,43 @@ class SDO {
     var $mc;
 
     function SDO() {
-        $this->db = null;
+        $this->db_write = null;
+        $this->db_read = null;
         $this->mc = new Memcaching();
+        $this->db_details = array (
+                                'db_write' => array ( 
+                                    'host' => DBHOST,
+                                    'name' => DBNAME,
+                                    'user' => DBUSER,
+                                    'pass' => DBPASS,
+                                ),
+                                'db_read'  => array (
+                                    'host' => defined('SHADOWDBHOST') ? SHADOWDBHOST : DBHOST,
+                                    'name' => defined('SHADOWDBNAME') ? SHADOWDBNAME : DBNAME,
+                                    'user' => defined('SHADOWDBUSER') ? SHADOWDBUSER : DBUSER,
+                                    'pass' => defined('SHADOWDBPASS') ? SHADOWDBPASS : DBPASS,
+                                ),
+                            );
     }
 
     /**
      *  Connect to a MySQL database server.
-     *  @param string $host db server
-     *  @param string $user db username
-     *  @param string $password db password 
-     *  @param string $dbname db name
+     *  @param string $dbtype db selector (db_write,db_read)
      *  @return resource|boolean
      */
-    function connect($host=DBHOST,$user=DBUSER,$password=DBPASS,$dbname=DBNAME)
+    function connect($dbtype='db_write')
     {
-        if (is_resource($this->db) && @mysql_db_name($this->db)) {
-            return $this->db;
+        if (is_resource($this->$dbtype) && @mysql_db_name($this->$dbtype)) {
+            return $this->$dbtype;
         }
 
-        $db = @mysql_connect($host,$user,$password);
+        $details = $this->db_details[$dbtype];
+
+        $db = @mysql_connect($details['host'],$details['user'],$details['pass']);
         if (is_resource($db) && !@mysql_db_name($db)) { 
-            @mysql_select_db($dbname,$db);
-            $this->db = $db;
-            return $this->db;
+            @mysql_select_db($details['name'],$db);
+            $this->$dbtype = $db;
+            return $this->$dbtype;
         }
 
         /**
@@ -61,10 +75,11 @@ class SDO {
      *  Execute a MySQL query.
      *  @param string $q MySQL query
      *  @param array $args arguments
+     *  @param boolean $readonly query from read only database?
      */
-    function query($q,$args=null)
+    function query($q,$args=null,$readonly=true)
     {
-        $dbh =& $this->connect();
+        $dbh = $readonly ? $this->connect('db_read') : $this->connect('db_write');
         return @mysql_query($this->build_query($q,$args),$dbh);
     }
 
@@ -182,6 +197,7 @@ class SDO {
         }
 
         array_walk($args, array($this, 'escape_string'));
+        // array_merge now requires a type-cast to handle strings (changed in PHP5)
         return call_user_func_array('sprintf', array_merge((array)$base, $args));
     }
 
