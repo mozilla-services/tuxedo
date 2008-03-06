@@ -103,36 +103,36 @@ if (!empty($_GET['product'])) {
 
         // did we get a valid location?
         if (!empty($location)) {
-            
-            // determine the querying user's geographical region
-            if (defined('ALLOW_TEST_IP') && ALLOW_TEST_IP && isset($_GET['ip']))
-                $client_ip = $_GET['ip'];
-            elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-                $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            else
-                $client_ip = $_SERVER['REMOTE_ADDR'];
-            $client_region = getRegionFromIP($client_ip);
-            
-            if ($client_region) {
-                $mirrors = $sdo->get("
-                    SELECT
-                        mirror_mirrors.mirror_id,
-                        mirror_baseurl,
-                        mirror_rating
-                    FROM 
-                        mirror_mirrors,
-                        mirror_location_mirror_map
-                    INNER JOIN
-                        mirror_mirror_region_map ON (mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id)
-                    WHERE
-                        mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
-                        mirror_location_mirror_map.location_id = %d AND
-                        mirror_mirror_region_map.region_id = %d AND
-                        mirror_active='1' AND 
-                        location_active ='1' 
-                    ORDER BY mirror_rating",array($location['location_id'], $client_region),MYSQL_ASSOC,'mirror_id');
-            } else {
-                $mirrors = false;
+            $mirrors = false;
+            if (GEOIP) { 
+                // determine the querying user's geographical region
+                if (defined('ALLOW_TEST_IP') && ALLOW_TEST_IP && isset($_GET['ip']))
+                    $client_ip = $_GET['ip'];
+                elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+                    $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+                else
+                    $client_ip = $_SERVER['REMOTE_ADDR'];
+                $client_region = getRegionFromIP($client_ip);
+                
+                if ($client_region) {
+                    $mirrors = $sdo->get("
+                        SELECT
+                            mirror_mirrors.mirror_id,
+                            mirror_baseurl,
+                            mirror_rating
+                        FROM 
+                            mirror_mirrors,
+                            mirror_location_mirror_map
+                        INNER JOIN
+                            mirror_mirror_region_map ON (mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id)
+                        WHERE
+                            mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
+                            mirror_location_mirror_map.location_id = %d AND
+                            mirror_mirror_region_map.region_id = %d AND
+                            mirror_active='1' AND 
+                            location_active ='1' 
+                        ORDER BY mirror_rating",array($location['location_id'], $client_region),MYSQL_ASSOC,'mirror_id');
+                }
             }
 
             if (empty($mirrors)) {
