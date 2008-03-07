@@ -53,6 +53,11 @@ class Memcaching {
         else
             return false;
 
+        if (defined('MEMCACHE_NAMESPACE')) 
+            $this->namespace = MEMCACHE_NAMESPACE;
+        else
+            $this->namespace = '';
+
         if (is_array($memcache_config)) {
             foreach ($memcache_config as $host=>$options) {
                 if ($this->cache->addServer($host, $options['port'], $options['persistent'], $options['weight'], $options['timeout'], $options['retry_interval'])) {
@@ -71,7 +76,7 @@ class Memcaching {
      */
     function get($key) {
         if (!$this->memcacheConnected) return false;
-        return $this->cache->get($key);
+        return $this->cache->get($this->namespaceKey($key));
     }
 
     /**
@@ -80,7 +85,7 @@ class Memcaching {
      */
     function set($key, $var, $flag = null, $expire = CACHE_EXPIRE) {
         if (!$this->memcacheConnected) return false;
-        return $this->cache->set($key, $var, $flag, $expire);
+        return $this->cache->set($this->namespaceKey($key), $var, $flag, $expire);
     }
     
     /**
@@ -90,7 +95,7 @@ class Memcaching {
      */
     function add($key, $var, $flag = null, $expire = CACHE_EXPIRE) {
         if (!$this->memcacheConnected) return false;
-        return $this->cache->add($key, $var, $flag, $expire);
+        return $this->cache->add($this->namespaceKey($key), $var, $flag, $expire);
     }
 
     /**
@@ -100,7 +105,7 @@ class Memcaching {
      */
     function replace($key, $var, $flag = null, $expire = CACHE_EXPIRE) {
         if (!$this->memcacheConnected) return false;
-        return $this->cache->replace($key, $var, $flag, $expire);
+        return $this->cache->replace($this->namespaceKey($key), $var, $flag, $expire);
     }
 
     /**
@@ -118,8 +123,17 @@ class Memcaching {
      */
     function delete($key, $timeout = null) {
         if (!$this->memcacheConnected) return false;
-        return $this->cache->delete($key, $timeout);
+        return $this->cache->delete($this->namespaceKey($key), $timeout);
     }
+
+    /**
+     * Returns key in the appropriate namespace.
+     * @param string $key memcache key 
+     * @return string Namespaced key
+     */
+     function namespaceKey($key) {
+        return $this->namespace . $key;
+     }
 
     /**
      * Flush the cache

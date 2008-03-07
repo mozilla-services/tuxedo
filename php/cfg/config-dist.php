@@ -19,6 +19,7 @@ define('CACHE',true);  // enable memcache?  true=on false=off (admin pages never
 define('CACHE_EXPIRE',60);  // how long to cache entries?
 define('ALLOW_TEST_IP', false); // allow GeoIP testing by adding GET parameter &ip=11.22.33.44 ?
 define('GEOIP',true); // enable GeoIP? true=on, false=off
+define('MEMCACHE_NAMESPACE', 'ns'); // set memcache namespace.  Keep this string as short and simple as possible.
 
 /**
  * Memcache configuration.
