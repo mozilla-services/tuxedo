@@ -38,9 +38,9 @@ function mirror_get_regions_select_priority()
  *  @param int $priority
  *  @return bool
  */ 
-function mirror_insert_region($name,$priority)
+function mirror_insert_region($name,$priority,$throttle)
 {
-    return db_query("INSERT INTO mirror_regions(region_name,region_priority) VALUES('{$name}',{$priority})");
+    return db_query("INSERT INTO mirror_regions(region_name,region_priority,region_throttle) VALUES('{$name}',{$priority},{$throttle})");
 }
 
 /**
@@ -50,9 +50,9 @@ function mirror_insert_region($name,$priority)
  *  @param int $priority
  *  @return bool
  */ 
-function mirror_update_region($id,$name,$priority)
+function mirror_update_region($id,$name,$priority,$throttle)
 {
-    return db_query("UPDATE mirror_regions SET region_name='{$name}',region_priority={$priority} WHERE region_id={$id}");
+    return db_query("UPDATE mirror_regions SET region_name='{$name}',region_priority={$priority},region_throttle={$throttle} WHERE region_id={$id}");
 }
 
 /**

@@ -147,6 +147,7 @@ CREATE TABLE `mirror_regions` (
   `region_id` int(10) unsigned NOT NULL auto_increment,
   `region_name` varchar(255) NOT NULL default '',
   `region_priority` int(11) NOT NULL default '0',
+  `region_throttle` int(11) NOT NULL default '0',
   PRIMARY KEY  (`region_id`),
   UNIQUE KEY `region_name` (`region_name`)
 ) TYPE=InnoDB AUTO_INCREMENT=13 ;
