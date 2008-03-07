@@ -9,7 +9,9 @@ require_once('../cfg/init.php');
 
 // add region
 if (!empty($_POST['add-submit'])&&!empty($_POST['region_name'])) {
-    if (mirror_insert_region($_POST['region_name'],$_POST['region_priority'])) {
+    if ( $_POST['region_throttle'] > 100 || $_POST['region_throttle'] < 0 ) {
+        set_error('GeoIP Throttle should be a integer between 0 and 100.');
+    } elseif (mirror_insert_region($_POST['region_name'],$_POST['region_priority'],$_POST['region_throttle'])) {
         set_msg('Region added successfully.');
         header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
         exit;
@@ -24,7 +26,9 @@ if (!empty($_POST['submit'])) {
         switch($_POST['action']) {
             case 'edit':
                 if (!empty($_POST['doit'])) {
-                    if (mirror_update_region($_POST['region_id'],$_POST['region_name'],$_POST['region_priority'])) {
+                    if ( $_POST['region_throttle'] > 100 || $_POST['region_throttle'] < 0 ) {
+                        set_error('GeoIP Throttle should be a integer between 0 and 100.');
+                    } elseif (mirror_update_region($_POST['region_id'],$_POST['region_name'],$_POST['region_priority'],$_POST['region_throttle'])) {
                         set_msg('Region updated successfully.');
                         header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
                         exit;
@@ -79,7 +83,8 @@ $headers = array(
     'region_id'=>'',
     'region_name'=>'Region Name',
     'mirrors'=>'Mirrors',
-    'region_priority'=>'Priority'
+    'region_priority'=>'Priority',
+    'region_throttle'=>'GeoIP Throttle'
 );
 
 $actions = array(

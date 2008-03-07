@@ -59,6 +59,44 @@ function getRegionFromIP($ip) {
         return false;
 }
 
+/**
+ * GeoIP: For a given region id do any throttling for the region
+ * @param int $region_id a region id
+ * @return boolean should this request come from the clients region? false = yes true = no
+ */
+function throttleGeoIPRegion($region_id) {
+    global $sdo;
+
+    $region_throttle = $sdo->get_one("
+        SELECT
+            region_throttle
+        FROM
+            mirror_regions
+        WHERE
+            region_id = %d
+        ",array($region_id));
+    
+    $region_throttle = $region_throttle['region_throttle'];
+
+    // Don't throttle the user if the throttle is invalid.
+    if ( $region_throttle == 100 || $region_throttle > 100 || $region_throttle < 0 ) {
+        return false;
+    } else {
+        /* Ex: Thottle is at 25% GeoIP
+          A random number from 1 to 100 will be less than or equal to 25 25% or the time.
+          100 will always be greater than or equal to a random number between 1 and 100
+          0 will never be greater than or equal to a random number between 1 and 100
+        */
+        if ( $region_throttle >= mt_rand(1,100) ) {
+            return false;
+        } else {
+            return true;
+        }
+        
+    }
+
+}
+
 
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
@@ -114,7 +152,7 @@ if (!empty($_GET['product'])) {
                     $client_ip = $_SERVER['REMOTE_ADDR'];
                 $client_region = getRegionFromIP($client_ip);
                 
-                if ($client_region) {
+                if ($client_region && !throttleGeoIPRegion($client_region)) {
                     $mirrors = $sdo->get("
                         SELECT
                             mirror_mirrors.mirror_id,
