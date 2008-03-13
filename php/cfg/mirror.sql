@@ -29,8 +29,8 @@ CREATE TABLE `mirror_country_to_region` (
 
 DROP TABLE IF EXISTS `mirror_ip_to_country`;
 CREATE TABLE `mirror_ip_to_country` (
-  `ip_start` int(12) NOT NULL default '0',
-  `ip_end` int(12) NOT NULL default '0',
+  `ip_start` int(10) unsigned NOT NULL default '0',
+  `ip_end` int(10) unsigned NOT NULL default '0',
   `country_code` char(2) NOT NULL default '',
   KEY `ip_start` (`ip_start`),
   KEY `ip_end` (`ip_end`)
