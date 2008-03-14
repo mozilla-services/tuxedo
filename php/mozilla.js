@@ -1,6 +1,6 @@
 function getDownloadURLForLanguage(aABCD, aPlatform)
 {
-  var url = "http://download.mozilla.org/?product=firefox&os=";
+  var url = "http://download.mozilla.org/?product=firefox&amp;os=";
 
   switch (aPlatform) {
   case PLATFORM_WINDOWS:
@@ -13,10 +13,12 @@ function getDownloadURLForLanguage(aABCD, aPlatform)
     url += "osx";
     if (aABCD == "ja-JP")
       aABCD = "ja-JPM";
+    if (aABCD == "ja")
+      aABCD = "ja-JP-mac";
     break;
   default:
-    return "http://www.mozilla.org/products/firefox/all.html";
+    return "http://www.mozilla.com/" + aABCD + "/firefox/all.html";
   }
 
-  return url + "&lang=" + aABCD;
+  return url + "&amp;lang=" + aABCD;
 }

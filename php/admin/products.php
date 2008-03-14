@@ -11,7 +11,7 @@ require_once('../cfg/init.php');
 if (!empty($_POST['add-submit'])&&!empty($_POST['product_name'])) {
     if (mirror_insert_product($_POST['product_name'],$_POST['product_priority'])) {
         set_msg('Product added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/products.php');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/products.php');
         exit;
     } else {
         set_error('Product could not be added because of an unknown error.');
@@ -26,7 +26,7 @@ if (!empty($_POST['submit'])) {
                 if (!empty($_POST['doit'])) {
                     if (mirror_update_product($_POST['product_id'],$_POST['product_name'],$_POST['product_priority'])) {
                         set_msg('Product updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/products.php');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/products.php');
                         exit;
                     } else {
                         set_error('Product update failed.');

@@ -11,7 +11,7 @@ require_once('../cfg/init.php');
 if (!empty($_POST['add-submit'])&&!empty($_POST['username'])&&!empty($_POST['password'])&&!empty($_POST['rpassword'])) {
     if (mirror_insert_user($_POST['username'],$_POST['password'],$_POST['rpassword'],$_POST['user_firstname'],$_POST['user_lastname'],$_POST['user_email'])) {
         set_msg('User added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/users.php');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/users.php');
         exit;
     } else {
         set_error('User could not be added because of an unknown error.');
@@ -26,7 +26,7 @@ if (!empty($_POST['submit'])) {
                 if (!empty($_POST['doit'])) {
                     if (mirror_update_user($_POST['user_id'],$_POST['username'],$_POST['password'],$_POST['rpassword'],$_POST['user_firstname'],$_POST['user_lastname'],$_POST['user_email'])) {
                         set_msg('User updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/users.php');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/users.php');
                         exit;
                     } else {
                         set_error('User update failed.');

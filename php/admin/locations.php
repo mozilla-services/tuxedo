@@ -27,7 +27,7 @@ if (!empty($_POST['add-submit'])&&!empty($_POST['location_path'])) {
     }
     if ($success) {
         set_msg('Location added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/locations.php');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/locations.php');
         exit;
     } else {
         set_error('Location could not be added because of an unknown error.');
@@ -42,7 +42,7 @@ if (!empty($_POST['submit'])) {
                 if (!empty($_POST['doit'])) {
                     if (mirror_update_location($_POST['location_id'],$_POST['product_id'],$_POST['os_id'],$_POST['lang_id'],$_POST['location_path'])) {
                         set_msg('Location updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/locations.php');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/locations.php');
                         exit;
                     } else {
                         set_error('Location update failed.');

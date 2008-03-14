@@ -11,7 +11,7 @@ require_once('../cfg/init.php');
 if (!empty($_POST['add-submit'])) {
     if (mirror_insert_mirror($_POST['mirror_name'],$_POST['region_id'],$_POST['mirror_baseurl'],$_POST['mirror_rating'])) {
         set_msg('Mirror added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
         exit;
     } else {
         set_error('Mirror could not be added because of an unknown error.');
@@ -26,7 +26,7 @@ if (!empty($_POST['submit'])) {
                 if (!empty($_POST['doit'])) {
                     if (mirror_update_mirror($_POST['mirror_id'],$_POST['mirror_name'],$_POST['region_id'],$_POST['mirror_baseurl'],$_POST['mirror_rating'])) {
                         set_msg('Mirror updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
                         exit;
                     } else {
                         set_error('Mirror update failed.');

@@ -11,7 +11,7 @@ require_once('../cfg/init.php');
 if (!empty($_POST['add-submit'])&&!empty($_POST['os_name'])) {
     if (mirror_insert_os($_POST['os_name'],$_POST['os_priority'])) {
         set_msg('OS added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/os.php');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/os.php');
         exit;
     } else {
         set_error('OS could not be added because of an unknown error.');
@@ -26,7 +26,7 @@ if (!empty($_POST['submit'])) {
                 if (!empty($_POST['doit'])) {
                     if (mirror_update_os($_POST['os_id'],$_POST['os_name'],$_POST['os_priority'])) {
                         set_msg('OS updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/os.php');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/os.php');
                         exit;
                     } else {
                         set_error('OS update failed.');
