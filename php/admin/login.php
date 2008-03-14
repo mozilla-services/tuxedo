@@ -11,7 +11,7 @@ require_once(LIB.'/auth.php');
 if (!empty($_POST['submit'])) {
     if ($auth = auth_mysql($_POST['username'],$_POST['password'])) {
         auth_create_session($auth);
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/');
         exit;
     } else {
         $msg = 'Authentication failed.  Please check username and password and try again.';

@@ -6,6 +6,7 @@
  */
 define('FILEPATH','/var/www/download');  // filepath of root dir
 define('WEBPATH','');  // web path of root dir
+define('PROTOCOL','https');  // protocol to use for admin sessions (http or https)
 define('LIB',FILEPATH.'/lib');  // path to lib dir
 define('INC',FILEPATH.'/inc');  // path to inc dir 
 define('HEADER',INC.'/header.php');  // header document

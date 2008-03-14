@@ -13,7 +13,7 @@ if (!empty($_POST['add-submit'])&&!empty($_POST['region_name'])) {
         set_error('GeoIP Throttle should be a integer between 0 and 100.');
     } elseif (mirror_insert_region($_POST['region_name'],$_POST['region_priority'],$_POST['region_throttle'])) {
         set_msg('Region added successfully.');
-        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
+        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
         exit;
     } else {
         set_error('Region could not be added because of an unknown error.');
@@ -30,7 +30,7 @@ if (!empty($_POST['submit'])) {
                         set_error('GeoIP Throttle should be a integer between 0 and 100.');
                     } elseif (mirror_update_region($_POST['region_id'],$_POST['region_name'],$_POST['region_priority'],$_POST['region_throttle'])) {
                         set_msg('Region updated successfully.');
-                        header('Location: http://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
+                        header('Location: '.PROTOCOL.'://'.$_SERVER['HTTP_HOST'].WEBPATH.'/admin/regions.php');
                         exit;
                     } else {
                         set_error('Region update failed.');
