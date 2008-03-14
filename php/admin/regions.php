@@ -83,6 +83,7 @@ $headers = array(
     'region_id'=>'',
     'region_name'=>'Region Name',
     'mirrors'=>'Mirrors',
+    'ratings'=>'Total Ratings',
     'region_priority'=>'Priority',
     'region_throttle'=>'GeoIP Throttle'
 );
