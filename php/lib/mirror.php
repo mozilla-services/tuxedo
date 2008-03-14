@@ -98,7 +98,7 @@ function mirror_get_regions()
         SELECT 
             mirror_regions.*,
             COUNT(mirror_mirrors.mirror_id) as mirrors,
-            SUM(mirror_rating) as ratings
+            SUM(IFNULL(mirror_rating,0)) as ratings
         FROM 
             mirror_regions
         LEFT JOIN
@@ -108,7 +108,8 @@ function mirror_get_regions()
         LEFT JOIN
             mirror_mirrors
         ON
-            mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id
+            mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id AND
+            mirror_mirrors.mirror_active = '1'
         GROUP BY
             mirror_regions.region_id 
     ",MYSQL_ASSOC);
