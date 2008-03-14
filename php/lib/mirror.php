@@ -97,13 +97,18 @@ function mirror_get_regions()
     return db_get("
         SELECT 
             mirror_regions.*,
-            COUNT(mirror_id) as mirrors
+            COUNT(mirror_mirrors.mirror_id) as mirrors,
+            SUM(mirror_rating) as ratings
         FROM 
             mirror_regions
         LEFT JOIN
             mirror_mirror_region_map
         ON
             mirror_regions.region_id = mirror_mirror_region_map.region_id
+        LEFT JOIN
+            mirror_mirrors
+        ON
+            mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id
         GROUP BY
             mirror_regions.region_id 
     ",MYSQL_ASSOC);
