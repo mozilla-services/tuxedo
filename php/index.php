@@ -159,12 +159,12 @@ if (!empty($_GET['product'])) {
                             mirror_baseurl,
                             mirror_rating
                         FROM 
-                            mirror_mirrors,
-                            mirror_location_mirror_map
+                            mirror_mirrors
+                        JOIN
+                            mirror_location_mirror_map ON mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id
                         INNER JOIN
                             mirror_mirror_region_map ON (mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id)
                         WHERE
-                            mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
                             mirror_location_mirror_map.location_id = %d AND
                             mirror_mirror_region_map.region_id = %d AND
                             mirror_active='1' AND 
