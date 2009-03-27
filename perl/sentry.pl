@@ -11,6 +11,7 @@ use LWP::UserAgent;
 use Net::DNS;
 use URI;
 
+my $start_timestamp = time;
 my $ua = LWP::UserAgent->new;
 $ua->timeout(4);
 $ua->agent("Mozilla Mirror Monitor/1.0");
@@ -39,17 +40,32 @@ if (defined($ARGV[0]) and $ARGV[0] eq 'checknow') {
     $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
     ON mirror_locations.product_id = mirror_products.product_id WHERE
     product_active='1' AND product_checknow=1};
+    if (defined($ARGV[1])) {
+        if ($ARGV[1] =~ /^\d+$/) {
+            $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' AND mirror_id=$ARGV[1]};
+        } else {
+            $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' AND (mirror_baseurl LIKE } . $dbh->quote('%'.$ARGV[1].'%') . qq{ OR mirror_name LIKE } . $dbh->quote('%'.$ARGV[1].'%') . ")";
+        }
+    } else {
+        $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' ORDER BY mirror_name};
+    }
 } else {
     $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.product_id WHERE product_active='1'};
+    $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' ORDER BY mirror_name};
 }
-$mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE mirror_active='1' ORDER BY mirror_name};
 $update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=?,location_active=?};
 $failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET location_active='0' WHERE mirror_id=?};
+$log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
+$getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
+$updaterating_sql = qq{UPDATE mirror_mirrors SET mirror_rating = ? WHERE mirror_id = ?};
 
 my $location_sth = $dbh->prepare($location_sql);
 my $mirror_sth = $dbh->prepare($mirror_sql);
 my $update_sth = $dbh->prepare($update_sql);
 my $failed_mirror_sth = $dbh->prepare($failed_mirror_sql);
+my $log_sth = $dbh->prepare($log_sql);
+my $getlog_sth = $dbh->prepare($getlog_sql);
+my $updaterating_sth = $dbh->prepare($updaterating_sql);
 
 # populate a product and os hash if we're debugging stuff
 # this way we don't have to make too many selects against the DB
@@ -96,10 +112,11 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     if ($domain !~ m($ipregex) && !$netres->query($domain)) {
         print "DNS resolution for $mirror->{mirror_name} FAILED!  Moving on to next mirror.\n" if $DEBUG;
         $failed_mirror_sth->execute($mirror->{mirror_id});
+        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "DNS failed");
 
         # send email to infra
         open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-        print SENDMAIL "Subject: [bouncer] " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") has failed DNS resolution\n";
+        print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") has failed DNS resolution\n";
         print SENDMAIL "To: $email\n";
         print SENDMAIL "Content-type: text/plain\n\n";
         print SENDMAIL "$mirror->{mirror_name} failed DNS resolution.  All files for this mirror will be disabled until the next check.";
@@ -117,10 +134,31 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     if ( $mirrorRes->{_rc}>=500 ) {
         print "$mirror->{mirror_name} sent no response!  Moving on to next mirror.\n" if $DEBUG;
         $failed_mirror_sth->execute($mirror->{mirror_id});
+        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "No response");
+        $getlog_sth->execute($mirror->{mirror_id});
+        my ($prevweight, $prevactive) = ($mirror->{mirror_rating}, 1);
+        my $dropit = 1;
+        while (my ($weight, $active) = $getlog_sth->fetchrow_array) {
+            print "**** weight $weight active $active for $mirror->{mirror_baseurl}\n";
+            if (($prevweight != $weight) || ($prevactive == $active)) {
+                $dropit = 0;
+            }
+            $prevweight = $weight;
+            $prevactive = $active;
+        }
+        my $newweight;
+        if ($dropit) {
+            print "**** $mirror->{mirror_baseurl} Weight Drop Pattern matched, weight will be dropped 10%\n" if $DEBUG;
+            $newweight = $mirror->{mirror_rating} - int($mirror->{mirror_rating} * 0.10);
+            print "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n" if $DEBUG;
+            $updaterating_sth->execute($newweight, $mirror->{mirror_id});
+        }
 
         # send email to infra
         open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-        print SENDMAIL "Subject: [bouncer] " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") is not responding\n";
+        print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") is not responding";
+        print SENDMAIL " - weight dropped to $newweight" if $dropit;
+        print SENDMAIL "\n";
         print SENDMAIL "To: $email\n";
         print SENDMAIL "Content-type: text/plain\n\n";
         print SENDMAIL "$mirror->{mirror_name} sent no response for its URI: $mirror->{mirror_baseurl}.  All files for this mirror will be disabled until the next check.";
@@ -153,4 +191,5 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 			}
 		}
 	}
+        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '1', $mirror->{mirror_rating}, "");
 }
