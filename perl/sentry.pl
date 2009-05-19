@@ -169,7 +169,15 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
 	foreach my $location (@locations) {
 
-		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $location->{location_path});
+		my $filepath = $location->{location_path};
+		if ($filepath =~ m!/firefox/!) {
+			$filepath =~ s@/en-US/@/zh-TW/@;
+		}
+		if ($filepath =~ m!/thunderbird/!) {
+			$filepath =~ s@/en-US/@/zh-CN/@;
+		}
+		print "Checking $filepath...\n";
+		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $filepath);
 		my $res = $ua->simple_request($req);
 
 		if ( $res->{_rc} == 200 ) {
