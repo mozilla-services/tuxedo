@@ -180,7 +180,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $filepath);
 		my $res = $ua->simple_request($req);
 
-		if ( $res->{_rc} == 200 ) {
+		if ( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ ) {
 			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} is okay.\n" if $DEBUG;
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '1');
 		}
