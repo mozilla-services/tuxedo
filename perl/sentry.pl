@@ -14,11 +14,11 @@ use URI;
 use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my $ua = LWP::UserAgent->new;
-$ua->timeout(4);
+$ua->timeout(5);
 $ua->agent("Mozilla Mirror Monitor/1.0");
 
 my $netres = Net::DNS::Resolver->new();
-$netres->tcp_timeout(5);
+$netres->tcp_timeout(10);
 
 my $DEBUG = 1;
 my %products = ();
@@ -65,7 +65,7 @@ $update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=
 $failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET location_active='0' WHERE mirror_id=?};
 $log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
 $getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
-$updatelog_sql = qq{UPDATE sentry_log SET reason=? WHERE log_date=? AND mirror_id=?};
+$updatelog_sql = qq{UPDATE sentry_log SET reason=? WHERE log_date=FROM_UNIXTIME(?) AND mirror_id=?};
 $updaterating_sql = qq{UPDATE mirror_mirrors SET mirror_rating = ? WHERE mirror_id = ?};
 
 my $location_sth = $dbh->prepare($location_sql);
@@ -74,7 +74,7 @@ my $update_sth = $dbh->prepare($update_sql);
 my $failed_mirror_sth = $dbh->prepare($failed_mirror_sql);
 my $log_sth = $dbh->prepare($log_sql);
 my $getlog_sth = $dbh->prepare($getlog_sql);
-my $updatelog_sql = $dbh->prepare($updatelog_sql);
+my $updatelog_sth = $dbh->prepare($updatelog_sql);
 my $updaterating_sth = $dbh->prepare($updaterating_sql);
 
 # populate a product and os hash if we're debugging stuff
@@ -142,7 +142,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
     if ( $mirrorRes->{_rc}>=500 ) {
-        log_this "$mirror->{mirror_name} sent no response!  Moving on to next mirror.\n";
+        log_this "$mirror->{mirror_name} sent no response after " . $ua->timeout() . " seconds!  Checking recent history...\n";
         $failed_mirror_sth->execute($mirror->{mirror_id});
         $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "No response");
         $getlog_sth->execute($mirror->{mirror_id});
@@ -162,6 +162,8 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             $newweight = $mirror->{mirror_rating} - int($mirror->{mirror_rating} * 0.10);
             log_this "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n";
             $updaterating_sth->execute($newweight, $mirror->{mirror_id});
+        } else {
+            log_this "Pattern OK, leaving weight unchanged.\n";
         }
         $updatelog_sth->execute($output, $start_timestamp, $mirror->{mirror_id});
         # send email to infra
