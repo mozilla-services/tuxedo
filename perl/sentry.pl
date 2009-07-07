@@ -11,6 +11,7 @@ use LWP::UserAgent;
 use Net::DNS;
 use URI;
 
+use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my $ua = LWP::UserAgent->new;
 $ua->timeout(4);
@@ -35,6 +36,13 @@ my $email = '';
 # IP address regex
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};
 
+my $output = "";
+
+sub log_this {
+  $output .= $_[0];
+  print $_[0] if $DEBUG;
+}
+
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
 if (defined($ARGV[0]) and $ARGV[0] eq 'checknow') {
     $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
@@ -57,6 +65,7 @@ $update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=
 $failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET location_active='0' WHERE mirror_id=?};
 $log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
 $getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
+$updatelog_sql = qq{UPDATE sentry_log SET reason=? WHERE log_date=? AND mirror_id=?};
 $updaterating_sql = qq{UPDATE mirror_mirrors SET mirror_rating = ? WHERE mirror_id = ?};
 
 my $location_sth = $dbh->prepare($location_sql);
@@ -65,6 +74,7 @@ my $update_sth = $dbh->prepare($update_sql);
 my $failed_mirror_sth = $dbh->prepare($failed_mirror_sql);
 my $log_sth = $dbh->prepare($log_sql);
 my $getlog_sth = $dbh->prepare($getlog_sql);
+my $updatelog_sql = $dbh->prepare($updatelog_sql);
 my $updaterating_sth = $dbh->prepare($updaterating_sql);
 
 # populate a product and os hash if we're debugging stuff
@@ -110,17 +120,17 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     # we also only want to check the domain if the host is NOT a straight IP address
     # since for some reason Net::DNS::query still tries to resolve IP addresses (dumb).
     if ($domain !~ m($ipregex) && !$netres->query($domain)) {
-        print "DNS resolution for $mirror->{mirror_name} FAILED!  Moving on to next mirror.\n" if $DEBUG;
+        log_this "DNS resolution for $mirror->{mirror_name} FAILED!  Moving on to next mirror.\n";
         $failed_mirror_sth->execute($mirror->{mirror_id});
         $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "DNS failed");
 
         # send email to infra
-        open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-        print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") has failed DNS resolution\n";
-        print SENDMAIL "To: $email\n";
-        print SENDMAIL "Content-type: text/plain\n\n";
-        print SENDMAIL "$mirror->{mirror_name} failed DNS resolution.  All files for this mirror will be disabled until the next check.";
-        close(SENDMAIL);
+#        open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
+#        print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") has failed DNS resolution\n";
+#        print SENDMAIL "To: $email\n";
+#        print SENDMAIL "Content-type: text/plain\n\n";
+#        print SENDMAIL "$mirror->{mirror_name} failed DNS resolution.  All files for this mirror will be disabled until the next check.";
+#        close(SENDMAIL);
 
         next;
     }
@@ -132,14 +142,14 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
     if ( $mirrorRes->{_rc}>=500 ) {
-        print "$mirror->{mirror_name} sent no response!  Moving on to next mirror.\n" if $DEBUG;
+        log_this "$mirror->{mirror_name} sent no response!  Moving on to next mirror.\n";
         $failed_mirror_sth->execute($mirror->{mirror_id});
         $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "No response");
         $getlog_sth->execute($mirror->{mirror_id});
         my ($prevweight, $prevactive) = ($mirror->{mirror_rating}, 1);
         my $dropit = 1;
         while (my ($weight, $active) = $getlog_sth->fetchrow_array) {
-            print "**** weight $weight active $active for $mirror->{mirror_baseurl}\n";
+            log_this "**** weight $weight active $active for $mirror->{mirror_baseurl}\n";
             if (($prevweight != $weight) || ($prevactive == $active)) {
                 $dropit = 0;
             }
@@ -148,21 +158,21 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         }
         my $newweight;
         if ($dropit) {
-            print "**** $mirror->{mirror_baseurl} Weight Drop Pattern matched, weight will be dropped 10%\n" if $DEBUG;
+            log_this "**** $mirror->{mirror_baseurl} Weight Drop Pattern matched, weight will be dropped 10%\n";
             $newweight = $mirror->{mirror_rating} - int($mirror->{mirror_rating} * 0.10);
-            print "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n" if $DEBUG;
+            log_this "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n";
             $updaterating_sth->execute($newweight, $mirror->{mirror_id});
         }
-
+        $updatelog_sth->execute($output, $start_timestamp, $mirror->{mirror_id});
         # send email to infra
-        open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-        print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") is not responding";
-        print SENDMAIL " - weight dropped to $newweight" if $dropit;
-        print SENDMAIL "\n";
-        print SENDMAIL "To: $email\n";
-        print SENDMAIL "Content-type: text/plain\n\n";
-        print SENDMAIL "$mirror->{mirror_name} sent no response for its URI: $mirror->{mirror_baseurl}.  All files for this mirror will be disabled until the next check.";
-        close(SENDMAIL);
+ #       open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
+ #       print SENDMAIL "Subject: [bouncer] (" . $mirror->{mirror_id} . ") " . $mirror->{mirror_name} . " (weight: " . $mirror->{mirror_rating} . ") is not responding";
+ #       print SENDMAIL " - weight dropped to $newweight" if $dropit;
+ #       print SENDMAIL "\n";
+ #       print SENDMAIL "To: $email\n";
+ #       print SENDMAIL "Content-type: text/plain\n\n";
+ #       print SENDMAIL "$mirror->{mirror_name} sent no response for its URI: $mirror->{mirror_baseurl}.  All files for this mirror will be disabled until the next check.";
+ #       close(SENDMAIL);
 
         next;
     }
@@ -176,28 +186,31 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 		if ($filepath =~ m!/thunderbird/!) {
 			$filepath =~ s@/en-US/@/zh-CN/@;
 		}
-		print "Checking $filepath...\n";
+		log_this "Checking $filepath... ";
 		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $filepath);
 		my $res = $ua->simple_request($req);
 
-		if ( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ ) {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} is okay.\n" if $DEBUG;
+		if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
+			#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} is okay.\n";
+			log_this "okay.\n";
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '1');
 		}
 		else {
-			print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED.\n" if $DEBUG;
+			#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED.\n";
+			log_this "FAILED. rc=" . $res->{_rc} . "\n";
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 		}
 
 		# content-type == text/plain hack here for Mac dmg's
 		if ( ($res->{_rc} == 200) && ($location->{os_id} == 4) ) {
-			print "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " .
-                $res->{_headers}->{'content-type'} . "\n" if $DEBUG;
+			#log_this "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " .
+                $res->{_headers}->{'content-type'} . "\n";
 			if ( $location->{location_path} =~ m/.*\.dmg$/ && $res->{_headers}->{'content-type'} !~ /application\/x-apple-diskimage/ ) {
-				print "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED due to content-type mis-match.\n" if $DEBUG;
+				#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED due to content-type mis-match.\n";
+				log_this " -> FAILED due to content-type mis-match, expected 'application/x-apple-diskimage', got '$res->{_headers}->{'content-type'}'\n";
 	            $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 			}
 		}
 	}
-        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '1', $mirror->{mirror_rating}, "");
+        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '1', $mirror->{mirror_rating}, $output);
 }
