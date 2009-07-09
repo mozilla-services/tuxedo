@@ -90,7 +90,7 @@ CREATE TABLE `mirror_mirror_region_map` (
 DROP TABLE IF EXISTS `mirror_mirrors`;
 CREATE TABLE `mirror_mirrors` (
   `mirror_id` int(10) unsigned NOT NULL auto_increment,
-  `mirror_name` varchar(32) NOT NULL default '',
+  `mirror_name` varchar(64) NOT NULL default '',
   `mirror_baseurl` varchar(255) NOT NULL default '',
   `mirror_rating` int(11) NOT NULL default '0',
   `mirror_active` enum('0','1') NOT NULL default '0',
