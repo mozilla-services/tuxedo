@@ -194,3 +194,21 @@ CREATE TABLE `mirror_users` (
   PRIMARY KEY  (`user_id`,`username`,`password`),
   UNIQUE KEY `user_email` (`user_email`)
 ) TYPE=InnoDB AUTO_INCREMENT=8 ;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `sentry_log`
+-- 
+
+DROP TABLE IF EXISTS `sentry_log`;
+CREATE TABLE `sentry_log` (
+  `log_date` datetime NOT NULL,
+  `check_time` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `mirror_id` int(10) unsigned NOT NULL,
+  `mirror_active` enum('0','1') NOT NULL,
+  `mirror_rating` int(11) NOT NULL,
+  `reason` text,
+  UNIQUE KEY `log_entry` (`mirror_id`,`log_date`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
+
