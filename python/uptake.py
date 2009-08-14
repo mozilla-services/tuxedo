@@ -8,22 +8,36 @@
     @author Frederic Wenzel <fwenzel@mozilla.com>
 
 """
+
+import os
+import sys
+import traceback
+import cgi
+import httplib
+
 import cse
 import cse.Database
 import cse.MySQLDatabase
+import cse.ConfigurationManager
 
-import sys
-import traceback
+version="0.2"
 
-version="0.1"
-standardError = sys.stderr
-
-#---------------------------------------------------------------------------------------------------
-# Database Class
-#---------------------------------------------------------------------------------------------------
+# valid script options
+options = [ ('?',  'help', False, None, 'print this message'), 
+            ('c',  'config', True, './bouncer.conf', 'specify the location and name of the config file'),
+            (None, 'DatabaseName', True, "", 'the name of the database within the server'),
+            (None, 'ServerName', True, "", 'the name of the database server'),
+            (None, 'UserName', True, "", 'the name of the user in the database'),
+            (None, 'Password', True, "", 'the password for the user in the database'),
+            ('p', 'product', True, '', '(part of) the product name to display the uptake for'),
+            (None, 'os', True, '', '(part of) the os/platform name to display the uptake for'),
+            ('f', 'format', True, 'text', 'output format: text or xml')
+            ]
+        
 class Database:
 
-    def __init__(self):
+    def __init__(self, conf):
+        self.conf = conf
         self.bouncer_db = cse.MySQLDatabase.MySQLDatabase(conf["DatabaseName"],
             conf["ServerName"], conf["UserName"],
             conf["Password"])
@@ -37,7 +51,7 @@ class Database:
     def quote(self,s):
           return self.bouncer_db.module.escape_string(s)
 
-    def getMirrorUptake(self):
+    def get_mirror_uptake(self):
         query = """
             SELECT 
             p.product_name as productname,
@@ -64,7 +78,7 @@ class Database:
             AND p.product_name LIKE '%%%s%%'
             AND o.os_name LIKE '%%%s%%'
             GROUP BY lmm.location_id
-            """ % (self.quote(conf['product']), self.quote(conf['os']))
+            """ % (self.quote(self.conf['product']), self.quote(self.conf['os']))
         result = self.bouncer_db.executeSql(query)
         return result
 
@@ -117,10 +131,8 @@ def indent(rows, hasHeader=False, headerChar='-', delim=' | ', justify='left',
         if separateRows or hasHeader: print >> output, rowSeparator; hasHeader=False
     return output.getvalue()
 
-#===========================================================================================================
-# printResultText
-#===========================================================================================================
-def printResultText(result):
+
+def print_result_text(result):
     """Print result set in plain text format"""
     labels = ['Product', 'OS', 'Available', 'Total', 'Percentage']
     # formatting columns
@@ -128,10 +140,8 @@ def printResultText(result):
     applyformat = lambda (pos,data): formats[pos] % data
     print indent([labels] + [ [ applyformat(item) for item in enumerate(data) ] for data in result.content ], hasHeader=True)
 
-#===========================================================================================================
-# printResultXML
-#===========================================================================================================
-def printResultXML(result):
+
+def print_result_xml(result):
     """Print result set in xml format"""
 
     from xml.sax import saxutils
@@ -165,30 +175,37 @@ def printResultXML(result):
 
     print "</mirror_uptake>"
 
-#===========================================================================================================
-# main
-#===========================================================================================================
-if __name__ == "__main__":
 
-    import cse.ConfigurationManager
-    
+def print_uptake(conf):
+    """determine and print mirror uptake"""
     try:
-        
-        options = [ ('?',  'help', False, None, 'print this message'), 
-                    ('c',  'config', True, './bouncer.conf', 'specify the location and name of the config file'),
-                    (None, 'DatabaseName', True, "", 'the name of the database within the server'),
-                    (None, 'ServerName', True, "", 'the name of the database server'),
-                    (None, 'UserName', True, "", 'the name of the user in the database'),
-                    (None, 'Password', True, "", 'the password for the user in the database'),
-                    ('p', 'product', True, '', '(part of) the product name to display the uptake for'),
-                    (None, 'os', True, '', '(part of) the os/platform name to display the uptake for'),
-                    ('f', 'format', True, 'text', 'output format: text or xml')
-                    ]
-        
+        # Load our database
+        db = Database(conf)
+
+        # fetch uptake from db
+        uptake = db.get_mirror_uptake()
+
+    except Exception, x:
+        sys.stderr.write(str(x))
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+
+    printformats = { 'text': print_result_text, 'xml': print_result_xml}
+    try:
+        printformats[conf['format']](uptake)
+    except KeyError, x:
+        sys.stderr.write("Invalid output format: %s" % (conf['format']))
+        sys.exit(1)
+
+
+def handle_cli():
+    """Command line interface"""
+
+    try:
         conf = cse.ConfigurationManager.ConfigurationManager(options)
     
     except cse.ConfigurationManager.ConfigurationManagerNotAnOption, x:
-        print >>standardError, "%s %s\n%s\nFor usage, try --help" % (sys.argv[0], version, x)
+        sys.stderr.write("%s %s\n%s\nFor usage, try --help" % (sys.argv[0], version, x))
         sys.exit()
     
     # show help
@@ -196,21 +213,47 @@ if __name__ == "__main__":
         conf.outputCommandSummary()
         sys.exit()
 
+    print_uptake(conf)
+
+
+def handle_cgi():
+    """CGI interface"""
+
+    # get parameters
+    params = cgi.FieldStorage()
+    conf = cse.ConfigurationManager.ConfigurationManager(options)
+    conf.update({
+        'product': params.getfirst('product', ''),
+        'os': params.getfirst('os', ''),
+        'format': params.getfirst('format', 'text')
+        })
+
+    contenttypes = { 'text': 'text/plain', 'xml': 'text/xml' }
     try:
-        # Load our database
-        db = Database()
-
-        # fetch uptake from db
-        uptake = db.getMirrorUptake()
-
-    except Exception, x:
-        print >>standardError, x
-        traceback.print_exc(file=standardError)
-        sys.exit(1)
-
-    printformats = { 'text': printResultText, 'xml': printResultXML }
-    try:
-        printformats[conf['format']](uptake)
+        print "Content-type: %s" % contenttypes[conf['format']]
+        print
     except KeyError, x:
-        print >>standardError, "Invalid output format: %s" % (conf['format'])
-        sys.exit(1)
+        cgi_error(400, "Invalid output format: %s" % (conf['format']))
+
+    print_uptake(conf)
+
+
+def cgi_error(error_code = httplib.INTERNAL_SERVER_ERROR, error_message = ''):
+    """Throw a (fatal) CGI error"""
+
+    try:
+        print "Status: %s %s" % (error_code, httplib.responses[error_code])
+    except AttributeError:
+        print "Status: %s" % (error_code)
+    print "Content-type: text/html"
+    print
+    print error_message
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    # XXX: fuuuzzzy guess if we are called from CLI or CGI
+    if "QUERY_STRING" in os.environ:
+        handle_cgi()
+    else:
+        handle_cli()
