@@ -39,10 +39,6 @@ $email = '';
 # load the config
 do "sentry.cfg";
 
-use Data::Dumper;
-print Data::Dumper::Dumper(\%content_type);
-exit;
-
 # IP address regex
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};
 
