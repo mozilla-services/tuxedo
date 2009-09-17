@@ -31,15 +31,17 @@ $pass = '';
 $db = $user;
 
 # email address to notify of mirror failures
-my $email = '';
+$email = '';
 
-my %content_type = (
-    dmg => 'application/x-apple-diskimage',
-    xpi => 'application/x-xpinstall',
-    jar => 'application/x-java-archive',
-    mar => 'application/octet-stream',
-    msi => 'application/octet-stream',
-);
+# content types that we need to check
+%content_type = ();
+
+# load the config
+do "sentry.cfg";
+
+use Data::Dumper;
+print Data::Dumper::Dumper(\%content_type);
+exit;
 
 # IP address regex
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};

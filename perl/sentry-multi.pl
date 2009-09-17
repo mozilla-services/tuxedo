@@ -23,11 +23,14 @@ my $DEBUG = 1;
 my %products = ();
 my %oss = ();
 
-# Some db credentials
+# Some db credentials (defaults)
 $host = '';
 $user = '';
 $pass = '';
-$db = $user;
+$db = '';
+
+# load the config
+do "sentry.cfg";
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
 my $checknow = "";
