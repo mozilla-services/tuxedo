@@ -33,6 +33,14 @@ $db = $user;
 # email address to notify of mirror failures
 my $email = '';
 
+my %content_type = (
+    dmg => 'application/x-apple-diskimage',
+    xpi => 'application/x-xpinstall',
+    jar => 'application/x-java-archive',
+    mar => 'application/octet-stream',
+    msi => 'application/octet-stream',
+);
+
 # IP address regex
 my $ipregex = qr{^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$};
 
@@ -142,29 +150,37 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
     if ( $mirrorRes->{_rc}>=500 ) {
-        log_this "$mirror->{mirror_name} sent no response after " . $ua->timeout() . " seconds!  Checking recent history...\n";
-        $failed_mirror_sth->execute($mirror->{mirror_id});
-        $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "No response");
-        $getlog_sth->execute($mirror->{mirror_id});
-        my ($prevweight, $prevactive) = ($mirror->{mirror_rating}, 1);
-        my $dropit = 1;
-        while (my ($weight, $active) = $getlog_sth->fetchrow_array) {
-            log_this "**** weight $weight active $active for $mirror->{mirror_baseurl}\n";
-            if (($prevweight != $weight) || ($prevactive == $active)) {
-                $dropit = 0;
+        if ( $mirrorRes->{_rc} == 500 ) {
+            log_this "$mirror->{mirror_baseurl} sent no response after " . $ua->timeout() . " seconds!  Checking recent history...\n";
+            $failed_mirror_sth->execute($mirror->{mirror_id});
+            $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "No response");
+            $getlog_sth->execute($mirror->{mirror_id});
+            my ($prevweight, $prevactive) = ($mirror->{mirror_rating}, 1);
+            my $dropit = 1;
+            while (my ($weight, $active) = $getlog_sth->fetchrow_array) {
+                log_this "**** weight $weight active $active for $mirror->{mirror_baseurl}\n";
+                if (($prevweight != $weight) || ($prevactive == $active)) {
+                    $dropit = 0;
+                }
+                $prevweight = $weight;
+                $prevactive = $active;
             }
-            $prevweight = $weight;
-            $prevactive = $active;
+            my $newweight;
+            if ($dropit) {
+                log_this "**** $mirror->{mirror_baseurl} Weight Drop Pattern matched, weight will be dropped 10%\n";
+                $newweight = $mirror->{mirror_rating} - int($mirror->{mirror_rating} * 0.10);
+                log_this "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n";
+                $updaterating_sth->execute($newweight, $mirror->{mirror_id});
+            } else {
+                log_this "Pattern OK, leaving weight unchanged.\n";
+            }
         }
-        my $newweight;
-        if ($dropit) {
-            log_this "**** $mirror->{mirror_baseurl} Weight Drop Pattern matched, weight will be dropped 10%\n";
-            $newweight = $mirror->{mirror_rating} - int($mirror->{mirror_rating} * 0.10);
-            log_this "**** $mirror->{mirror_baseurl} Weight change $mirror->{mirror_rating} -> $newweight\n";
-            $updaterating_sth->execute($newweight, $mirror->{mirror_id});
-        } else {
-            log_this "Pattern OK, leaving weight unchanged.\n";
+        else {
+            log_this "$mirror->{mirror_baseurl} returned error " . $mirrorRes->{_rc} . ".\n";
+            $failed_mirror_sth->execute($mirror->{mirror_id});
+            $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '0', $mirror->{mirror_rating}, "Bad response");
         }
+
         $updatelog_sth->execute($output, $start_timestamp, $mirror->{mirror_id});
         # send email to infra
  #       open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
@@ -182,7 +198,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 	foreach my $location (@locations) {
 
 		my $filepath = $location->{location_path};
-		if ($filepath =~ m!/firefox/!) {
+                if (($filepath =~ m!/firefox/!) && ($filepath !~ m!/namoroka/!)) {
 			$filepath =~ s@/en-US/@/zh-TW/@;
 		}
 		if ($filepath =~ m!/thunderbird/!) {
@@ -193,25 +209,22 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 		my $res = $ua->simple_request($req);
 
 		if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
-			#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} is okay.\n";
 			log_this "okay.\n";
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '1');
 		}
 		else {
-			#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED.\n";
 			log_this "FAILED. rc=" . $res->{_rc} . "\n";
 			$update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 		}
 
 		# content-type == text/plain hack here for Mac dmg's
-		if ( ($res->{_rc} == 200) && ($location->{os_id} == 4) ) {
-			#log_this "Testing: $products{$location->{product_id}} on $oss{$location->{os_id}} content-type: " .
-                $res->{_headers}->{'content-type'} . "\n";
-			if ( $location->{location_path} =~ m/.*\.dmg$/ && $res->{_headers}->{'content-type'} !~ /application\/x-apple-diskimage/ ) {
-				#log_this "$mirror->{mirror_name} for $products{$location->{product_id}} on $oss{$location->{os_id}} FAILED due to content-type mis-match.\n";
-				log_this " -> FAILED due to content-type mis-match, expected 'application/x-apple-diskimage', got '$res->{_headers}->{'content-type'}'\n";
-	            $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
+		if ($res->{_rc} == 200) {
+                    foreach my $exten (keys %content_type) {
+			if ( $location->{location_path} =~ m/.*\.$exten$/ && $res->{_headers}->{'content-type'} !~ /\Q$content_type{$exten}\E/ ) {
+				log_this " -> FAILED due to content-type mis-match, expected '$content_type{$exten}', got '$res->{_headers}->{'content-type'}'\n";
+	                    $update_sth->execute($location->{location_id}, $mirror->{mirror_id}, '0');
 			}
+                    }
 		}
 	}
         $log_sth->execute($start_timestamp, $mirror->{mirror_id}, '1', $mirror->{mirror_rating}, $output);
