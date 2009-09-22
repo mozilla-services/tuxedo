@@ -11,10 +11,11 @@ my $dbpass = "";
 my $dsn = "dbi:mysql:host=$host;database=$dbname";
 my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {});
 
-my $product = "Firefox-3.5";
-my $productregexp = "^Firefox-(3.5|3.5-Complete|3.5-Partial)\$";
-my $throttlewarn = 45000;
-my $throttlecrit = 35000;
+# [ product name, product regexp, throttle warn level, throttle critical level ]
+my @productlist = (
+  ["Firefox 3.5.3", "^Firefox-3\\.5\\.3", 45000, 35000],
+  ["Firefox 3.0.14", "^Firefox-3\\.0\\.14", 45000, 35000],
+);
 
 my $uptakequery = "SELECT MIN(t.available) from (SELECT 
     SUM( m.mirror_rating ) as available,
@@ -38,12 +39,10 @@ my $uptakequery = "SELECT MIN(t.available) from (SELECT
     JOIN mirror_products p ON p.product_id = l.product_id
     JOIN mirror_os o ON o.os_id = l.os_id
     WHERE lmm.location_active = '1' AND m.mirror_active = '1'
-    AND p.product_name REGEXP '$productregexp'
+    AND p.product_name REGEXP ?
     AND o.os_name = 'win'
     GROUP BY lmm.location_id) as t";
 my $uptakeqh = $dbh->prepare($uptakequery);
-$uptakeqh->execute();
-my ($uptake) = $uptakeqh->fetchrow_array();
 
 my $query = "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(log_date) - (UNIX_TIMESTAMP(log_date) % 300))) AS log_run,
        check_time,
@@ -103,7 +102,7 @@ Refresh: 150;
 <title>Sentry log overview</title>
 <style type="text/css"><!--
 table { border: solid black 1px; padding: 0px; }
-td { border: solid black 1px; font-family: sans-serif; font-size: xx-small; }
+td { border: solid black 1px; font-family: sans-serif; font-size: xx-small; white-space: nowrap; }
 td.active { background-color: #9f9; }
 td.inactive { background-color: #f99; }
 td.dnsfail { background-color: #99f; }
@@ -142,22 +141,26 @@ foreach my $timestamp (reverse sort keys %seentime) {
 print "</tr>\n<tr><td>Active and available aggregate weight:</td>";
 foreach my $timestamp (reverse sort keys %seentime) {
   my $class = "good";
-  if ($activeweight{$timestamp} < $throttlewarn) { $class = "ok" };
-  if ($activeweight{$timestamp} < $throttlecrit) { $class = "poor" };
+  if ($activeweight{$timestamp} < $productlist[0][2]) { $class = "ok" };
+  if ($activeweight{$timestamp} < $productlist[0][3]) { $class = "poor" };
   print qq{<td class="$class" title="$class">} . $activeweight{$timestamp} . "</td>";
 }
-print "</tr>\n<tr><td>$product Uptake ($throttlewarn to stay unthrottled)</td>";
-{
-  my $class = "good";
-  if ($uptake < $throttlewarn) { $class = "ok" };
-  if ($uptake < $throttlecrit) { $class = "poor" };
-  print qq{<td class="$class" title="$class">} . $uptake . "</td>";
+for my $productitem (@productlist) {
+  my ($product, $productregexp, $throttlewarn, $throttlecrit) = @$productitem;
+  $uptakeqh->execute($productregexp);
+  my ($uptake) = $uptakeqh->fetchrow_array();
+  print "</tr>\n<tr><td>$product Uptake ($throttlewarn to stay unthrottled)</td>";
+  {
+    my $class = "good";
+    if ($uptake < $throttlewarn) { $class = "ok" };
+    if ($uptake < $throttlecrit) { $class = "poor" };
+    print qq{<td class="$class" title="$class">} . $uptake . "</td>";
+  }
+  my $colcount = scalar(keys %seentime);
+  $colcount--;
+  print "<td>&nbsp;</td>" x $colcount;
+  print "</tr>\n";
 }
-my $colcount = scalar(keys %seentime);
-$colcount--;
-print "<td>&nbsp;</td>" x $colcount;
-print "</tr>\n";
-
 print qq{</tr>\n<tr class="divider"><td>&nbsp;</td>};
 print "<td>&nbsp;</td>" x scalar(keys %seentime);
 print "</tr>\n";
