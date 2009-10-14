@@ -33,7 +33,7 @@ if (!empty($product)) {
     JOIN mirror_locations l ON l.location_id = lmm.location_id
     JOIN mirror_products p ON p.product_id = l.product_id
     JOIN mirror_os o ON o.os_id = l.os_id
-    WHERE lmm.location_active = '1'
+    WHERE lmm.location_active = '1' AND m.mirror_active = '1'
     AND p.product_name LIKE '%{$product}%'
     GROUP BY lmm.location_id
     ",MYSQL_ASSOC);
@@ -46,8 +46,7 @@ if (!empty($product)) {
         'product_name'=>'Product',
         'os_name'=>'OS',
         'available'=>'Available',
-        'total'=>'Total',
-        'percentage'=>'Percentage'
+        'total'=>'Total'
     );
 
     // should we export to csv?
