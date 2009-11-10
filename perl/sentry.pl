@@ -196,11 +196,18 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 	foreach my $location (@locations) {
 
 		my $filepath = $location->{location_path};
-                if (($filepath =~ m!/firefox/!) && ($filepath !~ m!/namoroka/!)) {
+                if (($filepath =~ m!/firefox/!)
+                     && ($filepath !~ m!/namoroka/!)
+                     && ($filepath !~ m!3\.6b1!)
+                     && ($filepath !~ m!wince\-arm!)
+                   ) {
 			$filepath =~ s@/en-US/@/zh-TW/@;
 		}
 		if ($filepath =~ m!/thunderbird/!) {
-			$filepath =~ s@/en-US/@/zh-CN/@;
+			$filepath =~ s@/en-US/@/uk/@;
+		}
+		if ($filepath =~ m!/seamonkey/!) {
+			$filepath =~ s@/en-US/@/tr/@;
 		}
 		log_this "Checking $filepath... ";
 		my $req = HTTP::Request->new(HEAD => $mirror->{mirror_baseurl} . $filepath);
