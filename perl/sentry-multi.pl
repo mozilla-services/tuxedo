@@ -57,6 +57,6 @@ while (my $location = $location_sth->fetchrow_hashref() ) {
 $mirror_sth->execute();
 
 while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
-    system ("/data/dist/www/download.mozilla.org/perl/sentry.pl checknow " . $mirror->{mirror_id} . " &");
+    system ("/usr/bin/perl -I/data/sentry /data/sentry/sentry.pl checknow " . $mirror->{mirror_id} . " &");
     sleep 1; # wait a second between each spawn so we don't hose the system by spawning 150 at once
 }
