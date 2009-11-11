@@ -8,6 +8,7 @@ dbpass = "";
 
 print "Content-type: text/csv; charset=utf-8"
 print
+print "# mirror_id, mirror_name, mirror_baseurl, mirror_rating, mirror_active"
 
 con = MySQLdb.connect(host, dbuser, dbpass, dbname)
 
