@@ -6,7 +6,7 @@ dbname = "";
 dbuser = "";
 dbpass = "";
 
-print "Content-type: text/html; charset=utf-8"
+print "Content-type: text/csv; charset=utf-8"
 print
 
 con = MySQLdb.connect(host, dbuser, dbpass, dbname)
