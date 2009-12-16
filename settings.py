@@ -85,3 +85,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
 )
+
+# override this with local settings
+try:
+    from local_settings import *
+except ImportError, exp:
+    pass
+
