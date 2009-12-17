@@ -121,8 +121,8 @@ class CountryToRegion(models.Model):
 class IPToCountry(models.Model):
     """returns a GeoIP mapping from an IP block to a country"""
     # TODO dotted-quad representations
-    ip_start = models.Decimalfield(max_digits=12, decimal_places=0)
-    ip_end = models.Decimalfield(max_digits=12, decimal_places=0)
+    ip_start = models.DecimalField(max_digits=12, decimal_places=0)
+    ip_end = models.DecimalField(max_digits=12, decimal_places=0)
     country_code = models.ForeignKey('CountryToRegion')
 
     @property
