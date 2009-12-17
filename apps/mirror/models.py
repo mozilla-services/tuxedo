@@ -76,7 +76,7 @@ class User(models.Model):
         managed = False
 
 
-class MirrorLocation(models.Model):
+class Location(models.Model):
     """represents a single location (i.e., file) on a mirror"""
     location_id = models.AutoField(primary_key=True)
     product_id = models.ForeignKey('Product')
