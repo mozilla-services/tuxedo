@@ -10,6 +10,9 @@ class Region(models.Model):
     region_priority = models.IntegerField()
     region_throttle = models.IntegerField()
 
+    def __unicode__(self):
+        return self.region_name
+
     class Meta:
         db_table = 'mirror_regions'
         managed = False
@@ -20,9 +23,12 @@ class CountryToRegion(models.Model):
     country_code = models.CharField(help_text='ISO 3166 alpha2 country code',
                                     max_length=2,
                                     primary_key=True)
-    region_id = models.ForeignKey('Region')
+    region = models.ForeignKey('Region')
     country_name = models.CharField(max_length=255)
     continent = models.CharField(max_length=2)
+
+    def __unicode__(self):
+        return "%s (%s): %s" % (country_name, country_code, region)
 
     class Meta:
         db_table = 'mirror_country_to_region'
@@ -34,7 +40,7 @@ class IPToCountry(models.Model):
     # TODO dotted-quad representations
     ip_start = models.DecimalField(max_digits=12, decimal_places=0)
     ip_end = models.DecimalField(max_digits=12, decimal_places=0)
-    country_code = models.ForeignKey('CountryToRegion')
+    country = models.ForeignKey('CountryToRegion', db_column='country_code')
 
     @property
     def ip_start_addr(self):
@@ -54,8 +60,11 @@ class IPToCountry(models.Model):
 
 class MirrorRegionMap(models.Model):
     """MtM mapping between Mirrors and Regions"""
-    mirror_id = models.ForeignKey('Mirror')
-    region_id = models.ForeignKey('Region')
+    mirror = models.ForeignKey('mirror.Mirror')
+    region = models.ForeignKey('Region')
+
+    def __unicode(self):
+        return "%s %s" % (self.mirror, self.region)
 
     class Meta:
         db_table = 'mirror_mirror_region_map'
