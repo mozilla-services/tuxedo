@@ -1,12 +1,7 @@
+import ipaddr
+
 from django.db import models
 
-# todo:
-# mirror_country_to_region
-# mirror_ip_to_country
-# mirror_location_mirror_map
-# mirror_mirror_region_map
-
-# *** basic entities ***
 
 class Mirror(models.Model):
     """represents a single mirror"""
@@ -20,6 +15,7 @@ class Mirror(models.Model):
 
     class Meta:
         db_table = 'mirror_mirrors'
+        managed = False
 
 
 class OS(models.Model):
@@ -30,6 +26,7 @@ class OS(models.Model):
 
     class Meta:
         db_table = 'mirror_os'
+        managed = False
 
 
 class Product(models.Model):
@@ -43,6 +40,7 @@ class Product(models.Model):
 
     class Meta:
         db_table = 'mirror_products'
+        managed = False
 
 
 class Lang(models.Model):
@@ -52,6 +50,7 @@ class Lang(models.Model):
 
     class Meta:
         db_table = 'mirror_langs'
+        managed = False
 
 
 class Region(models.Model):
@@ -63,6 +62,7 @@ class Region(models.Model):
 
     class Meta:
         db_table = 'mirror_regions'
+        managed = False
 
 
 # TODO User and Session may need to go into an auth app
@@ -73,6 +73,7 @@ class Session(models.Model):
 
     class Meta:
         db_table = 'mirror_sessions'
+        managed = False
 
 
 class User(models.Model):
@@ -86,11 +87,11 @@ class User(models.Model):
 
     class Meta:
         db_table = 'mirror_users'
+        managed = False
 
-
-# *** complex entities ***
 
 class MirrorLocation(models.Model):
+    """represents a single location (i.e., file) on a mirror"""
     location_id = models.AutoField(primary_key=True)
     product_id = models.ForeignKey('Product')
     os_id = models.ForeignKey('OS')
@@ -99,8 +100,64 @@ class MirrorLocation(models.Model):
 
     class Meta:
         db_table = 'mirror_locations'
+        managed = False
         unique_together = ('location_id', 'product_id', 'os_id', 'lang_id')
 
 
-# *** ManyToMany relationship models ***
+class CountryToRegion(models.Model):
+    """represents a country-to-region mapping for GeoIP"""
+    country_code = models.CharField(help_text='ISO 3166 alpha2 country code',
+                                    max_length=2,
+                                    primary_key=True)
+    region_id = models.ForeignKey('Region')
+    country_name = models.CharField(max_length=255)
+    continent = models.CharField(max_length=2)
+
+    class Meta:
+        db_table = 'mirror_country_to_region'
+        managed = False
+
+
+class IPToCountry(models.Model):
+    """returns a GeoIP mapping from an IP block to a country"""
+    # TODO dotted-quad representations
+    ip_start = models.Decimalfield(max_digits=12, decimal_places=0)
+    ip_end = models.Decimalfield(max_digits=12, decimal_places=0)
+    country_code = models.ForeignKey('CountryToRegion')
+
+    @property
+    def ip_start_addr(self):
+        return ipaddr.IP(self.ip_start).ip_ext
+
+    @property
+    def ip_end_addr(self):
+        return ipaddr.IP(self.ip_end).ip_ext
+
+    def __unicode__(self):
+       return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
+
+    class Meta:
+        db_table = 'mirror_ip_to_country'
+        managed = False
+
+
+class LocationMirrorMap(models.Model):
+    """MtM mapping between Locations and Mirrors"""
+    location_id = models.ForeignKey('Location')
+    mirror_id = models.ForeignKey('Mirror')
+    location_active = models.BooleanField()
+
+    class Meta:
+        db_table = 'mirror_location_mirror_map'
+        managed = False
+
+
+class MirrorRegionMap(models.Model):
+    """MtM mapping between Mirrors and Regions"""
+    mirror_id = models.ForeignKey('Mirror')
+    region_id = models.ForeignKey('Region')
+
+    class Meta:
+        db_table = 'mirror_mirror_region_map'
+        managed = False
 
