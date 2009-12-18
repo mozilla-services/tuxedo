@@ -3,15 +3,15 @@ from django.db import models
 
 class Mirror(models.Model):
     """represents a single mirror"""
-    mirror_id = models.AutoField(primary_key=True)
-    mirror_name = models.CharField(max_length=64, unique=True)
-    mirror_baseurl = models.CharField(max_length=255)
-    mirror_rating = models.IntegerField()
-    mirror_active = models.BooleanField()
-    mirror_count = models.DecimalField(max_digits=20, decimal_places=0,
-                                       db_index=True)
+    id = models.AutoField(primary_key=True, db_column='mirror_id')
+    name = models.CharField(max_length=64, unique=True, db_column='mirror_name')
+    baseurl = models.CharField(max_length=255, db_column='mirror_baseurl')
+    rating = models.IntegerField(db_column='mirror_rating')
+    active = models.BooleanField(db_column='mirror_active')
+    count = models.DecimalField(max_digits=20, decimal_places=0,
+                                db_column='mirror_count', db_index=True)
     def __unicode__(self):
-        return self.mirror_name
+        return self.name
 
     class Meta:
         db_table = 'mirror_mirrors'
@@ -20,12 +20,12 @@ class Mirror(models.Model):
 
 class OS(models.Model):
     """represents a platform, e.g., osx"""
-    os_id = models.AutoField(primary_key=True)
-    os_name = models.CharField(max_length=32, unique=True)
-    os_priority = models.IntegerField()
+    id = models.AutoField(primary_key=True, db_column='os_id')
+    name = models.CharField(max_length=32, unique=True, db_column='os_name')
+    priority = models.IntegerField(db_column='os_priority')
 
     def __unicode__(self):
-        return self.os_name
+        return self.name
 
     class Meta:
         db_table = 'mirror_os'
@@ -36,15 +36,17 @@ class OS(models.Model):
 
 class Product(models.Model):
     """represents a single product, e.g., Firefox-3.5.6"""
-    product_id = models.AutoField(primary_key=True)
-    product_name = models.CharField(max_length=255, unique=True)
-    product_priority = models.IntegerField()
-    product_count = models.DecimalField(max_digits=20, decimal_places=0)
-    product_active = models.BooleanField(db_index=True)
-    product_checknow = models.BooleanField(db_index=True)
+    id = models.AutoField(primary_key=True, db_column='product_id')
+    name = models.CharField(max_length=255, unique=True,
+                            db_column='product_name')
+    priority = models.IntegerField(db_column='product_priority')
+    count = models.DecimalField(max_digits=20, decimal_places=0,
+                                db_column='product_count')
+    active = models.BooleanField(db_index=True, db_column='product_active')
+    checknow = models.BooleanField(db_index=True, db_column='product_checknow')
 
     def __unicode__(self):
-        return self.product_name
+        return self.name
 
     class Meta:
         db_table = 'mirror_products'
@@ -53,7 +55,7 @@ class Product(models.Model):
 
 class Lang(models.Model):
     """represents a locale, e.g., en-US"""
-    lang_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, db_column='lang_id')
     lang = models.CharField(max_length=10, unique=True)
 
     def __unicode__(self):
@@ -69,12 +71,13 @@ class Lang(models.Model):
 
 class User(models.Model):
     """represents a user who can log into this app"""
-    user_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, db_column='user_id')
     username = models.CharField(max_length=32, unique=True)
     password = models.CharField(max_length=32)
-    user_firstname = models.CharField(max_length=255)
-    user_lastname = models.CharField(max_length=255)
-    user_email = models.CharField(max_length=255, unique=True)
+    firstname = models.CharField(max_length=255, db_column='user_firstname')
+    lastname = models.CharField(max_length=255, db_column='user_lastname')
+    email = models.CharField(max_length=255, unique=True,
+                             db_column='user_email')
 
     def __unicode__(self):
         return self.username
@@ -82,30 +85,32 @@ class User(models.Model):
     class Meta:
         db_table = 'mirror_users'
         managed = False
+        verbose_name = 'Legacy User'
+        verbose_name_plural = 'Legacy Users'
 
 
 class Location(models.Model):
     """represents a single location (i.e., file) on a mirror"""
-    location_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, db_column='location_id')
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS')
-    location_path = models.CharField(max_length=255)
+    path = models.CharField(max_length=255, db_column='location_path')
     lang = models.ForeignKey('Lang', null=True)
 
     def __unicode__(self):
-        return self.location_path
+        return self.path
 
     class Meta:
         db_table = 'mirror_locations'
         managed = False
-        unique_together = ('location_id', 'product', 'os', 'lang')
+        unique_together = ('product', 'os', 'lang')
 
 
 class LocationMirrorMap(models.Model):
     """MtM mapping between Locations and Mirrors"""
     location = models.ForeignKey('Location')
     mirror = models.ForeignKey('Mirror')
-    location_active = models.BooleanField()
+    active = models.BooleanField(db_column='location_active')
 
     def __unicode__(self):
         return "%s %s" % (self.location, self.mirror)
