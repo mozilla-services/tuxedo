@@ -10,7 +10,6 @@ class Mirror(models.Model):
     mirror_active = models.BooleanField()
     mirror_count = models.DecimalField(max_digits=20, decimal_places=0,
                                        db_index=True)
-
     def __unicode__(self):
         return self.mirror_name
 
@@ -31,6 +30,8 @@ class OS(models.Model):
     class Meta:
         db_table = 'mirror_os'
         managed = False
+        verbose_name = 'OS'
+        verbose_name_plural = 'OSes'
 
 
 class Product(models.Model):
@@ -63,18 +64,7 @@ class Lang(models.Model):
         managed = False
 
 
-# TODO User and Session may need to go into an auth app
-class Session(models.Model):
-    """represents a login session"""
-    session_id = models.CharField(max_length=32, unique=True)
-    username = models.CharField(max_length=32)
-
-    def __unicode__(self):
-        return "%s: %s..." % (self.username, self.session_id[:7])
-
-    class Meta:
-        db_table = 'mirror_sessions'
-        managed = False
+# XXX: old 'mirror_sessions' table not represented as a model
 
 
 class User(models.Model):

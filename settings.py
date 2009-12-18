@@ -91,6 +91,7 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     'mirror',
 
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
