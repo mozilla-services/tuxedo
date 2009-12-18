@@ -78,6 +78,7 @@ class User(models.Model):
     lastname = models.CharField(max_length=255, db_column='user_lastname')
     email = models.CharField(max_length=255, unique=True,
                              db_column='user_email')
+    converted = models.BooleanField()
 
     def __unicode__(self):
         return self.username

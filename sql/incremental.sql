@@ -26,3 +26,6 @@ UPDATE `mirror_country_to_region` SET region_id = NULL WHERE region_id = 0;
 ALTER TABLE `mirror_regions`  ENGINE =  InnoDB;
 ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `mirror_regions` (`region_id`) ON DELETE SET NULL ;
 
+-- converted users
+ALTER TABLE `mirror_users` ADD `converted` TINYINT NOT NULL DEFAULT '0';
+

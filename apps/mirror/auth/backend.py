@@ -9,14 +9,19 @@ class ConversionBackend(ModelBackend):
 
     def authenticate(self, username=None, password=None):
         pwhash = hashlib.md5(password).hexdigest()
-        olduser = MirrorUser.objects.get(username=username, password=pwhash)
+        olduser = MirrorUser.objects.get(username=username, password=pwhash,
+                                         converted=False)
         if not olduser:
             return None
         
+        # mark old user as converted
+        olduser.converted = True
+        olduser.save()
+
         # create new django user
         newuser = User.objects.create_superuser(username=username, 
                                                 password=password,
-                                                email=olduser.user_email)
+                                                email=olduser.email)
         # make sure we don't come back here
         newuser.backend = 'django.contrib.auth.backends.ModelBackend'
         newuser.save()

@@ -24,7 +24,7 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Product, ProductAdmin)
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'firstname', 'lastname', 'email')
+    list_display = ('username', 'firstname', 'lastname', 'email', 'converted')
     ordering = ('username',)
 admin.site.register(User, UserAdmin)
 
