@@ -90,6 +90,7 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'mirror',
+    'geoip',
 
     'django.contrib.admin',
     'django.contrib.auth',

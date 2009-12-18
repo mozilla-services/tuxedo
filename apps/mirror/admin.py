@@ -1,6 +1,7 @@
 from mirror.models import Mirror, OS, Product, User, Location
 from django.contrib import admin
 
+
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('product', 'os', 'path', 'lang')
     list_filter = ('product', 'os', 'lang')

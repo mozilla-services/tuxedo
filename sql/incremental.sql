@@ -20,3 +20,9 @@ ALTER TABLE `mirror_products` CHANGE `product_active` `product_active` TINYINT N
 UPDATE `mirror_products` SET product_active = 0 WHERE product_active = 1;
 UPDATE `mirror_products` SET product_active = 1 WHERE product_active = 2;
 
+-- foreign keys
+ALTER TABLE `mirror_country_to_region` CHANGE `region_id` `region_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL;
+UPDATE `mirror_country_to_region` SET region_id = NULL WHERE region_id = 0;
+ALTER TABLE `mirror_regions`  ENGINE =  InnoDB;
+ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `mirror_regions` (`region_id`) ON DELETE SET NULL ;
+
