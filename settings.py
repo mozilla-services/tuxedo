@@ -73,6 +73,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
+# auth backends: uses django first, and converts old Bouncer users as needed
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'mirror.auth.backend.ConversionBackend'
+)
+
 ROOT_URLCONF = 'tuxedo.urls'
 
 TEMPLATE_DIRS = (
