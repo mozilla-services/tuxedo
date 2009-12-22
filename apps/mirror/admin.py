@@ -8,8 +8,10 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 class MirrorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'baseurl', 'rating', 'active', 'count')
+    list_display = ('active', 'rating', 'name', 'baseurl', 'count')
+    list_display_links = ('name',)
     list_filter = ('active',)
+    ordering = ('active',)
 admin.site.register(Mirror, MirrorAdmin)
 
 class OSAdmin(admin.ModelAdmin):

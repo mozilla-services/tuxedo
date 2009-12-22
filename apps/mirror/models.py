@@ -4,12 +4,17 @@ from django.db import models
 class Mirror(models.Model):
     """represents a single mirror"""
     id = models.AutoField(primary_key=True, db_column='mirror_id')
-    name = models.CharField(max_length=64, unique=True, db_column='mirror_name')
-    baseurl = models.CharField(max_length=255, db_column='mirror_baseurl')
+    name = models.CharField(max_length=64, unique=True, db_column='mirror_name',
+                            verbose_name='Host Name')
+    baseurl = models.CharField(max_length=255, db_column='mirror_baseurl',
+                               verbose_name='Address')
     rating = models.IntegerField(db_column='mirror_rating')
     active = models.BooleanField(db_column='mirror_active')
     count = models.DecimalField(max_digits=20, decimal_places=0,
                                 db_column='mirror_count', db_index=True)
+    regions = models.ManyToManyField('geoip.Region',
+                                     db_table='mirror_mirror_region_map')
+
     def __unicode__(self):
         return self.name
 

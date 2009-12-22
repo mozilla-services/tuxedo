@@ -16,7 +16,7 @@ class IPBlockAdmin(admin.ModelAdmin):
 admin.site.register(IPBlock, IPBlockAdmin)
 
 class RegionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'priority', 'throttle')
+    list_display = ('name', 'mirror_count', 'ratings', 'priority', 'throttle')
     list_filter = ('priority',)
     ordering = ('name',)
 admin.site.register(Region, RegionAdmin)

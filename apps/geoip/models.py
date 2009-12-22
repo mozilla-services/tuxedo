@@ -1,6 +1,7 @@
 import ipaddr
 
 from django.db import models
+from django.db.models import Sum
 
 
 class Country(models.Model):
@@ -48,27 +49,26 @@ class IPBlock(models.Model):
 class Region(models.Model):
     """represents a geographical region, e.g., Europe"""
     id = models.AutoField(primary_key=True, db_column='region_id')
-    name = models.CharField(max_length=255, db_column='region_name')
-    priority = models.IntegerField(db_column='region_priority')
-    throttle = models.IntegerField(db_column='region_throttle')
+    name = models.CharField(max_length=255, db_column='region_name',
+                            verbose_name='Region Name')
+    priority = models.IntegerField(db_column='region_priority',
+                                   help_text='The lower the number, the '
+                                             'higher the priority')
+    throttle = models.IntegerField(db_column='region_throttle',
+                                   verbose_name='GeoIP Throttle')
+
+    def mirror_count(self):
+        return len(self.mirror_set.all())
+    mirror_count.short_description = 'Mirrors'
+
+    def ratings(self):
+        return self.mirror_set.all().aggregate(Sum('rating'))['rating__sum']
+    ratings.short_description = 'Total Ratings'
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         db_table = 'mirror_regions'
-        managed = False
-
-
-class MirrorRegionMap(models.Model):
-    """MtM mapping between Mirrors and Regions"""
-    mirror = models.ForeignKey('mirror.Mirror')
-    region = models.ForeignKey('Region')
-
-    def __unicode(self):
-        return "%s %s" % (self.mirror, self.region)
-
-    class Meta:
-        db_table = 'mirror_mirror_region_map'
         managed = False
 
