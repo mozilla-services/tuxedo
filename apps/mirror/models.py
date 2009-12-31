@@ -43,12 +43,15 @@ class Product(models.Model):
     """represents a single product, e.g., Firefox-3.5.6"""
     id = models.AutoField(primary_key=True, db_column='product_id')
     name = models.CharField(max_length=255, unique=True,
-                            db_column='product_name')
+                            db_column='product_name',
+                            verbose_name='Product Name')
     priority = models.IntegerField(db_column='product_priority')
     count = models.DecimalField(max_digits=20, decimal_places=0,
-                                db_column='product_count')
+                                db_column='product_count',
+                                verbose_name='Downloads')
     active = models.BooleanField(db_index=True, db_column='product_active')
-    checknow = models.BooleanField(db_index=True, db_column='product_checknow')
+    checknow = models.BooleanField(db_index=True, db_column='product_checknow',
+                                   verbose_name='Check Now?')
 
     def __unicode__(self):
         return self.name
