@@ -1,4 +1,4 @@
-from mirror.models import Mirror, OS, Product, User, Location
+from mirror.models import Mirror, OS, Product, User, Location, Lang
 from django.contrib import admin
 
 
@@ -40,4 +40,9 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'firstname', 'lastname', 'email', 'converted')
     ordering = ('username',)
 admin.site.register(User, UserAdmin)
+
+class LangAdmin(admin.ModelAdmin):
+    list_display = ('lang',)
+    ordering = ('lang',)
+admin.site.register(Lang, LangAdmin)
 

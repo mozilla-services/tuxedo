@@ -35,8 +35,7 @@ class OS(models.Model):
     class Meta:
         db_table = 'mirror_os'
         managed = False
-        verbose_name = 'OS'
-        verbose_name_plural = 'OSes'
+        verbose_name = 'Operating System'
 
 
 class Product(models.Model):
@@ -64,7 +63,8 @@ class Product(models.Model):
 class Lang(models.Model):
     """represents a locale, e.g., en-US"""
     id = models.AutoField(primary_key=True, db_column='lang_id')
-    lang = models.CharField(max_length=10, unique=True)
+    lang = models.CharField(max_length=10, unique=True,
+                            verbose_name='Language')
 
     def __unicode__(self):
         return self.lang
@@ -72,6 +72,7 @@ class Lang(models.Model):
     class Meta:
         db_table = 'mirror_langs'
         managed = False
+        verbose_name = 'Language'
 
 
 # XXX: old 'mirror_sessions' table not represented as a model
