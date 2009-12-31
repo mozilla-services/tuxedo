@@ -102,9 +102,9 @@ class Location(models.Model):
     """represents a single location (i.e., file) on a mirror"""
     id = models.AutoField(primary_key=True, db_column='location_id')
     product = models.ForeignKey('Product')
-    os = models.ForeignKey('OS')
+    os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(max_length=255, db_column='location_path')
-    lang = models.ForeignKey('Lang', null=True)
+    lang = models.ForeignKey('Lang', null=True, verbose_name='Locale')
 
     def __unicode__(self):
         return self.path

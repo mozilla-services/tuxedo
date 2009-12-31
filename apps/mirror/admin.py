@@ -3,8 +3,9 @@ from django.contrib import admin
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('product', 'os', 'path', 'lang')
+    list_display = ('product', 'os', 'lang', 'path')
     list_filter = ('product', 'os', 'lang')
+    ordering = ('product',)
 admin.site.register(Location, LocationAdmin)
 
 class MirrorAdmin(admin.ModelAdmin):
