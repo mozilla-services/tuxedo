@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     (r'^stats/', include('mirror.urls')),
     (r'^admin/', include(admin.site.urls)),
     (r'^accounts/login/', 'django.contrib.auth.views.login'),
+    (r'^accounts/logout/', 'django.contrib.auth.views.logout'),
 )
 
 # serve media files in debug mode
