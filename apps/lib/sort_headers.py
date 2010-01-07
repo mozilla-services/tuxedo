@@ -52,6 +52,7 @@ class SortHeaders:
             raise AttributeError('If given, default_order_type must be one of \'asc\' or \'desc\'.')
         if additional_params is None: additional_params = {}
 
+        self.request = request
         self.header_defs = headers
         self.additional_params = additional_params
         self.order_field, self.order_type = default_order_field, default_order_type
@@ -88,13 +89,15 @@ class SortHeaders:
 
     def get_query_string(self, params):
         """
-        Creates a query string from the given dictionary of
+        Creates a query string from the given pairwise list of
         parameters, including any additonal parameters which should
         always be present.
         """
-        params.update(self.additional_params)
-        return '?%s' % '&'.join(['%s=%s' % (param, value) \
-                                 for param, value in params.items()])
+        all_params = self.request.GET.copy()
+        all_params.update(self.additional_params) # does not overwrite
+        for param, value in params.items():
+            all_params[param] = value
+        return '?%s' % all_params.urlencode()
 
     def get_order_by(self):
         """
