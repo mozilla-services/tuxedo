@@ -184,6 +184,16 @@ img {
 	padding: 5px 0 0 0;
 }
 
+/* Forms */
+button {
+    font-size: 14px;
+}
+
+/* Lists */
+table.datalist {
+    border: 1px solid #6B6B6B;
+}
+
 /* Footer */
 
 #footer {
@@ -196,4 +206,16 @@ img {
 
 #footer a {
 	color: #5D5D5D;
+}
+
+/*** individual pages ***/
+#uptake-form {
+    margin-bottom: 2em;
+}
+#uptake-form label {
+    vertical-align: top;
+    margin-right: 1em;
+}
+#uptake-form #id_p {
+    height: 10em;
 }

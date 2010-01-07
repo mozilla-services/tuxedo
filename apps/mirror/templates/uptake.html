@@ -2,7 +2,18 @@
 {% load sort_headers %}
 
 {% block main_content %}
-<table>
+<h2>Product Uptake on Mirrors</h2>
+
+<p>Choose one or more products to see their status on the network.</p>
+<form action="" method="get" id="uptake-form">
+<ul>
+  {{ form.as_ul }}
+</ul>
+<button type="submit">Go</button>
+</form>
+
+{% if locations %}
+<table class="datalist">
 <thead>
   <tr>
     {% table_header headers %}
@@ -20,6 +31,11 @@
   {% endfor %}
 </tbody>
 </table>
+{% else %}
+  {% if form.is_bound %}
+  <p>No data found for the chosen products.</p>
+  {% endif %}
+{% endif %}
 {% endblock %}
 
 {% block sidebar %}
