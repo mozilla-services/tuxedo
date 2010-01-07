@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load sort_headers %}
+
+{% block main_content %}
+<table>
+<thead>
+  <tr>
+    {% table_header headers %}
+  </tr>
+</thead>
+<tbody>
+  {% for location in locations %}
+  <tr class="{% cycle 'odd' 'even' %}">
+    <td>{{ location.location__product__name|escape }}</td>
+    <td>{{ location.location__os__name|escape }}</td>
+    <td>{{ location.available }}</td>
+    <td>{{ location.total }}</td>
+    <td>{{ location.percentage|floatformat }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}
+
+{% block sidebar %}
+    {% include "stats_menu.html" %}
+{% endblock %}

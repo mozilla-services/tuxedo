@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
-    #(r'^uptake/', 'mirror.views.uptake'),
+    (r'^uptake/', 'mirror.views.uptake'),
 )
