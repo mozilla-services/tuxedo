@@ -193,6 +193,22 @@ button {
 table.datalist {
     border: 1px solid #6B6B6B;
 }
+table.datalist th {
+    margin-bottom: .5em;
+}
+table.datalist th,
+table.datalist td {
+    padding: .3em;
+}
+table.datalist th {
+    text-align: left;
+}
+table.datalist tr.even {
+    background-color: #EFEFEF;
+}
+table.datalist tr.odd {
+    background-color: #E0E0E0;
+}
 
 /* Footer */
 
