@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load sort_headers %}
+
+{% block main_content %}
+<h2>Location Statistics</h2>
+
+<p>This shows whether or not a server is serving up the locations for a
+product.</p>
+<form action="" method="get" id="uptake-form">
+<ul>
+  {{ form.as_ul }}
+</ul>
+<button type="submit">Go</button>
+</form>
+
+{% if locations %}
+<table class="datalist">
+<thead>
+  <tr>
+    {% table_header headers %}
+  </tr>
+</thead>
+<tbody>
+  {% for loc in locations %}
+  <tr class="{% cycle 'odd' 'even' %}">
+    <td>{{ loc.active|yesno:"ok,DISABLED" }}</td>
+    <td>{{ loc.mirror__name|escape }}</td>
+    <td>{{ loc.mirror__baseurl|escape }}</td>
+    <td>{{ loc.location__path|escape }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% else %}
+  {% if form.is_bound %}
+  <p>No data found for the chosen products.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}
+    {% include "stats_menu.html" %}
+{% endblock %}
