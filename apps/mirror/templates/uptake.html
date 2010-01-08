@@ -13,13 +13,13 @@
 </form>
 
 {% if locations %}
-<table class="datalist">
+<table class="datalist sortable">
 <thead>
   <tr>
     {% table_header headers %}
   </tr>
 </thead>
-<tbody>
+<tbody class="sorttable_body">
   {% for location in locations %}
   <tr class="{% cycle 'odd' 'even' %}">
     <td>{{ location.location__product__name|escape }}</td>

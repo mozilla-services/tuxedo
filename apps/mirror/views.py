@@ -57,6 +57,7 @@ def uptake(request):
                                            float(total)})
         data.update({'locations': locations,
                      'headers': list(sort_headers.headers()),
+                     'use_sorttable': True,
                     })
 
     return render_to_response('uptake.html', data, context_instance =
@@ -80,7 +81,8 @@ def lstats(request):
                     'location__path') \
             .order_by(sort_headers.get_order_by())
         data.update({'locations': locations,
-                     'headers': list(sort_headers.headers())
+                     'headers': list(sort_headers.headers()),
+                     'use_sorttable': True,
                     })
     return render_to_response('lstats.html', data, context_instance =
                               RequestContext(request))

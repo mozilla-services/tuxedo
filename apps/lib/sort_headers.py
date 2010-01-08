@@ -80,9 +80,12 @@ class SortHeaders:
             if i == self.order_field:
                 th_classes.append('sorted %sending' % self.order_type)
                 new_order_type = {'asc': 'desc', 'desc': 'asc'}[self.order_type]
+            is_sortable = order_criterion is not None
+            if not is_sortable:
+                th_classes.append('sorttable_nosort')
             yield {
                 'text': header,
-                'sortable': order_criterion is not None,
+                'sortable': is_sortable,
                 'url': self.get_query_string({ORDER_VAR: i, ORDER_TYPE_VAR: new_order_type}),
                 'class_attr': (th_classes and ' class="%s"' % ' '.join(th_classes) or ''),
             }

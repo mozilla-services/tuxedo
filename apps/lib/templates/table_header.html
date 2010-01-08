@@ -1,4 +1,4 @@
-{% for header in headers %}<th{{ header.class_attr }}>
+{% for header in headers %}<th{{ header.class_attr|safe }}>
   {% if header.sortable %}<a href="{{ header.url }}">{% endif %}
   {{ header.text }}
   {% if header.sortable %}</a>{% endif %}

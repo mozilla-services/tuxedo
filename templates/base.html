@@ -5,6 +5,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL}}img/favicon.png"/>
     <link href="{{ MEDIA_URL}}css/tuxedo.css" rel="stylesheet" type="text/css" />
+    {% if use_sorttable %}<script src="{{ MEDIA_URL }}js/sorttable.js"></script>{% endif %}
     {% block extrahead %}{% endblock %}
 </head>
 <body>
