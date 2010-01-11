@@ -1,3 +1,4 @@
 * Statistics: CSV export
-* Product Uptake: "API" functionality
+* Product Uptake: "API" functionality (bug 408673)
 * Memcache Server Status
+* "new entry" API (bug 408674)
