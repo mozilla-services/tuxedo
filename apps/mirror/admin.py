@@ -9,8 +9,10 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 class MirrorAdmin(admin.ModelAdmin):
+    exclude = ('count',)
     list_display = ('active', 'rating', 'name', 'baseurl', 'count')
     list_display_links = ('name',)
+    list_editable = ('active',)
     list_filter = ('active',)
     ordering = ('active',)
 admin.site.register(Mirror, MirrorAdmin)

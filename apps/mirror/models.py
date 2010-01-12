@@ -7,10 +7,10 @@ class Mirror(models.Model):
     name = models.CharField(max_length=64, unique=True, db_column='mirror_name',
                             verbose_name='Host Name')
     baseurl = models.CharField(max_length=255, db_column='mirror_baseurl',
-                               verbose_name='Address')
+                               verbose_name='Base URL')
     rating = models.IntegerField(db_column='mirror_rating')
     active = models.BooleanField(db_column='mirror_active')
-    count = models.DecimalField(max_digits=20, decimal_places=0,
+    count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
                                 db_column='mirror_count', db_index=True)
     regions = models.ManyToManyField('geoip.Region',
                                      db_table='mirror_mirror_region_map')
