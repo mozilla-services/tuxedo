@@ -71,7 +71,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'tuxedo.middleware.RequireLoginMiddleware',
 )
 
 # auth backends: uses django first, and converts old Bouncer users as needed
