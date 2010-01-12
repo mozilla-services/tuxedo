@@ -25,3 +25,14 @@ class locale_details(_json_details):
     def get_languages(self):
         return self._get_json_data('languages')
 
+    def get_model_choices(self):
+        """
+        Get list of languages usable as 'choices' for Django model fields.
+        Will be sorted by their English name"""
+        # TODO cache this if it is called repeatedly
+        langs = self.get_languages()
+        choices = [(key, "%s: %s" % (key, value['English']))
+                   for key, value in langs.items()]
+        choices.sort()
+        return choices
+

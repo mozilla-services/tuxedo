@@ -1,4 +1,4 @@
-from mirror.models import Mirror, OS, Product, User, Location, Lang
+from mirror.models import Mirror, OS, Product, User, Location
 from django.contrib import admin
 
 
@@ -35,16 +35,10 @@ class ProductAdmin(admin.ModelAdmin):
         self.message_user(request, msg % rows_updated)
     mark_for_checknow.short_description = "Check selected projects now with " \
                                           "Sentry"
-
 admin.site.register(Product, ProductAdmin)
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'firstname', 'lastname', 'email', 'converted')
     ordering = ('username',)
 admin.site.register(User, UserAdmin)
-
-class LangAdmin(admin.ModelAdmin):
-    list_display = ('lang',)
-    ordering = ('lang',)
-admin.site.register(Lang, LangAdmin)
 

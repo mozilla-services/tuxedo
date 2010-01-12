@@ -1,5 +1,10 @@
 from django.db import models
 
+from lib.product_details import locale_details
+
+
+# get the possible languages from product details
+LANG_CHOICES = locale_details().get_model_choices()
 
 class Mirror(models.Model):
     """represents a single mirror"""
@@ -60,24 +65,6 @@ class Product(models.Model):
         managed = False
 
 
-class Lang(models.Model):
-    """represents a locale, e.g., en-US"""
-    id = models.AutoField(primary_key=True, db_column='lang_id')
-    lang = models.CharField(max_length=10, unique=True,
-                            verbose_name='Language')
-
-    def __unicode__(self):
-        return self.lang
-
-    class Meta:
-        db_table = 'mirror_langs'
-        managed = False
-        verbose_name = 'Language'
-
-
-# XXX: old 'mirror_sessions' table not represented as a model
-
-
 class User(models.Model):
     """represents a user who can log into this app"""
     id = models.AutoField(primary_key=True, db_column='user_id')
@@ -105,7 +92,8 @@ class Location(models.Model):
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(max_length=255, db_column='location_path')
-    lang = models.ForeignKey('Lang', null=True, verbose_name='Locale')
+    lang = models.CharField(max_length=10, unique=True,
+                            choices=LANG_CHOICES, verbose_name='Language')
 
     def __unicode__(self):
         return self.path

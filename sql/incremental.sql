@@ -29,3 +29,10 @@ ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCE
 -- converted users
 ALTER TABLE `mirror_users` ADD `converted` TINYINT NOT NULL DEFAULT '0';
 
+-- flatten language table (bug 538975)
+ALTER TABLE `mirror_locations`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_locations` ADD `lang` VARCHAR( 10 ) NULL , ADD INDEX ( `lang` ) ;
+UPDATE `mirror_locations` AS loc LEFT JOIN mirror_langs AS lang ON (loc.lang_id = lang.lang_id) SET loc.lang = lang.lang;
+ALTER TABLE `mirror_locations` DROP `lang_id`;
+DROP TABLE `mirror_langs`;
+
