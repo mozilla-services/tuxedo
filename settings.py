@@ -100,6 +100,9 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
 )
 
+# path to mozilla product details
+PRODUCT_DETAILS = path('inc', 'product-details')
+
 # override this with local settings
 try:
     from local_settings import *
