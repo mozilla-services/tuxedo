@@ -13,8 +13,7 @@ UPTAKE_LIST_HEADERS = (
     ('Product', 'location__product__name'),
     ('OS', 'location__os__name'),
     ('Available', 'available'),
-    ('Total', None),
-    ('Percentage', None)
+    ('Total', None)
 )
 LOCATION_STATS_LIST_HEADERS = (
     ('Status', 'active'),
@@ -50,13 +49,11 @@ def uptake(request):
             .order_by(sort_headers.get_order_by())
         locations = list(locations)
 
-        # calculate totals and percentages
+        # calculate totals
         total = Mirror.objects.filter(active=True) \
                 .aggregate(total=Sum('rating'))['total']
         for location in locations:
-            location.update({'total': total,
-                             'percentage': 100 * location['available'] /
-                                           float(total)})
+            location.update({'total': total})
         data.update({'locations': locations,
                      'headers': list(sort_headers.headers()),
                      'use_sorttable': True,
