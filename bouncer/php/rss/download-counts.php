@@ -8,8 +8,8 @@
 require_once('../cfg/config.php');  // config file
 require_once(LIB.'/sdo.php');  // core mysql wrappers with caching
 
-db_connect(DBHOST,DBUSER,DBPASS);  // open persistent connection to db
-db_select(DBNAME);  // select db
+db_connect(SHADOWDBHOST,SHADOWDBUSER,SHADOWDBPASS);  // open persistent connection to db
+db_select(SHADOWDBNAME);  // select db
 
 // get download counts per product
 $data = db_get("SELECT * FROM mirror_products ORDER BY product_name");
