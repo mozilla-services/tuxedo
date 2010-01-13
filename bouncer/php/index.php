@@ -44,12 +44,12 @@ function getRegionFromIP($ip) {
         SELECT
             cty.region_id
         FROM
-            mirror_country_to_region AS cty
+            geoip_country_to_region AS cty
         INNER JOIN
-            mirror_ip_to_country AS ip
+            geoip_ip_to_country AS ip
             ON 
             ip.country_code = cty.country_code AND
-            ip_end = ( SELECT MIN(ip_end) FROM mirror_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
+            ip_end = ( SELECT MIN(ip_end) FROM geoip_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
             ip_start <= INET_ATON('%s')
         ",array($ip, $ip));
     
@@ -69,14 +69,14 @@ function throttleGeoIPRegion($region_id) {
 
     $region_throttle = $sdo->get_one("
         SELECT
-            region_throttle
+            throttle
         FROM
-            mirror_regions
+            geoip_regions
         WHERE
-            region_id = %d
+            id = %d
         ",array($region_id));
     
-    $region_throttle = $region_throttle['region_throttle'];
+    $region_throttle = $region_throttle['throttle'];
 
     // Don't throttle the user if the throttle is invalid.
     if ( $region_throttle == 100 || $region_throttle > 100 || $region_throttle < 0 ) {
@@ -115,8 +115,8 @@ if (!empty($_GET['product'])) {
     $sdo = new SDO();
 
     // get os and product IDs
-    $os_id = $sdo->name_to_id('mirror_os','os_id','os_name',$os_name);
-    $product_id = $sdo->name_to_id('mirror_products','product_id','product_name',$product_name);
+    $os_id = $sdo->name_to_id('mirror_os','id','name',$os_name);
+    $product_id = $sdo->name_to_id('mirror_products','id','name',$product_name);
 
     // do we have a valid os and product?
     if (!empty($os_id)&&!empty($product_id)) {
@@ -128,16 +128,14 @@ if (!empty($_GET['product'])) {
 
         $location = $sdo->get_one("
             SELECT
-                location_id,
-                location_path
+                id,
+                path
             FROM
                 mirror_locations
-            LEFT JOIN
-                mirror_langs ON (mirror_locations.lang_id = mirror_langs.lang_id)
             WHERE
                 product_id = %d AND 
                 os_id = %d AND
-                mirror_langs.lang = '%s'",array($product_id, $os_id, $where_lang));
+                lang = '%s'",array($product_id, $os_id, $where_lang));
 
         // did we get a valid location?
         if (!empty($location)) {
@@ -155,21 +153,21 @@ if (!empty($_GET['product'])) {
                 if ($client_region && !throttleGeoIPRegion($client_region)) {
                     $mirrors = $sdo->get("
                         SELECT
-                            mirror_mirrors.mirror_id,
-                            mirror_baseurl,
-                            mirror_rating
+                            mirror_mirrors.id,
+                            baseurl,
+                            rating
                         FROM 
                             mirror_mirrors
                         JOIN
-                            mirror_location_mirror_map ON mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id
+                            mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
                         INNER JOIN
-                            mirror_mirror_region_map ON (mirror_mirror_region_map.mirror_id = mirror_mirrors.mirror_id)
+                            geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
                         WHERE
                             mirror_location_mirror_map.location_id = %d AND
-                            mirror_mirror_region_map.region_id = %d AND
-                            mirror_active='1' AND 
-                            location_active ='1' 
-                        ORDER BY mirror_rating",array($location['location_id'], $client_region),MYSQL_ASSOC,'mirror_id');
+                            geoip_mirror_region_map.region_id = %d AND
+                            mirror_mirrors.active='1' AND 
+                            mirror_location_mirror_map.active ='1' 
+                        ORDER BY rating",array($location['id'], $client_region),MYSQL_ASSOC,'id');
                 }
             }
 
@@ -177,25 +175,25 @@ if (!empty($_GET['product'])) {
                 // either no region chosen or no mirror found in the given region
                 $mirrors = $sdo->get("
                     SELECT
-                        mirror_mirrors.mirror_id,
-                        mirror_baseurl,
-                        mirror_rating
+                        mirror_mirrors.id,
+                        baseurl,
+                        rating
                     FROM 
                         mirror_mirrors,
                         mirror_location_mirror_map
                     WHERE
-                        mirror_mirrors.mirror_id = mirror_location_mirror_map.mirror_id AND
+                        mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
                         mirror_location_mirror_map.location_id = %d AND
-                        mirror_active='1' AND 
-                        location_active ='1' 
-                    ORDER BY mirror_rating",array($location['location_id']),MYSQL_ASSOC,'mirror_id');
+                        mirror_mirrors.active='1' AND 
+                        mirror_location_mirror_map.active ='1' 
+                    ORDER BY rating",array($location['id']),MYSQL_ASSOC,'id');
             }
 
             $mirrors_rand = array();
             $sum = 0;
             foreach ($mirrors as $buf) {
-                $mirrors_rand[$buf['mirror_id']] = $buf['mirror_rating'];
-                $sum += $buf['mirror_rating'];
+                $mirrors_rand[$buf['id']] = $buf['rating'];
+                $sum += $buf['rating'];
             }
 
             $mirror_rand_id = getRandElement($mirrors_rand, $sum);
@@ -207,20 +205,20 @@ if (!empty($_GET['product'])) {
 
                 // if logging is enabled, insert log
                 if (LOGGING) {
-                    $sdo->query("UPDATE mirror_mirrors SET mirror_count=mirror_count+1 WHERE mirror_id = %d",array($mirror['mirror_id']),false);
-                    $sdo->query("UPDATE mirror_products SET product_count=product_count+1 WHERE product_id = %d",array($product_id),false);
+                    $sdo->query("UPDATE mirror_mirrors SET count=count+1 WHERE id = %d",array($mirror['id']),false);
+                    $sdo->query("UPDATE mirror_products SET count=count+1 WHERE id = %d",array($product_id),false);
                 }
 
                 // if we are just testing, then just print and exit.
                 if (!empty($_GET['print'])) {
                     show_no_cache_headers();
-                    print(htmlentities('Location: '.$mirror['mirror_baseurl'].$location['location_path']));
+                    print(htmlentities('Location: '.$mirror['baseurl'].$location['path']));
                     exit;
                 }
 
                 // otherwise, by default, redirect them and exit
                 show_no_cache_headers();
-                header('Location: '.$mirror['mirror_baseurl'].$location['location_path']);
+                header('Location: '.$mirror['baseurl'].$location['path']);
                 exit;
             }
         }
