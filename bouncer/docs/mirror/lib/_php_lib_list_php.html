@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<!-- template designed by Marco Von Ballmoos -->
+			<title>Docs for page list.php</title>
+			<link rel="stylesheet" href="../../media/stylesheet.css" />
+			<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'/>
+		</head>
+		<body>
+			<div class="page-body">			
+<h2 class="file-name">/php/lib/list.php</h2>
+
+<a name="sec-description"></a>
+<div class="info-box">
+	<div class="info-box-title">Description</div>
+	<div class="nav-bar">
+					<span class="disabled">Description</span> |
+															<a href="#sec-functions">Functions</a>
+			</div>
+	<div class="info-box-body">	
+		<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">List functions for lists of values.</p>
+	<ul class="tags">
+				<li><span class="field">author:</span> <p>Mike Morgan &lt;<a href="mailto:mike.morgan@oregonstate.edu">mike.morgan@oregonstate.edu</a>&gt;</p><p>Usage example:     <pre><ol><code><pre><li>    <span class="src-var">$orderby</span>=<a href="../../mirror/lib/_php_lib_list_php.html#functionget_order">get_order</a><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li>    <span class="src-var">$query</span>=<span class="src-str">&quot;</span><span class="src-id">SELECT</span> * <span class="src-id">FROM fic_courses </span><span class="src-var">$orderby</span><span class="src-str">&quot;</span><span class="src-sym">;</span></li>
+<li>    <span class="src-var">$courses</span>=<a href="../../mirror/lib/_php_lib_db_php.html#functiondb_get">db_get</a><span class="src-sym">(</span><span class="src-var">$query</span><span class="src-sym">,</span><span class="src-id">MYSQL_ASSOC</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li>    <span class="src-var">$headers</span>=<span class="src-key">array</span><span class="src-sym">(</span></li>
+<li>        <span class="src-str">'course_id'</span>=&gt;<span class="src-str">''</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'title'</span>=&gt;<span class="src-str">'Course Title'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'date_start_course'</span>=&gt;<span class="src-str">'Start'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'date_end_course'</span>=&gt;<span class="src-str">'End'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'date_start_reg'</span>=&gt;<span class="src-str">'Reg Starts'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'date_end_reg'</span>=&gt;<span class="src-str">'Reg Ends'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'active'</span>=&gt;<span class="src-str">'Active?'</span><span class="src-sym">,</span></li>
+<li>        <span class="src-str">'entry_date'</span>=&gt;<span class="src-str">'Created'</span></li>
+<li>    <span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li>    <a href="../../mirror/lib/_php_lib_list_php.html#functionshow_list">show_list</a><span class="src-sym">(</span><span class="src-var">$courses</span><span class="src-sym">,</span><span class="src-var">$headers</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+</pre></code></ol></pre></p><p>Accompanying CSS for table output:     <pre><ol><code><pre><li>    .list</li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">border</span>:<span class="src-num">1</span><span class="src-id">px solid </span><span class="src-comm">#999;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .list <span class="src-id">th</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#eee;</span></li>
+<li>        <span class="src-id">border</span>:<span class="src-num">1</span><span class="src-id">px solid </span><span class="src-comm">#000;</span></li>
+<li>        <span class="src-id">font</span>-<span class="src-id">weight</span>:<span class="src-id">bold</span><span class="src-sym">;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .list <span class="src-id">th a</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">display</span>:<span class="src-id">block</span><span class="src-sym">;</span></li>
+<li>        <span class="src-id">padding</span>:<span class="src-num">0 14</span><span class="src-id">px</span><span class="src-sym">;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .list <span class="src-id">th a</span>:<span class="src-id">hover</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>-<span class="src-id">color</span>:<span class="src-comm">#fff;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<span class="src-id">row1</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#ddd;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<span class="src-id">row2</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#ccc;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<span class="src-id">row1</span>:<span class="src-id">hover</span><span class="src-sym">, </span>.<span class="src-id">row2</span>:<span class="src-id">hover</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>-<span class="src-id">color</span>:<span class="src-comm">#fec;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<a href="http://www.php.net/current">current</a>-<a href="http://www.php.net/sort">sort</a></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#fda;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<a href="http://www.php.net/sort">sort</a>-<span class="src-id">desc</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#fec url(../img/up.gif) no-repeat right;</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    .<a href="http://www.php.net/sort">sort</a>-<span class="src-id">asc</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-id">background</span>:<span class="src-comm">#fec url(../img/down.gif) no-repeat right;</span></li>
+<li>    <span class="src-sym">}</span></li>
+</pre></code></ol></pre>     Accompanying JavaScript for select all / inverse:     <pre><ol><code><pre><li>    &lt;<span class="src-id">script type</span>=<span class="src-str">&quot;text/javascript&quot;</span>&gt;</li>
+<li>    <span class="src-comm">//&lt;!--</span></li>
+<li>    <span class="src-key">function </span><span class="src-id">selectAll</span><span class="src-sym">(</span><span class="src-id">formObj</span><span class="src-sym">,</span><span class="src-id">invert</span><span class="src-sym">)</span></li>
+<li>    <span class="src-sym">{</span></li>
+<li>        <span class="src-key">for </span><span class="src-sym">(</span><span class="src-key">var </span><span class="src-id">i</span>=<span class="src-num">0</span><span class="src-sym">;</span><span class="src-id">i </span>&lt; <span class="src-id">formObj</span>.<span class="src-id">elements</span>.<span class="src-id">length</span><span class="src-sym">;</span><span class="src-id">i</span>++<span class="src-sym">)</span></li>
+<li>        <span class="src-sym">{</span></li>
+<li>            <span class="src-id">fldObj </span>= <span class="src-id">formObj</span>.<span class="src-id">elements</span><span class="src-sym">[</span><span class="src-id">i</span><span class="src-sym">]</span><span class="src-sym">;</span></li>
+<li>            <span class="src-key">if </span><span class="src-sym">(</span><span class="src-id">fldObj</span>.<span class="src-id">type </span>== <span class="src-str">'checkbox'</span><span class="src-sym">)</span></li>
+<li>            <span class="src-sym">{</span></li>
+<li>                <span class="src-key">if </span><span class="src-sym">(</span><span class="src-id">invert</span>==<span class="src-num">1</span><span class="src-sym">)</span></li>
+<li>                <span class="src-sym">{</span></li>
+<li>                    <span class="src-id">fldObj</span>.<span class="src-id">checked </span>= <span class="src-sym">(</span><span class="src-id">fldObj</span>.<span class="src-id">checked</span><span class="src-sym">) </span>? <span class="src-id">false </span>: <span class="src-id">true</span><span class="src-sym">;</span></li>
+<li>                <span class="src-sym">}</span></li>
+<li>                <span class="src-key">else</span></li>
+<li>                <span class="src-sym">{</span></li>
+<li>                    <span class="src-id">fldObj</span>.<span class="src-id">checked </span>= <span class="src-id">true</span><span class="src-sym">;</span></li>
+<li>                <span class="src-sym">}</span></li>
+<li>            <span class="src-sym">}</span></li>
+<li>        <span class="src-sym">}</span></li>
+<li>    <span class="src-sym">}</span></li>
+<li>    <span class="src-comm">//--&gt;</span></li>
+<li>    <span class="src-php">&lt;/script&gt;</span></li>
+</pre></code></ol></pre></p></li>
+			</ul>
+		
+			</div>
+</div>
+		
+
+	
+	
+	
+	<a name="sec-functions"></a>	
+	<div class="info-box">
+		<div class="info-box-title">Functions</div>
+		<div class="nav-bar">
+			<a href="#sec-description">Description</a> |
+															<span class="disabled">Functions</span>
+		</div>
+		<div class="info-box-body">	
+			<a name="functionget_order" id="functionget_order"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">get_order</span> (line <span class="line-number">283</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Determine current sort order.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			get_order
+		</span>
+				()
+			</div>
+
+		
+	
+</div>
+<a name="functionget_orderby" id="functionget_orderby"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">get_orderby</span> (line <span class="line-number">293</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Determine whether or not list is currently sorted.</p>
+	<ul class="tags">
+				<li><span class="field">return:</span> cleaned orderby clause based on saved sort information or null if no orderby is set in the defined method</li>
+			</ul>
+	
+	<div class="method-signature">
+		<span class="method-result">mixed</span>
+		<span class="method-name">
+			get_orderby
+		</span>
+					([<span class="var-type">string</span>&nbsp;<span class="var-name">$method</span> = <span class="var-default">'get'</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$method</span><span class="var-description">: which http method to check for sort information</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionlist_edit_ids" id="functionlist_edit_ids"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">list_edit_ids</span> (line <span class="line-number">334</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Parses $_POST for ids, shows edit forms for each id with populated data.</p>
+<p class="description"><p><ul><li>name will be used to retrieve an _array_ from $_POST of the same name</li><li>the form will be an include, with $posts[col_name] as the default for all values</li><li>try to keep your query simple (no crazy sorting, etc.) -- we're talking one record at a time here anyway</li></ul> 	Example: 	<pre><ol><code><pre><li>    <a href="../../mirror/lib/_php_lib_list_php.html#functionlist_edit_ids">list_edit_ids</a><span class="src-sym">(</span><span class="src-str">'course_id'</span><span class="src-sym">,</span><span class="src-str">'../forms/course.php'</span><span class="src-sym">,</span><span class="src-str">'SELECT * FROM fic_courses'</span><span class="src-sym">,</span><span class="src-str">'1'</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+</pre></code></ol></pre></p></p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			list_edit_ids
+		</span>
+					(<span class="var-type">string</span>&nbsp;<span class="var-name">$name</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$form</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$q_front</span>, [<span class="var-type">string</span>&nbsp;<span class="var-name">$q_where</span> = <span class="var-default">'1'</span>], [<span class="var-type">array</span>&nbsp;<span class="var-name">$dates</span> = <span class="var-default">null</span>], [<span class="var-type">array</span>&nbsp;<span class="var-name">$datetimes</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$name</span><span class="var-description">: name of id field</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$form</span><span class="var-description">: path to form to be used to items</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$q_front</span><span class="var-description">: front half of query</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$q_where</span><span class="var-description">: where statement</span>			</li>
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$dates</span><span class="var-description">: array of date field names, so they can be fixed for forms</span>			</li>
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$datetimes</span><span class="var-description">: array of datetime field names, so they can be fixed for forms</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionlist_update_ids" id="functionlist_update_ids"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">list_update_ids</span> (line <span class="line-number">370</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Process a submitted list_edit_ids form.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			list_update_ids
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$name</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$table</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$name</span><span class="var-description">: array of primary ids posted from the form, these are vital to the WHERE clause of the UPDATE statements.</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$table</span><span class="var-description">: name of table being affected</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_headers" id="functionshow_headers"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">show_headers</span> (line <span class="line-number">190</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show table headers.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_headers
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$headers</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$type</span>, [<span class="var-type">bool</span>&nbsp;<span class="var-name">$sortable</span> = <span class="var-default">true</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$headers</span><span class="var-description">: column name =&gt; column title (for table heads)</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$type</span><span class="var-description">: type of list that is being shown</span>			</li>
+					<li>
+				<span class="var-type">bool</span>
+				<span class="var-name">$sortable</span><span class="var-description">: whether or not to show sortable column headers (links in th's)</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_list" id="functionshow_list"><!-- --></a>
+<div class="oddrow">
+	
+	<div>
+		<span class="method-title">show_list</span> (line <span class="line-number">110</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show a list of values, for forms.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_list
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$list</span>, <span class="var-type">array</span>&nbsp;<span class="var-name">$headers</span>, [<span class="var-type">string</span>&nbsp;<span class="var-name">$type</span> = <span class="var-default">'checkbox'</span>], [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$actions</span> = <span class="var-default">null</span>], [<span class="var-type">string</span>&nbsp;<span class="var-name">$form_id</span> = <span class="var-default">null</span>], [<span class="var-type">bool</span>&nbsp;<span class="var-name">$sortable</span> = <span class="var-default">true</span>], [<span class="var-type">array|string</span>&nbsp;<span class="var-name">$selected</span> = <span class="var-default">null</span>], <span class="var-type">array</span>&nbsp;<span class="var-name">$array</span>)
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$list</span><span class="var-description">: associative array</span>			</li>
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$headers</span><span class="var-description">: column name =&gt; column title (for table heads)</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$type</span><span class="var-description">: checkbox, radio, simple</span>			</li>
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$array</span><span class="var-description">: actions to display in actions select list</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$form_id</span><span class="var-description">: id of form holding list</span>			</li>
+					<li>
+				<span class="var-type">bool</span>
+				<span class="var-name">$sortable</span><span class="var-description">: whether or not to show sortable column headers (links in th's)</span>			</li>
+					<li>
+				<span class="var-type">array|string</span>
+				<span class="var-name">$selected</span><span class="var-description">: if type is checkbox, array otherwise string with one val</span>			</li>
+				</ul>
+		
+	
+</div>
+<a name="functionshow_row" id="functionshow_row"><!-- --></a>
+<div class="evenrow">
+	
+	<div>
+		<span class="method-title">show_row</span> (line <span class="line-number">245</span>)
+	</div> 
+
+	<!-- ========== Info from phpDoc block ========= -->
+<p class="short-description">Show table data.</p>
+	
+	<div class="method-signature">
+		<span class="method-result">void</span>
+		<span class="method-name">
+			show_row
+		</span>
+					(<span class="var-type">array</span>&nbsp;<span class="var-name">$headers</span>, <span class="var-type">array</span>&nbsp;<span class="var-name">$row</span>, <span class="var-type">string</span>&nbsp;<span class="var-name">$type</span>, [<span class="var-type">mixed</span>&nbsp;<span class="var-name">$num</span> = <span class="var-default">null</span>], [<span class="var-type">array|string</span>&nbsp;<span class="var-name">$selected</span> = <span class="var-default">null</span>])
+			</div>
+
+			<ul class="parameters">
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$headers</span><span class="var-description">: column name =&gt; column title (for knowing which ones to display)</span>			</li>
+					<li>
+				<span class="var-type">array</span>
+				<span class="var-name">$row</span><span class="var-description">: table row, assoc</span>			</li>
+					<li>
+				<span class="var-type">string</span>
+				<span class="var-name">$type</span><span class="var-description">: type of table, determines first column, which could be an input</span>			</li>
+					<li>
+				<span class="var-type">array|string</span>
+				<span class="var-name">$selected</span><span class="var-description">: selected items; if type is checkbox, array otherwise string with one val</span>			</li>
+				</ul>
+		
+	
+</div>
+		</div>
+	</div>
+	
+	<p class="notes" id="credit">
+		Documentation generated on Mon,  8 Nov 2004 13:43:04 -0800 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.3.0RC3</a>
+	</p>
+	</div></body>
+</html>
