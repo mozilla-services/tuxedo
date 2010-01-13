@@ -18,29 +18,29 @@ my @productlist = (
 );
 
 my $uptakequery = "SELECT MIN(t.available) from (SELECT 
-    SUM( m.mirror_rating ) as available,
+    SUM( m.rating ) as available,
     (
-        SELECT SUM( mirror_rating )
+        SELECT SUM( rating )
         FROM mirror_mirrors
-        WHERE mirror_active = '1' 
+        WHERE active = '1' 
     ) as total,
-    (   100 * SUM( m.mirror_rating )/
+    (   100 * SUM( m.rating )/
         (
-            SELECT SUM( mirror_rating )
+            SELECT SUM( rating )
             FROM mirror_mirrors
-            WHERE mirror_active = '1' 
+            WHERE active = '1' 
         )
     ) as percentage,
-    p.product_name as product_name,
-    o.os_name as os_name
+    p.name as product_name,
+    o.name as os_name
     FROM mirror_mirrors m
-    JOIN mirror_location_mirror_map lmm ON lmm.mirror_id = m.mirror_id
-    JOIN mirror_locations l ON l.location_id = lmm.location_id
-    JOIN mirror_products p ON p.product_id = l.product_id
-    JOIN mirror_os o ON o.os_id = l.os_id
-    WHERE lmm.location_active = '1' AND m.mirror_active = '1'
-    AND p.product_name REGEXP ?
-    AND o.os_name = 'win'
+    JOIN mirror_location_mirror_map lmm ON lmm.mirror_id = m.id
+    JOIN mirror_locations l ON l.id = lmm.location_id
+    JOIN mirror_products p ON p.id = l.product_id
+    JOIN mirror_os o ON o.id = l.os_id
+    WHERE lmm.active = '1' AND m.active = '1'
+    AND p.name REGEXP ?
+    AND o.name = 'win'
     GROUP BY lmm.location_id) as t";
 my $uptakeqh = $dbh->prepare($uptakequery);
 
@@ -53,11 +53,11 @@ my $query = "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(log_date) - (UNIX_TIMESTAMP(lo
        sentry_log.mirror_rating,
        LEFT(reason,20)
 FROM sentry_log
-     INNER JOIN mirror_mirrors ON sentry_log.mirror_id = mirror_mirrors.mirror_id
+     INNER JOIN mirror_mirrors ON sentry_log.mirror_id = mirror_mirrors.id
 WHERE log_date > NOW() - INTERVAL 2 HOUR
 ORDER BY log_date DESC";
 
-my $qh = $dbh->prepare("SELECT mirror_baseurl, mirror_rating FROM mirror_mirrors");
+my $qh = $dbh->prepare("SELECT baseurl, rating FROM mirror_mirrors");
 $qh->execute();
 my %weight = ();
 while (my ($url, $weight) = $qh->fetchrow_array()) {
