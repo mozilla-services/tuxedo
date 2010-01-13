@@ -6,7 +6,7 @@
  */
 
 require_once('../cfg/config.php');  // config file
-require_once(LIB.'/sdo.php');  // core mysql wrappers with caching
+require_once(LIB.'/db.php'); // core mysql wrappers 
 
 db_connect(SHADOWDBHOST,SHADOWDBUSER,SHADOWDBPASS);  // open persistent connection to db
 db_select(SHADOWDBNAME);  // select db
