@@ -40,7 +40,7 @@ DROP TABLE `mirror_langs`;
 ALTER TABLE `mirror_locations` CHANGE `location_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT , CHANGE `location_path` `path` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '';
 ALTER TABLE `mirror_location_mirror_map` CHANGE `location_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '0';
 ALTER TABLE `mirror_mirrors` CHANGE `mirror_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
-CHANGE `mirror_name` `name` VARCHAR( 32 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `mirror_name` `name` VARCHAR( 64 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
 CHANGE `mirror_baseurl` `baseurl` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
 CHANGE `mirror_rating` `rating` INT( 11 ) NOT NULL DEFAULT '0',
 CHANGE `mirror_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '0',
