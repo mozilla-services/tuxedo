@@ -65,3 +65,29 @@ RENAME TABLE `mirror_country_to_region`   TO `geoip_country_to_region`  ;
 RENAME TABLE `mirror_ip_to_country`   TO `geoip_ip_to_country` ;
 RENAME TABLE `mirror_regions`  TO `geoip_regions` ;
 
+-- convert all tables to INNODB and UTF-8
+ALTER TABLE `geoip_country_to_region`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `geoip_country_to_region` CHANGE `country_code` `country_code` VARCHAR( 2 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `geoip_country_to_region` CHANGE `country_name` `country_name` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `geoip_country_to_region` CHANGE `continent` `continent` VARCHAR( 2 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `geoip_ip_to_country`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `geoip_mirror_region_map`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `geoip_regions`  DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `geoip_regions` CHANGE `name` `name` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_locations`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_locations` CHANGE `path` `path` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_locations_mirror_map`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_mirrors`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_mirrors` CHANGE `name` `name` VARCHAR( 64 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+CHANGE `baseurl` `baseurl` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_os`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_os` CHANGE `name` `name` VARCHAR( 32 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_products`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_products` CHANGE `name` `name` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_users`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_users` CHANGE `username` `username` VARCHAR( 32 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_users` CHANGE `password` `password` VARCHAR( 32 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_users` CHANGE `user_firstname` `user_firstname` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_users` CHANGE `user_lastname` `user_lastname` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_users` CHANGE `user_email` `user_email` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+
