@@ -17,14 +17,12 @@ class Country(models.Model):
         return "%s (%s)" % (self.country_name, self.country_code)
 
     class Meta:
-        db_table = 'mirror_country_to_region'
-        managed = False
+        db_table = 'geoip_country_to_region'
         verbose_name_plural = 'Countries'
 
 
 class IPBlock(models.Model):
     """returns a GeoIP mapping from an IP block to a country"""
-    # TODO dotted-quad representations
     ip_start = models.DecimalField(max_digits=12, decimal_places=0)
     ip_end = models.DecimalField(max_digits=12, decimal_places=0)
     country = models.ForeignKey('Country', db_column='country_code')
@@ -41,34 +39,29 @@ class IPBlock(models.Model):
        return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
 
     class Meta:
-        db_table = 'mirror_ip_to_country'
-        managed = False
+        db_table = 'geoip_ip_to_country'
         verbose_name = 'IP Block'
 
 
 class Region(models.Model):
     """represents a geographical region, e.g., Europe"""
-    id = models.AutoField(primary_key=True, db_column='region_id')
-    name = models.CharField(max_length=255, db_column='region_name',
-                            verbose_name='Region Name')
-    priority = models.IntegerField(db_column='region_priority',
-                                   help_text='The lower the number, the '
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255, verbose_name='Region Name')
+    priority = models.IntegerField(help_text='The lower the number, the '
                                              'higher the priority')
-    throttle = models.IntegerField(db_column='region_throttle',
-                                   verbose_name='GeoIP Throttle')
+    throttle = models.IntegerField(verbose_name='GeoIP Throttle')
 
     def mirror_count(self):
-        return len(self.mirror_set.all())
+        return self.mirror_set.count()
     mirror_count.short_description = 'Mirrors'
 
     def ratings(self):
-        return self.mirror_set.all().aggregate(Sum('rating'))['rating__sum']
+        return self.mirror_set.aggregate(Sum('rating'))['rating__sum']
     ratings.short_description = 'Total Ratings'
 
     def __unicode__(self):
         return self.name
 
     class Meta:
-        db_table = 'mirror_regions'
-        managed = False
+        db_table = 'geoip_regions'
 

@@ -8,65 +8,61 @@ LANG_CHOICES = locale_details().get_model_choices()
 
 class Mirror(models.Model):
     """represents a single mirror"""
-    id = models.AutoField(primary_key=True, db_column='mirror_id')
-    name = models.CharField(max_length=64, unique=True, db_column='mirror_name',
-                            verbose_name='Host Name')
-    baseurl = models.CharField(max_length=255, db_column='mirror_baseurl',
-                               verbose_name='Base URL')
-    rating = models.IntegerField(db_column='mirror_rating')
-    active = models.BooleanField(db_column='mirror_active')
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=64, unique=True, verbose_name='Host Name')
+    baseurl = models.CharField(max_length=255, verbose_name='Base URL')
+    rating = models.IntegerField()
+    active = models.BooleanField()
     count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
-                                db_column='mirror_count', db_index=True)
+                                 db_index=True)
     regions = models.ManyToManyField('geoip.Region',
-                                     db_table='mirror_mirror_region_map')
+                                     db_table='geoip_mirror_region_map')
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         db_table = 'mirror_mirrors'
-        managed = False
 
 
 class OS(models.Model):
     """represents a platform, e.g., osx"""
-    id = models.AutoField(primary_key=True, db_column='os_id')
-    name = models.CharField(max_length=32, unique=True, db_column='os_name')
-    priority = models.IntegerField(db_column='os_priority')
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=32, unique=True)
+    priority = models.IntegerField()
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         db_table = 'mirror_os'
-        managed = False
         verbose_name = 'Operating System'
 
 
 class Product(models.Model):
     """represents a single product, e.g., Firefox-3.5.6"""
-    id = models.AutoField(primary_key=True, db_column='product_id')
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True,
-                            db_column='product_name',
                             verbose_name='Product Name')
-    priority = models.IntegerField(db_column='product_priority')
+    priority = models.IntegerField()
     count = models.DecimalField(max_digits=20, decimal_places=0,
-                                db_column='product_count',
                                 verbose_name='Downloads')
-    active = models.BooleanField(db_index=True, db_column='product_active')
-    checknow = models.BooleanField(db_index=True, db_column='product_checknow',
-                                   verbose_name='Check Now?')
+    active = models.BooleanField(db_index=True)
+    checknow = models.BooleanField(db_index=True, verbose_name='Check Now?')
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         db_table = 'mirror_products'
-        managed = False
 
 
 class User(models.Model):
-    """represents a user who can log into this app"""
+    """
+    represents a legacy user who can log into this app
+    Note: This model is unmanaged because it's not needed unless we're
+    migrating from an older version of Bouncer.
+    """
     id = models.AutoField(primary_key=True, db_column='user_id')
     username = models.CharField(max_length=32, unique=True)
     password = models.CharField(max_length=32)
@@ -83,15 +79,14 @@ class User(models.Model):
         db_table = 'mirror_users'
         managed = False
         verbose_name = 'Legacy User'
-        verbose_name_plural = 'Legacy Users'
 
 
 class Location(models.Model):
     """represents a single location (i.e., file) on a mirror"""
-    id = models.AutoField(primary_key=True, db_column='location_id')
+    id = models.AutoField(primary_key=True)
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
-    path = models.CharField(max_length=255, db_column='location_path')
+    path = models.CharField(max_length=255)
     lang = models.CharField(max_length=10, unique=True,
                             choices=LANG_CHOICES, verbose_name='Language')
 
@@ -100,7 +95,6 @@ class Location(models.Model):
 
     class Meta:
         db_table = 'mirror_locations'
-        managed = False
         unique_together = ('product', 'os', 'lang')
 
 
@@ -108,12 +102,11 @@ class LocationMirrorMap(models.Model):
     """MtM mapping between Locations and Mirrors"""
     location = models.ForeignKey('Location')
     mirror = models.ForeignKey('Mirror')
-    active = models.BooleanField(db_column='location_active')
+    active = models.BooleanField()
 
     def __unicode__(self):
         return "%s %s" % (self.location, self.mirror)
 
     class Meta:
         db_table = 'mirror_location_mirror_map'
-        managed = False
 

@@ -36,3 +36,32 @@ UPDATE `mirror_locations` AS loc LEFT JOIN mirror_langs AS lang ON (loc.lang_id 
 ALTER TABLE `mirror_locations` DROP `lang_id`;
 DROP TABLE `mirror_langs`;
 
+-- remove column prefixes (bug 538988)
+ALTER TABLE `mirror_locations` CHANGE `location_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT , CHANGE `location_path` `path` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '';
+ALTER TABLE `mirror_location_mirror_map` CHANGE `location_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '0';
+ALTER TABLE `mirror_mirrors` CHANGE `mirror_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
+CHANGE `mirror_name` `name` VARCHAR( 32 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `mirror_baseurl` `baseurl` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `mirror_rating` `rating` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `mirror_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '0',
+CHANGE `mirror_count` `count` BIGINT( 20 ) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `mirror_os` CHANGE `os_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
+CHANGE `os_name` `name` VARCHAR( 32 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `os_priority` `priority` INT( 11 ) NOT NULL DEFAULT '0';
+ALTER TABLE `mirror_products` CHANGE `product_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
+CHANGE `product_name` `name` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `product_priority` `priority` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `product_count` `count` BIGINT( 20 ) UNSIGNED NOT NULL DEFAULT '0',
+CHANGE `product_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '1',
+CHANGE `product_checknow` `checknow` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '1';
+ALTER TABLE `mirror_country_to_region` DROP FOREIGN KEY `mirror_country_to_region_ibfk_1`  ;
+ALTER TABLE `mirror_regions` CHANGE `region_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
+CHANGE `region_name` `name` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
+CHANGE `region_priority` `priority` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `region_throttle` `throttle` INT( 11 ) NOT NULL ;
+ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `mirror_regions` (`id`) ON DELETE SET NULL ;
+RENAME TABLE `mirror_mirror_region_map`   TO `geoip_mirror_region_map`  ;
+RENAME TABLE `mirror_country_to_region`   TO `geoip_country_to_region`  ;
+RENAME TABLE `mirror_ip_to_country`   TO `geoip_ip_to_country` ;
+RENAME TABLE `mirror_regions`  TO `geoip_regions` ;
+

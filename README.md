@@ -9,10 +9,11 @@ Frederic Wenzel (fwenzel@mozilla.com).
 
 Getting Started
 ---------------
-Note that this Django app does not manage its own SQL... yet. Please refer to
-``sql/mirror.sql``, which is a copy of
-    http://svn.mozilla.org/projects/bouncer/1.0/trunk/php/cfg/mirror.sql
-at the time of writing.
+If you're migrating from an older version of Bouncer, you want to run
+``sql/incremental.sql`` to bring the DB up to date, followed by a
+``python manage.py syncdb`` to create Django-specific tables.
+
+If you're installing a new copy, just the ``...syncdb`` command should do.
 
 LICENSE
 -------
