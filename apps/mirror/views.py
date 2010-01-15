@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-import django_tables as tables
 
 from lib.sort_headers import SortHeaders
 from models import LocationMirrorMap, Mirror
