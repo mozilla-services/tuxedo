@@ -1,7 +1,7 @@
 from json import JSONDecoder
 import os
 
-import settings
+from django.conf import settings
 
 
 class _json_details(object):
