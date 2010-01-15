@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% load markup %}
 
 {% block main_content %}
-    {{ doctext|markdown }}
+    {% block doc_text %}{% endblock %}
 {% endblock %}
 
 {% block sidebar %}
     {% include "sidebar_menu.html" %}
 {% endblock %}
+

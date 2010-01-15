@@ -1,0 +1,15 @@
+{% extends "base_api_doc.html" %}
+{% load markup %}
+
+{% block doc_text %}
+{% filter markdown %}
+Bouncer API
+======
+Available commands:
+{% for command in commands %}
+* [{{ command }}]({% url api.views.docs command=command %})
+{% endfor %}
+
+{% endfilter %}
+{% endblock %}
+

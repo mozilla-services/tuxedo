@@ -1,4 +1,0 @@
-uptake
-======
-Query mirror uptake.
-

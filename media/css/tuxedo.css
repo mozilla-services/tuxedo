@@ -184,6 +184,10 @@ img {
 	padding: 5px 0 0 0;
 }
 
+#colOne ul {
+    list-style: disc inside;
+}
+
 /* Forms */
 button {
     font-size: 14px;
