@@ -1,2 +1,3 @@
 *.pyc
 local_settings.py
+bouncer/php/cfg/config.php
