@@ -89,6 +89,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'api',
     'mirror',
     'geoip',
     'lib',
