@@ -44,11 +44,12 @@ class Product(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True,
                             verbose_name='Product Name')
-    priority = models.IntegerField()
-    count = models.DecimalField(max_digits=20, decimal_places=0,
+    priority = models.IntegerField(default=1)
+    count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
                                 verbose_name='Downloads')
-    active = models.BooleanField(db_index=True)
-    checknow = models.BooleanField(db_index=True, verbose_name='Check Now?')
+    active = models.BooleanField(db_index=True, default=True)
+    checknow = models.BooleanField(db_index=True, verbose_name='Check Now?',
+                                   default=False)
 
     def __unicode__(self):
         return self.name

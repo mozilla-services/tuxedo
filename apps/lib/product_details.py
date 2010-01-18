@@ -25,6 +25,13 @@ class LocaleDetails(_JSONDetails):
     def get_languages(self):
         return self._get_json_data('languages')
 
+    def get_locale_codes(self):
+        """return a list of all known locale codes"""
+        langs = self.get_languages()
+        locale_codes = langs.keys()
+        locale_codes.sort()
+        return locale_codes
+
     def get_model_choices(self):
         """
         Get list of languages usable as 'choices' for Django model fields.
