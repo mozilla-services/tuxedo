@@ -5,8 +5,11 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from lib.decorators import logged_in_or_basicauth
 from mirror.models import Location, OS, Product
 
+
+HTTP_AUTH_REALM = 'Bouncer API'
 
 def _get_command_list():
     templates = os.listdir(os.path.join(os.path.dirname(__file__), 'templates',
@@ -29,6 +32,7 @@ def docs(request, command):
     return render_to_response('docs/%s.html' % command, context_instance=
                               RequestContext(request))
 
+@logged_in_or_basicauth(HTTP_AUTH_REALM)
 def uptake(request):
     """ping mirror uptake"""
     product = request.GET.get('product', None)
