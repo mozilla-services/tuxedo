@@ -1,8 +1,11 @@
 import os
+import xml.dom.minidom
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+
+from mirror.models import Location
 
 
 def _get_command_list():
@@ -25,4 +28,49 @@ def docs(request, command):
         raise Http404
     return render_to_response('docs/%s.html' % command, context_instance=
                               RequestContext(request))
+
+def uptake(request):
+    """ping mirror uptake"""
+    product = request.GET.get('product', None)
+    os = request.GET.get('os', None)
+    if product:
+        products = Product.objects.filter(name__icontains=product)
+        pids = [ p.id for p in products ]
+    else:
+        pids = None
+
+    if os:
+        oses = OS.objects.filter(name__icontains=os)
+        osids = [ o.id for o in oses ]
+    else:
+        osids = None
+    uptake = Location.get_mirror_uptake(products=pids, oses=osids)
+
+    xml = XMLRenderer().render_uptake(uptake)
+    return HttpResponse(xml.toxml(encoding='utf-8'), mimetype='text/xml')
+
+
+class XMLRenderer(object):
+    """Render API data as XML"""
+
+    def __init__(self):
+        self.doc = xml.dom.minidom.Document()
+
+    def render_uptake(self, uptake):
+        content_map = {'product': 'location__product__name',
+                       'os': 'location__os__name',
+                       'available': 'available',
+                       'total': 'total'}
+
+        root = self.doc.createElement('mirror_uptake')
+        self.doc.appendChild(root)
+        for row in uptake:
+            item = self.doc.createElement('item')
+            for key, value in content_map.iteritems():
+                elem = self.doc.createElement(key)
+                elem.appendChild(self.doc.createTextNode(str(row[value])))
+                item.appendChild(elem)
+            root.appendChild(item)
+
+        return self.doc
 

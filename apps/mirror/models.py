@@ -98,14 +98,19 @@ class Location(models.Model):
         return self.path
 
     @staticmethod
-    def get_mirror_uptake(products, order_by='location__product__name'):
+    def get_mirror_uptake(products=None, oses=None,
+                          order_by='location__product__name'):
         """
-        Given a list of product IDs, return a list of these products'
-        locations' mirror uptake
+        Given a list of product IDs and/or OS IDs, return a list of these
+        products' locations' mirror uptake
         """
         locations = LocationMirrorMap.objects \
-            .filter(location__product__id__in=products, active=True,
-                    mirror__active=True) \
+            .filter(active=True, mirror__active=True)
+        if products:
+            locations = locations.filter(location__product__id__in=products)
+        if oses:
+            locations = locations.filter(location__os__id__in=oses)
+        locations = locations \
             .values('location__id', 'location__product__name',
                     'location__os__name') \
             .annotate(available=models.Sum('mirror__rating')) \
