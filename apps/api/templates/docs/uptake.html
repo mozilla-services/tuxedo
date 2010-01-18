@@ -5,7 +5,46 @@
 {% filter markdown %}
 uptake
 ======
-Query mirror uptake.
+Query mirror uptake. Needs HTTP authentication.
+
+Syntax:
+-------
+``http://.../api/uptake``
+
+Required GET Parameters:
+------------------------
+At least one of:
+
+* ``product``: (Part of) a product name to display the uptake for
+* ``os``: (Part of) a platform name to display the uptake for
+
+Optional GET Parameters:
+------------------------
+*(None)*
+
+Returns:
+--------
+    XML
+
+Example:
+--------
+    <?xml version="1.0" encoding="utf-8"?>
+    <mirror_uptake>
+        <item>
+            <available>
+                20
+            </available>
+            <product>
+                Firefox-1.0.3
+            </product>
+            <total>
+                42433
+            </total>
+            <os>
+                win
+            </os>
+        </item>
+    </mirror_uptake>
 
 {% endfilter %}
 {% endblock %}

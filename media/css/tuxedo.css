@@ -22,9 +22,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h2 {
-	margin-bottom: 10px;
+	margin-bottom: 8px;
 	border-bottom: 1px solid #F4F4F4;
-	font-size: 26px;
+	font-size: 20px;
 }
 
 h3 {

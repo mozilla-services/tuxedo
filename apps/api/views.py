@@ -1,11 +1,11 @@
 import os
 import xml.dom.minidom
 
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from mirror.models import Location
+from mirror.models import Location, OS, Product
 
 
 def _get_command_list():
@@ -33,6 +33,10 @@ def uptake(request):
     """ping mirror uptake"""
     product = request.GET.get('product', None)
     os = request.GET.get('os', None)
+    if not product and not os:
+        return HttpResponseBadRequest('product and/or os are required GET '\
+                                      'parameters.')
+
     if product:
         products = Product.objects.filter(name__icontains=product)
         pids = [ p.id for p in products ]
@@ -44,6 +48,7 @@ def uptake(request):
         osids = [ o.id for o in oses ]
     else:
         osids = None
+
     uptake = Location.get_mirror_uptake(products=pids, oses=osids)
 
     xml = XMLRenderer().render_uptake(uptake)
