@@ -4,7 +4,7 @@ import os
 from django.conf import settings
 
 
-class _json_details(object):
+class _JSONDetails(object):
     """superclass for all JSON-based product and locale data"""
     json_file = os.path.join(settings.PRODUCT_DETAILS, 'json', '%s.json')
     json_data = {}
@@ -19,7 +19,7 @@ class _json_details(object):
             source.close()
             return self.json_data[filename]
 
-class locale_details(_json_details):
+class LocaleDetails(_JSONDetails):
     """language-specific data"""
 
     def get_languages(self):

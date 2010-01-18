@@ -1,10 +1,10 @@
 from django.db import models
 
-from lib.product_details import locale_details
+from lib.product_details import LocaleDetails
 
 
 # get the possible languages from product details
-LANG_CHOICES = locale_details().get_model_choices()
+LANG_CHOICES = LocaleDetails().get_model_choices()
 
 class Mirror(models.Model):
     """represents a single mirror"""
