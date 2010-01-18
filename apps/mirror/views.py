@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from lib.sort_headers import SortHeaders
-from models import LocationMirrorMap, Mirror
+from models import Location, LocationMirrorMap
 from forms import UptakeForm
 
 
@@ -39,21 +38,9 @@ def uptake(request):
     if form.is_bound:
         sort_headers = SortHeaders(request, UPTAKE_LIST_HEADERS)
         products = [ int(p) for p in form.data.getlist('p') ]
-        locations = LocationMirrorMap.objects \
-            .filter(location__product__id__in=products, active=True,
-                    mirror__active=True) \
-            .values('location__id', 'location__product__name',
-                    'location__os__name') \
-            .annotate(available=Sum('mirror__rating')) \
-            .order_by(sort_headers.get_order_by())
-        locations = list(locations)
-
-        # calculate totals
-        total = Mirror.objects.filter(active=True) \
-                .aggregate(total=Sum('rating'))['total']
-        for location in locations:
-            location.update({'total': total})
-        data.update({'locations': locations,
+        uptake = Location.get_mirror_uptake(
+            products, order_by=sort_headers.get_order_by())
+        data.update({'locations': uptake,
                      'headers': list(sort_headers.headers()),
                      'use_sorttable': True,
                     })

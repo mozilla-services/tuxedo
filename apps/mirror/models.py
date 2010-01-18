@@ -18,11 +18,11 @@ class Mirror(models.Model):
     regions = models.ManyToManyField('geoip.Region',
                                      db_table='geoip_mirror_region_map')
 
-    def __unicode__(self):
-        return self.name
-
     class Meta:
         db_table = 'mirror_mirrors'
+
+    def __unicode__(self):
+        return self.name
 
 
 class OS(models.Model):
@@ -90,12 +90,34 @@ class Location(models.Model):
     lang = models.CharField(max_length=10, unique=True,
                             choices=LANG_CHOICES, verbose_name='Language')
 
-    def __unicode__(self):
-        return self.path
-
     class Meta:
         db_table = 'mirror_locations'
         unique_together = ('product', 'os', 'lang')
+
+    def __unicode__(self):
+        return self.path
+
+    @staticmethod
+    def get_mirror_uptake(products, order_by='location__product__name'):
+        """
+        Given a list of product IDs, return a list of these products'
+        locations' mirror uptake
+        """
+        locations = LocationMirrorMap.objects \
+            .filter(location__product__id__in=products, active=True,
+                    mirror__active=True) \
+            .values('location__id', 'location__product__name',
+                    'location__os__name') \
+            .annotate(available=models.Sum('mirror__rating')) \
+            .order_by(order_by)
+        locations = list(locations)
+
+        # calculate totals
+        total = Mirror.objects.filter(active=True) \
+                .aggregate(total=models.Sum('rating'))['total']
+        for location in locations:
+            location.update({'total': total})
+        return locations
 
 
 class LocationMirrorMap(models.Model):
