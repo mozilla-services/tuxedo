@@ -76,7 +76,7 @@ MIDDLEWARE_CLASSES = (
 # auth backends: uses django first, and converts old Bouncer users as needed
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'mirror.auth.backend.ConversionBackend'
+    'users.auth.backend.ConversionBackend'
 )
 
 ROOT_URLCONF = 'tuxedo.urls'
@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'mirror',
     'geoip',
     'lib',
+    'users',
 
     'django.contrib.admin',
     'django.contrib.auth',
