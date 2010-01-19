@@ -22,7 +22,7 @@ LOCATION_STATS_LIST_HEADERS = (
 
 def index(request):
     """Main login/index page"""
-    return render_to_response('index.html', context_instance=
+    return render_to_response('mirror/index.html', context_instance=
                               RequestContext(request))
 
 @login_required
@@ -45,7 +45,7 @@ def uptake(request):
                      'use_sorttable': True,
                     })
 
-    return render_to_response('uptake.html', data, context_instance =
+    return render_to_response('mirror/uptake.html', data, context_instance =
                               RequestContext(request))
 
 @login_required
@@ -70,6 +70,6 @@ def lstats(request):
                      'headers': list(sort_headers.headers()),
                      'use_sorttable': True,
                     })
-    return render_to_response('lstats.html', data, context_instance =
+    return render_to_response('mirror/lstats.html', data, context_instance =
                               RequestContext(request))
 
