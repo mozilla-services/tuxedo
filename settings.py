@@ -79,6 +79,9 @@ AUTHENTICATION_BACKENDS = (
     'users.auth.backend.ConversionBackend'
 )
 
+# user profile data
+AUTH_PROFILE_MODULE = 'users.UserProfile'
+
 ROOT_URLCONF = 'tuxedo.urls'
 
 TEMPLATE_DIRS = (
