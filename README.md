@@ -9,11 +9,27 @@ Frederic Wenzel (fwenzel@mozilla.com).
 
 Getting Started
 ---------------
+
+### Python
+You need Python 2.6. Also, you probably want to run this application in a
+[virtualenv][virtualenv] environment.
+
+Run ``easy_install pip`` followed by ``pip install -r requirements.txt``
+to install the required Python libraries.
+
+[virtualenv]: http://pypi.python.org/pypi/virtualenv
+
+### Initial Database Setup
 If you're migrating from an older version of Bouncer, you want to run
 ``sql/incremental.sql`` to bring the DB up to date, followed by a
 ``python manage.py syncdb`` to create Django-specific tables.
 
 If you're installing a new copy, just the ``...syncdb`` command should do.
+
+### Database Migrations
+I am using [South](http://south.aeracode.org/) to keep track of database
+migrations. ``./manage.py syncdb`` may advise you to run ``./manage.py
+migrate``. Do it.
 
 Why "tuxedo"?
 -------------
