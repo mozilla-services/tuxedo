@@ -1,5 +1,6 @@
-from mirror.models import Mirror, OS, Product, User, Location
 from django.contrib import admin
+
+from mirror.models import Mirror, OS, Product, Location
 
 
 class LocationAdmin(admin.ModelAdmin):
@@ -36,9 +37,4 @@ class ProductAdmin(admin.ModelAdmin):
     mark_for_checknow.short_description = "Check selected projects now with " \
                                           "Sentry"
 admin.site.register(Product, ProductAdmin)
-
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'firstname', 'lastname', 'email', 'converted')
-    ordering = ('username',)
-admin.site.register(User, UserAdmin)
 
