@@ -11,18 +11,19 @@
 <body>
 <div id="header">
 	<div id="logo">
-		<h1><a href="{% url mirror.views.index %}"><span>bouncer</span> mirror management</a></h1>
+		<h1><a href="{% url mirror.views.index %}"><span>Bouncer</span> Mirror Management</a></h1>
 	</div>
 	<div id="menu">
 		<ul>
-			<li class="first"><a href="{% url mirror.views.index %}" accesskey="1" title="">Statistics</a></li>
+			<li class="first"><a href="{% url mirror.views.index %}">Statistics</a></li>
             {% if user.is_staff %}
-			<li><a href="{% url admin:index %}" accesskey="2" title="">Admin</a></li>
+			<li><a href="{% url admin:index %}">Admin</a></li>
             {% endif %}
             {% if user.is_authenticated %}
-			<li><a href="{% url django.contrib.auth.views.logout %}" accesskey="3" title="">Log out</a></li>
+			<li><a href="{% url users.views.profile %}">User Profile</a></li>
+			<li><a href="{% url django.contrib.auth.views.logout %}">Log out</a></li>
             {% else %}
-			<li><a href="{% url django.contrib.auth.views.login %}" accesskey="3" title="">Log in</a></li>
+			<li><a href="{% url django.contrib.auth.views.login %}">Log in</a></li>
             {% endif %}
 		</ul>
 	</div>

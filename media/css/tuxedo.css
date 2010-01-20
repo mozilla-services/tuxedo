@@ -189,8 +189,19 @@ img {
 }
 
 /* Forms */
+table.formtable th {
+    text-align: left;
+    padding-right: 1em;
+}
 button {
     font-size: 14px;
+}
+.errorlist,
+.error {
+    color: red;
+}
+.success {
+    color: green;
 }
 
 /* Lists */

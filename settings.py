@@ -79,8 +79,9 @@ AUTHENTICATION_BACKENDS = (
     'users.auth.backend.ConversionBackend'
 )
 
-# user profile data
+# user profile stuff
 AUTH_PROFILE_MODULE = 'users.UserProfile'
+LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'tuxedo.urls'
 

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit User Profile</h2>
+
+{% if success %}
+    <p class="success">Your user profile was successfully saved.</p>
+{% else %}
+    {% if django_user_form.errors or user_profile_form.errors %}
+    <p class="error">There are errors in this form. Please correct them and try again.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url users.views.profile %}">
+<table class="formtable">
+{{ django_user_form.as_table }}
+{{ user_profile_form.as_table }}
+</table>
+<button type="submit">Save</button>
+</form>
+
+{% endblock %}
+

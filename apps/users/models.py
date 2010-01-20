@@ -33,11 +33,13 @@ class UserProfile(models.Model):
     user = models.ForeignKey(DjangoUser, unique=True)
 
     # mirror contact info (bug 408677)
-    address = models.TextField(verbose_name='Mailing Address')
-    phone_number = models.CharField(max_length=32, verbose_name='Phone Number')
+    address = models.TextField(verbose_name='Mailing Address', blank=True)
+    phone_number = models.CharField(max_length=32, verbose_name='Phone Number',
+                                    blank=True)
     ircnick = models.CharField(max_length=32, verbose_name='IRC Nick',
-                               help_text='Nickname on irc.mozilla.org')
-    comments = models.TextField()
+                               help_text='Nickname on irc.mozilla.org',
+                               blank=True)
+    comments = models.TextField(blank=True)
 
 
 def user_post_save(sender, instance, **kwargs):
