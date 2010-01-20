@@ -8,8 +8,7 @@ urlpatterns = patterns('',
     (r'^$', 'mirror.views.index'),
     (r'^stats/', include('mirror.urls')),
     (r'^admin/', include(admin.site.urls)),
-    (r'^accounts/login/', 'django.contrib.auth.views.login'),
-    (r'^accounts/logout/', 'django.contrib.auth.views.logout'),
+    (r'^accounts/', include('users.urls')),
     (r'^api/', include('api.urls')),
 )
 
