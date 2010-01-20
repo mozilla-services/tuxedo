@@ -16,9 +16,13 @@
 	<div id="menu">
 		<ul>
 			<li class="first"><a href="{% url mirror.views.index %}" accesskey="1" title="">Statistics</a></li>
+            {% if user.is_staff %}
 			<li><a href="{% url admin:index %}" accesskey="2" title="">Admin</a></li>
+            {% endif %}
             {% if user.is_authenticated %}
-			<li><a href="{% url admin:logout %}" accesskey="3" title="">Log out</a></li>
+			<li><a href="{% url django.contrib.auth.views.logout %}" accesskey="3" title="">Log out</a></li>
+            {% else %}
+			<li><a href="{% url django.contrib.auth.views.login %}" accesskey="3" title="">Log in</a></li>
             {% endif %}
 		</ul>
 	</div>
