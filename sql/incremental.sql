@@ -76,7 +76,7 @@ ALTER TABLE `geoip_regions`  DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ALTER TABLE `geoip_regions` CHANGE `name` `name` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
 ALTER TABLE `mirror_locations`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ALTER TABLE `mirror_locations` CHANGE `path` `path` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
-ALTER TABLE `mirror_locations_mirror_map`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+ALTER TABLE `mirror_location_mirror_map`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ALTER TABLE `mirror_mirrors`  ENGINE = InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ALTER TABLE `mirror_mirrors` CHANGE `name` `name` VARCHAR( 64 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
 CHANGE `baseurl` `baseurl` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
@@ -90,4 +90,23 @@ ALTER TABLE `mirror_users` CHANGE `password` `password` VARCHAR( 32 ) CHARACTER 
 ALTER TABLE `mirror_users` CHANGE `user_firstname` `user_firstname` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
 ALTER TABLE `mirror_users` CHANGE `user_lastname` `user_lastname` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
 ALTER TABLE `mirror_users` CHANGE `user_email` `user_email` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '';
+
+-- some more key fixing fun: Django IDs are INT(11), not UNSIGNED
+ALTER TABLE `mirror_mirrors` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `geoip_mirror_region_map` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
+CHANGE `mirror_id` `mirror_id` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `region_id` `region_id` INT( 11 ) NOT NULL DEFAULT '0';
+
+ALTER TABLE `geoip_country_to_region` DROP FOREIGN KEY `geoip_country_to_region_ibfk_1`  ;
+ALTER TABLE `geoip_country_to_region` CHANGE `region_id` `region_id` INT( 11 ) NULL DEFAULT NULL ;
+ALTER TABLE `geoip_regions` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `geoip_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `geoip_regions` (`id`) ON DELETE SET NULL ;
+
+ALTER TABLE `mirror_locations` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
+CHANGE `product_id` `product_id` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `os_id` `os_id` INT( 11 ) NOT NULL DEFAULT '0';
+ALTER TABLE `mirror_location_mirror_map` CHANGE `location_id` `location_id` INT( 11 ) NOT NULL DEFAULT '0',
+CHANGE `mirror_id` `mirror_id` INT( 11 ) NOT NULL DEFAULT '0';
+ALTER TABLE `mirror_products` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `mirror_users` CHANGE `user_id` `user_id` INT( 11 ) NOT NULL AUTO_INCREMENT ;
 

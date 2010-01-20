@@ -1,4 +1,7 @@
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils.html import escape
 
 from lib.product_details import LocaleDetails
 
@@ -17,12 +20,24 @@ class Mirror(models.Model):
                                  db_index=True)
     regions = models.ManyToManyField('geoip.Region',
                                      db_table='geoip_mirror_region_map')
+    contacts = models.ManyToManyField(User, verbose_name="Admin Contact")
 
     class Meta:
         db_table = 'mirror_mirrors'
 
     def __unicode__(self):
         return self.name
+
+    def admin_contacts(self):
+        """get the administrative contacts for this mirror as HTML"""
+        contacts = self.contacts.order_by('last_name', 'first_name')
+        contacts = ['<a href="%s">%s</a>' % (
+                        reverse('admin:auth_user_change', args=(c.pk,)),
+                        escape('%s: %s' % (c.get_full_name() or c.username,
+                                           c.email))
+                    ) for c in contacts]
+        return "<br/>".join(contacts) or ''
+    admin_contacts.allow_tags = True
 
 
 class OS(models.Model):
