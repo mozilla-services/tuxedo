@@ -7,7 +7,7 @@ from django.template import RequestContext
 
 from mirror.models import Location, OS, Product
 
-from decorators import logged_in_or_basicauth
+from decorators import is_staff_or_basicauth
 
 
 HTTP_AUTH_REALM = 'Bouncer API'
@@ -33,7 +33,7 @@ def docs(request, command):
     return render_to_response('api/docs/%s.html' % command, context_instance=
                               RequestContext(request))
 
-@logged_in_or_basicauth(HTTP_AUTH_REALM)
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
 def uptake(request):
     """ping mirror uptake"""
     product = request.GET.get('product', None)

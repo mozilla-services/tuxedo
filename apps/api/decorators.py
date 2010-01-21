@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 
 
-# basic HTTP auth decorators from: http://www.djangosnippets.org/snippets/243/
+# basic HTTP auth decorators based on: http://www.djangosnippets.org/snippets/243/
 def logged_in_or_basicauth(realm = ""):
     """
     A simple decorator that requires a user to be logged in. If they are not
@@ -64,6 +64,16 @@ def has_perm_or_basicauth(perm, realm = ""):
         return wrapper
     return view_decorator
 
+def is_staff_or_basicauth(realm = ""):
+    """Checks if the user is a staff member, displays basic auth otherwise."""
+    def view_decorator(func):
+        def wrapper(request, *args, **kwargs):
+            return _view_or_basicauth(func, request,
+                                      lambda u: u.is_staff,
+                                      realm, *args, **kwargs)
+        return wrapper
+    return view_decorator
+
 def _view_or_basicauth(view, request, test_func, realm = "", *args, **kwargs):
     """
     This is a helper function used by both 'logged_in_or_basicauth' and
@@ -87,7 +97,7 @@ def _view_or_basicauth(view, request, test_func, realm = "", *args, **kwargs):
                 uname, passwd = base64.b64decode(auth[1]).split(':')
                 user = authenticate(username=uname, password=passwd)
                 if user is not None:
-                    if user.is_active:
+                    if user.is_active and test_func(user):
                         login(request, user)
                         request.user = user
                         return view(request, *args, **kwargs)
