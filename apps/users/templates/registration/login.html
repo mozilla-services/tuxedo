@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h2>Login</h2>
+<h2>{% block title %}Login{% endblock %}</h2>
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>

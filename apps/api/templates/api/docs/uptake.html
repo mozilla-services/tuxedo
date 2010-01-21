@@ -1,10 +1,12 @@
 {% extends "api/base_doc.html" %}
 {% load markup %}
 
+{% block title %}API Documentation: uptake{% endblock %}
+
 {% block doc_text %}
 {% filter markdown %}
 uptake
-======
+------
 Query mirror uptake. Needs HTTP authentication.
 
 Syntax:
