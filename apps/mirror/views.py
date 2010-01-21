@@ -1,10 +1,12 @@
+import hashlib
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from lib.sort_headers import SortHeaders
-from models import Location, LocationMirrorMap
+from models import Location, LocationMirrorMap, Mirror
 from forms import UptakeForm
 
 
@@ -22,9 +24,27 @@ LOCATION_STATS_LIST_HEADERS = (
 )
 
 def index(request):
-    """Main login/index page"""
-    return render_to_response('mirror/index.html', context_instance=
+    """Main index/summary page"""
+    # generic front page
+    if not request.user.is_authenticated():
+        return render_to_response('mirror/index.html', context_instance=
+                                  RequestContext(request))
+
+    # personal summary page
+    data = {}
+
+    # gravatar
+    emailhash = hashlib.md5(request.user.email).hexdigest()
+    data['gravatar'] = 'http://www.gravatar.com/avatar/%s.jpg?'\
+                       'd=identicon' % emailhash
+
+    # mirror data
+    mirrors = Mirror.objects.filter(contacts=request.user).order_by('name')
+    data['mirrors'] = mirrors
+
+    return render_to_response('mirror/summary.html', data, context_instance=
                               RequestContext(request))
+
 
 @staff_member_required
 def uptake(request):

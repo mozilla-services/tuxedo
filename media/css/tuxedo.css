@@ -34,6 +34,10 @@ h3 {
 	border-bottom: 1px solid #F4F4F4;
 }
 
+h4 {
+    font-size: 16px;
+}
+
 p, ol, ul, blockquote {
 	line-height: 24px;
 }
@@ -250,3 +254,20 @@ table.datalist tr.odd {
 #uptake-form #id_p {
     height: 10em;
 }
+
+/* front page */
+#front .gravatar {
+    float: left;
+}
+#front h2 {
+    margin-bottom: 1em;
+}
+#front #userinfo {
+    margin-left: 100px;
+    margin-bottom: 20px;
+}
+#front #userinfo p {
+    line-height: 16px;
+    margin: 10px 0;
+}
+

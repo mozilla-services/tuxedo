@@ -15,15 +15,14 @@
 	</div>
 	<div id="menu">
 		<ul>
-			<li class="first"><a href="{% url mirror.views.index %}">Statistics</a></li>
+            {% if user.is_authenticated %}
+			<li class="first"><a href="{% url users.views.profile %}">User Profile</a></li>
             {% if user.is_staff %}
 			<li><a href="{% url admin:index %}">Admin</a></li>
             {% endif %}
-            {% if user.is_authenticated %}
-			<li><a href="{% url users.views.profile %}">User Profile</a></li>
 			<li><a href="{% url django.contrib.auth.views.logout %}">Log out</a></li>
             {% else %}
-			<li><a href="{% url django.contrib.auth.views.login %}">Log in</a></li>
+			<li class="first"><a href="{% url django.contrib.auth.views.login %}">Log in</a></li>
             {% endif %}
 		</ul>
 	</div>
