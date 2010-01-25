@@ -45,7 +45,8 @@ Language and Product Details
 ----------------------------
 The list of known languages is provided by ``languages.json`` in the directory
 ``inc/product-details/json``. The source of the data is the [Mozilla
-product-details library]. Feel free to update the JSON files from there.
+product-details library][prod-details]. Feel free to update the JSON files
+from there.
 
 [prod-details]: http://svn.mozilla.org/libs/product-details/
 
