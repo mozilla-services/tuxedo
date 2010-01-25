@@ -41,6 +41,14 @@ Finally, run the following steps to initialize Django and South:
     ./manage.py migrate mirror 0001 --fake   # initialize South
     ./manage.py migrate   # apply all existing migrations
 
+Language and Product Details
+----------------------------
+The list of known languages is provided by ``languages.json`` in the directory
+``inc/product-details/json``. The source of the data is the [Mozilla
+product-details library]. Feel free to update the JSON files from there.
+
+[prod-details]: http://svn.mozilla.org/libs/product-details/
+
 Why "tuxedo"?
 -------------
 In my silly mind, I chose to interpret "Bouncer" as "doorman" and subsequently
