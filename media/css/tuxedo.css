@@ -198,6 +198,7 @@ table.formtable th {
     padding-right: 1em;
 }
 button {
+    margin-top: 1em;
     font-size: 14px;
 }
 .errorlist,
