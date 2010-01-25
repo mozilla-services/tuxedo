@@ -20,16 +20,26 @@ to install the required Python libraries.
 [virtualenv]: http://pypi.python.org/pypi/virtualenv
 
 ### Initial Database Setup
-If you're migrating from an older version of Bouncer, you want to run
-``sql/incremental.sql`` to bring the DB up to date, followed by a
-``python manage.py syncdb`` to create Django-specific tables.
-
-If you're installing a new copy, just the ``...syncdb`` command should do.
+If you're installing a new copy of Bouncer, run ``./manage.py syncdb``
+followed by ``./manage.py migrate`` (see "Database Migrations" below).
 
 ### Database Migrations
 I am using [South](http://south.aeracode.org/) to keep track of database
-migrations. ``./manage.py syncdb`` may advise you to run ``./manage.py
-migrate``. Do it.
+migrations. ``./manage.py migrate`` will apply these migrations when
+necessary.
+
+### Upgrading an older version of Bouncer
+If you are upgrading from an earlier version of Bouncer that isn't locale-
+aware yet, apply ``sql/bouncer-add-lang.sql`` first.
+
+Then, apply ``sql/incremental.sql`` to bring the DB up to date.
+
+Finally, run the following steps to initialize Django and South:
+
+    ./manage.py syncdb   # initialize django
+    # (answer "no" to the "add a new admin?" question)
+    ./manage.py migrate mirror 0001 --fake   # initialize South
+    ./manage.py migrate   # apply all existing migrations
 
 Why "tuxedo"?
 -------------
