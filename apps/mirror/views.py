@@ -114,7 +114,7 @@ def memcache_status(request):
 
     # get all memcached URIs
     m = re.match(
-        "memcached://(.*)/$", settings.CACHE_BACKEND
+        "memcached://([^/]*)/?$", settings.CACHE_BACKEND
     )
     if m:
         servers = m.group(1).split(';')
