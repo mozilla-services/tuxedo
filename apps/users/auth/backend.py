@@ -13,9 +13,11 @@ class ConversionBackend(ModelBackend):
     @transaction.commit_on_success
     def authenticate(self, username=None, password=None):
         pwhash = hashlib.md5(password).hexdigest()
-        olduser = LegacyUser.objects.get(username=username, password=pwhash,
-                                         converted=False)
-        if not olduser:
+        try:
+            olduser = LegacyUser.objects.get(username=username,
+                                             password=pwhash,
+                                             converted=False)
+        except LegacyUser.DoesNotExist:
             return None
 
         # mark old user as converted
