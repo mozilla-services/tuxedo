@@ -1,3 +1,0 @@
-[submodule "inc/product-details"]
-	path = inc/product-details
-	url = git://github.com/fwenzel/tuxedo.git
