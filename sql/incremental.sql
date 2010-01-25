@@ -24,7 +24,6 @@ UPDATE `mirror_products` SET product_active = 1 WHERE product_active = 2;
 ALTER TABLE `mirror_country_to_region` CHANGE `region_id` `region_id` INT( 10 ) UNSIGNED NULL DEFAULT NULL;
 UPDATE `mirror_country_to_region` SET region_id = NULL WHERE region_id = 0;
 ALTER TABLE `mirror_regions`  ENGINE =  InnoDB;
-ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `mirror_regions` (`region_id`) ON DELETE SET NULL ;
 
 -- converted users
 ALTER TABLE `mirror_users` ADD `converted` TINYINT NOT NULL DEFAULT '0';
@@ -54,12 +53,10 @@ CHANGE `product_priority` `priority` INT( 11 ) NOT NULL DEFAULT '0',
 CHANGE `product_count` `count` BIGINT( 20 ) UNSIGNED NOT NULL DEFAULT '0',
 CHANGE `product_active` `active` TINYINT( 4 ) NOT NULL DEFAULT '1',
 CHANGE `product_checknow` `checknow` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '1';
-ALTER TABLE `mirror_country_to_region` DROP FOREIGN KEY `mirror_country_to_region_ibfk_1`  ;
 ALTER TABLE `mirror_regions` CHANGE `region_id` `id` INT( 10 ) UNSIGNED NOT NULL AUTO_INCREMENT ,
 CHANGE `region_name` `name` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '',
 CHANGE `region_priority` `priority` INT( 11 ) NOT NULL DEFAULT '0',
 CHANGE `region_throttle` `throttle` INT( 11 ) NOT NULL ;
-ALTER TABLE `mirror_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `mirror_regions` (`id`) ON DELETE SET NULL ;
 RENAME TABLE `mirror_mirror_region_map`   TO `geoip_mirror_region_map`  ;
 RENAME TABLE `mirror_country_to_region`   TO `geoip_country_to_region`  ;
 RENAME TABLE `mirror_ip_to_country`   TO `geoip_ip_to_country` ;
@@ -97,10 +94,9 @@ ALTER TABLE `geoip_mirror_region_map` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_I
 CHANGE `mirror_id` `mirror_id` INT( 11 ) NOT NULL DEFAULT '0',
 CHANGE `region_id` `region_id` INT( 11 ) NOT NULL DEFAULT '0';
 
-ALTER TABLE `geoip_country_to_region` DROP FOREIGN KEY `geoip_country_to_region_ibfk_1`  ;
 ALTER TABLE `geoip_country_to_region` CHANGE `region_id` `region_id` INT( 11 ) NULL DEFAULT NULL ;
 ALTER TABLE `geoip_regions` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT;
-ALTER TABLE `geoip_country_to_region` ADD FOREIGN KEY ( `region_id` ) REFERENCES `geoip_regions` (`id`) ON DELETE SET NULL ;
+ALTER TABLE `geoip_country_to_region` ADD FOREIGN KEY `fk_region` ( `region_id` ) REFERENCES `geoip_regions` (`id`) ON DELETE SET NULL ;
 
 ALTER TABLE `mirror_locations` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
 CHANGE `product_id` `product_id` INT( 11 ) NOT NULL DEFAULT '0',
