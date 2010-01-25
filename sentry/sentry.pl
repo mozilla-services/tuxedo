@@ -119,6 +119,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     # parse domain out of the mirror's base uri
     my $domain = URI->new($mirror->{baseurl})->authority;
+    log_this "Checking mirror $domain ...\n";
 
     # test the domain, and mark the mirror as invalid on failure to resolve
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
