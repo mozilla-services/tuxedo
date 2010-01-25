@@ -1,7 +1,11 @@
+import datetime
 import hashlib
+import re
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+import django.http
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -93,4 +97,56 @@ def lstats(request):
                     })
     return render_to_response('mirror/lstats.html', data, context_instance =
                               RequestContext(request))
+
+
+@staff_member_required
+def memcache_status(request):
+    """
+    display memcache server info
+    based on: http://effbot.org/zone/django-memcached-view.htm
+    """
+    try:
+        import memcache
+    except ImportError:
+        raise http.Http404
+
+    stats = {}
+
+    # get all memcached URIs
+    m = re.match(
+        "memcached://(.*)/$", settings.CACHE_BACKEND
+    )
+    if m:
+        servers = m.group(1).split(';')
+        if not servers:
+            raise http.Http404
+
+        for server in servers:
+            host = memcache._Host(server)
+            host.connect()
+            host.send_cmd("stats")
+
+            stats[server] = {}
+            while True:
+                line = host.readline().split(None, 2)
+                if line[0] == "END":
+                    break
+                stat, key, value = line
+                try:
+                    # convert to native type, if possible
+                    value = int(value)
+                    if key == "uptime":
+                        value = datetime.timedelta(seconds=value)
+                    elif key == "time":
+                        value = datetime.datetime.fromtimestamp(value)
+                except ValueError:
+                    pass
+                stats[server][key] = value
+
+            stats[server]['hit_rate'] = (100 * stats[server]['get_hits'] /
+                                         stats[server]['cmd_get'])
+            host.close_socket()
+
+    return render_to_response('stats/memcached_status.html', {'stats': stats},
+                              context_instance = RequestContext(request))
 

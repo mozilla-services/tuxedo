@@ -4,6 +4,4 @@ ipaddr==2.0.0
 Markdown==2.0.3
 texttable==0.7.0
 South==0.6.2
-
--e git://github.com/robhudson/django-debug-toolbar.git#egg=django_debug_toolbar
-ipython==0.10
+python-memcached==1.45

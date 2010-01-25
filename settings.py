@@ -26,6 +26,10 @@ if (DATABASE_ENGINE == 'mysql'):
         "init_command": "SET storage_engine=INNODB",
     }
 
+# Cache Backend. Set up memcache here. Examples:
+#CACHE_BACKEND = 'memcached://172.19.26.240:11211;172.19.26.242:11211/'
+#CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -58,7 +62,7 @@ MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '2i774b=2^c3#loh-!*hl10%g9fn@r1scb#ggpantuu7dybu52q'
+SECRET_KEY = '### change me ###'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
