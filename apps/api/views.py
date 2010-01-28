@@ -7,7 +7,7 @@ from django.template import RequestContext
 
 from mirror.models import Location, OS, Product
 
-from decorators import is_staff_or_basicauth
+from decorators import is_staff_or_basicauth, logged_in_or_basicauth
 
 
 HTTP_AUTH_REALM = 'Bouncer API'
@@ -57,8 +57,22 @@ def uptake(request):
 
     uptake = Location.get_mirror_uptake(products=pids, oses=osids)
 
-    xml = XMLRenderer().render_uptake(uptake)
-    return HttpResponse(xml.toxml(encoding='utf-8'), mimetype='text/xml')
+    xml = XMLRenderer()
+    xml.prepare_uptake(uptake)
+    return HttpResponse(xml.toxml(), mimetype='text/xml')
+
+
+@logged_in_or_basicauth(HTTP_AUTH_REALM)
+def product_show(request):
+    product = request.GET.get('product', None)
+    if product:
+        products = Product.objects.filter(name__icontains=product) \
+            .order_by('name')
+    else:
+        products = Product.objects.order_by('name')
+    xml = XMLRenderer()
+    xml.prepare_products(products)
+    return HttpResponse(xml.toxml(), mimetype='text/xml')
 
 
 class XMLRenderer(object):
@@ -67,7 +81,21 @@ class XMLRenderer(object):
     def __init__(self):
         self.doc = xml.dom.minidom.Document()
 
-    def render_uptake(self, uptake):
+    def toxml(self):
+        return self.doc.toxml(encoding='utf-8')
+
+    def prepare_products(self, products):
+        """Product List"""
+        root = self.doc.createElement('products')
+        self.doc.appendChild(root)
+        for product in products:
+            item = self.doc.createElement('product')
+            item.appendChild(self.doc.createTextNode(str(product.name)))
+            item.setAttribute('id', str(product.id))
+            root.appendChild(item)
+
+    def prepare_uptake(self, uptake):
+        """Product uptake"""
         content_map = {'product': 'location__product__name',
                        'os': 'location__os__name',
                        'available': 'available',
@@ -82,6 +110,4 @@ class XMLRenderer(object):
                 elem.appendChild(self.doc.createTextNode(str(row[value])))
                 item.appendChild(elem)
             root.appendChild(item)
-
-        return self.doc
 
