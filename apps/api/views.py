@@ -7,7 +7,7 @@ from django.template import RequestContext
 
 from mirror.models import Location, OS, Product
 
-from decorators import is_staff_or_basicauth, logged_in_or_basicauth
+from .decorators import is_staff_or_basicauth, logged_in_or_basicauth
 
 
 HTTP_AUTH_REALM = 'Bouncer API'
@@ -59,7 +59,7 @@ def uptake(request):
 
     xml = XMLRenderer()
     xml.prepare_uptake(uptake)
-    return HttpResponse(xml.toxml(), mimetype='text/xml')
+    return xml.render()
 
 
 @logged_in_or_basicauth(HTTP_AUTH_REALM)
@@ -72,7 +72,32 @@ def product_show(request):
         products = Product.objects.order_by('name')
     xml = XMLRenderer()
     xml.prepare_products(products)
-    return HttpResponse(xml.toxml(), mimetype='text/xml')
+    return xml.render()
+
+
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def product_add(request):
+    """
+    Add a new product to the DB
+    Will return the single product on success, or if it already existed.
+    """
+    xml = XMLRenderer()
+
+    prodname = request.POST.get('product', None)
+    if not prodname:
+        return xml.error('Cannot add an empty product name')
+    products = Product.objects.filter(name__exact=prodname)
+    if not products:
+        try:
+            prod = Product(name=prodname)
+            prod.save()
+        except Exception, e:
+            return xml.error(e)
+        products = Product.objects.filter(pk=prod.pk)
+
+    # success: return the single product to the user
+    xml.prepare_products(products)
+    return xml.render()
 
 
 class XMLRenderer(object):
@@ -83,6 +108,10 @@ class XMLRenderer(object):
 
     def toxml(self):
         return self.doc.toxml(encoding='utf-8')
+
+    def render(self, status=200):
+        """serve the XML to the user"""
+        return HttpResponse(self.toxml(), mimetype='text/xml', status=status)
 
     def prepare_products(self, products):
         """Product List"""
@@ -110,4 +139,12 @@ class XMLRenderer(object):
                 elem.appendChild(self.doc.createTextNode(str(row[value])))
                 item.appendChild(elem)
             root.appendChild(item)
+
+    def error(self, message, render=True):
+        """Prepare an error message"""
+        root = self.doc.createElement('error')
+        root.appendChild(self.doc.createTextNode(str(message)))
+        self.doc.appendChild(root)
+        if render:
+            return self.render(status=400)
 

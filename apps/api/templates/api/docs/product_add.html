@@ -1,0 +1,26 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Add a new product to the database.
+{% endblock %}
+
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
+
+{% block post_required %}
+* ``product``: Product name to add to the DB, e.g. Firefox-3.0.5
+{% endblock %}
+
+{% block example %}
+Success:
+
+    <products>
+        <product id="649">Firefox-3.7</product>
+    </products>
+
+Failure:
+
+    <error>
+        Cannot add an empty product name
+    </error>
+{% endblock %}
+
