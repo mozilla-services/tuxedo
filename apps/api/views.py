@@ -30,8 +30,9 @@ def docs(request, command):
     """Individual API docs"""
     if command not in _get_command_list():
         raise Http404
-    return render_to_response('api/docs/%s.html' % command, context_instance=
-                              RequestContext(request))
+    data = {'command': command}
+    return render_to_response('api/docs/%s.html' % command, data,
+                              context_instance=RequestContext(request))
 
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def uptake(request):

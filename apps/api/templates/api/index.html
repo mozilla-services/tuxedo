@@ -1,17 +1,16 @@
 {% extends "api/base_doc.html" %}
-{% load markup %}
 
 {% block title %}API Documentation{% endblock %}
 
 {% block doc_text %}
-{% filter markdown %}
-Bouncer API
-======
-Available commands:
-{% for command in commands %}
-* [{{ command }}]({% url api.views.docs command=command %})
-{% endfor %}
+<h1>Bouncer API</h1>
 
-{% endfilter %}
+<p>Available commands:</p>
+<ul>
+{% for command in commands %}
+    <li><a href="{% url api.views.docs command=command %}">{{ command }}</a></li>
+{% endfor %}
+</ul>
+
 {% endblock %}
 

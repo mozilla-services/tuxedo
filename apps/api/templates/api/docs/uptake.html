@@ -1,35 +1,19 @@
-{% extends "api/base_doc.html" %}
-{% load markup %}
+{% extends "api/api_doc_template.html" %}
 
-{% block title %}API Documentation: uptake{% endblock %}
+{% block description %}
+Query mirror uptake.
+{% endblock %}
 
-{% block doc_text %}
-{% filter markdown %}
-uptake
-------
-Query mirror uptake. Needs HTTP authentication.
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
 
-Syntax:
--------
-``http://.../api/uptake``
-
-Required GET Parameters:
-------------------------
+{% block get_required %}
 At least one of:
 
 * ``product``: (Part of) a product name to display the uptake for
 * ``os``: (Part of) a platform name to display the uptake for
+{% endblock %}
 
-Optional GET Parameters:
-------------------------
-*(None)*
-
-Returns:
---------
-    XML
-
-Example:
---------
+{% block example %}
     <?xml version="1.0" encoding="utf-8"?>
     <mirror_uptake>
         <item>
@@ -47,7 +31,5 @@ Example:
             </os>
         </item>
     </mirror_uptake>
-
-{% endfilter %}
 {% endblock %}
 

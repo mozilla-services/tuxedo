@@ -1,0 +1,14 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Display a list of products in the database.
+{% endblock %}
+
+{% block get_optional %}
+* ``product``: (Part of) a product name to narrow the list down to. If not
+  provided, list will contain all products.
+{% endblock %}
+
+{% block example %}
+{% endblock %}
+
