@@ -131,6 +131,28 @@ def product_delete(request):
     return xml.success('Deleted product: %s' % prod.name)
 
 
+@logged_in_or_basicauth(HTTP_AUTH_REALM)
+def location_show(request):
+    xml = XMLRenderer()
+
+    prodname = request.GET.get('product', None)
+    fuzzy = request.GET.get('fuzzy', False)
+    if not prodname:
+        return xml.error('The GET parameter product is required')
+
+    if fuzzy:
+        products = Product.objects.filter(name__icontains=prodname)
+    else:
+        products = Product.objects.filter(name__exact=prodname)
+    products = products.order_by('name')
+
+    for product in products:
+        locations = Location.objects.filter(product__exact=product)
+        xml.prepare_locations(product, locations)
+
+    return xml.render()
+
+
 class XMLRenderer(object):
     """Render API data as XML"""
 
@@ -153,6 +175,25 @@ class XMLRenderer(object):
             item.appendChild(self.doc.createTextNode(str(product.name)))
             item.setAttribute('id', str(product.id))
             root.appendChild(item)
+
+    def prepare_locations(self, product, locations):
+        """Prepare list of locations for a given product"""
+        root = self.doc.documentElement
+        if not root:
+            root = self.doc.createElement('locations')
+            self.doc.appendChild(root)
+        prodnode = self.doc.createElement('product')
+        prodnode.setAttribute('id', str(product.pk))
+        prodnode.setAttribute('name', product.name)
+        root.appendChild(prodnode)
+
+        for location in locations:
+            locnode = self.doc.createElement('location')
+            locnode.setAttribute('id', str(location.pk))
+            locnode.setAttribute('os', location.os.name)
+            locnode.setAttribute('lang', location.lang)
+            locnode.appendChild(self.doc.createTextNode(location.path))
+            prodnode.appendChild(locnode)
 
     def prepare_uptake(self, uptake):
         """Product uptake"""
