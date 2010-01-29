@@ -44,7 +44,7 @@ class OS(models.Model):
     """represents a platform, e.g., osx"""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=32, unique=True)
-    priority = models.IntegerField()
+    priority = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -79,7 +79,7 @@ class Location(models.Model):
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(max_length=255)
-    lang = models.CharField(max_length=10, unique=True,
+    lang = models.CharField(max_length=30, unique=True,
                             choices=LANG_CHOICES, verbose_name='Language')
 
     class Meta:

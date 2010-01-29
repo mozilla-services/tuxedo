@@ -1,49 +1,15 @@
 from xml.dom import minidom
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import TestCase
-from django.test.client import Client
 
 from mirror.models import Product
 
+import testcases
 
-class APITestCase(TestCase):
-    """The mother of all API tests"""
-    def setUp(self):
-        # user and login
-        username = 'john'
-        pw = 'johnpw'
-
-        self.user = User.objects.create_user(
-            username, 'lennon@thebeatles.com', pw
-        )
-        self.user.is_staff = True
-        self.user.save()
-        self.c = Client()
-        self.c.login(username=username, password=pw)
-
-    def tearDown(self):
-        self.user.delete()
 
 # TODO uptake test
 
-class ProductTest(APITestCase):
-    def setUp(self):
-        super(ProductTest, self).setUp()
-
-        # products
-        self.products = []
-        for i in range(1, 11):
-            name = 'Product-%s-%s' % (i, i%2 and 'odd' or 'even')
-            p = Product(name=name)
-            p.save()
-            self.products.append(p)
-
-    def tearDown(self):
-        super(ProductTest, self).tearDown()
-        for p in self.products:
-            p.delete()
+class ProductTest(testcases.ProductTestCase):
 
     def test_product_show_all(self):
         """Make sure all products show up"""
