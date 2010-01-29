@@ -100,6 +100,33 @@ def product_add(request):
     return xml.render()
 
 
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def product_delete(request):
+    """Remove a product from the DB"""
+    xml = XMLRenderer()
+
+    prod_id = request.POST.get('product_id', None)
+    prodname = request.POST.get('product', None)
+    if not (prod_id or prodname):
+        return xml.error('Either product_id or product is required.')
+    try:
+        if prod_id:
+            prod = Product.objects.get(pk=prod_id)
+        else:
+            prod = Product.objects.get(name=prodname)
+    except Product.DoesNotExist:
+        return xml.error('No product found.')
+    except Exception, e:
+        return xml.error(e)
+
+    try:
+        prod.delete()
+    except Exception, e:
+        return xml.error(e)
+
+    return xml.success('Deleted product: %s' % prod.name)
+
+
 class XMLRenderer(object):
     """Render API data as XML"""
 
@@ -140,11 +167,19 @@ class XMLRenderer(object):
                 item.appendChild(elem)
             root.appendChild(item)
 
+    def success(self, message, render=True):
+        """Prepare a success message"""
+        return self.message(message, type='success', render=render)
+
     def error(self, message, render=True):
         """Prepare an error message"""
-        root = self.doc.createElement('error')
+        return self.message(message, type='error', render=render, status=400)
+
+    def message(self, message, type='info', render=True, status=200):
+        """Prepare a single message"""
+        root = self.doc.createElement(type)
         root.appendChild(self.doc.createTextNode(str(message)))
         self.doc.appendChild(root)
         if render:
-            return self.render(status=400)
+            return self.render(status)
 

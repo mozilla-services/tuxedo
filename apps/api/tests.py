@@ -1,4 +1,4 @@
-from xml.dom.minidom import parseString
+from xml.dom import minidom
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -48,7 +48,7 @@ class ProductTest(APITestCase):
     def test_product_show_all(self):
         """Make sure all products show up"""
         response = self.c.get(reverse('api.views.product_show'))
-        xmldoc = parseString(response.content)
+        xmldoc = minidom.parseString(response.content)
         prods = xmldoc.getElementsByTagName('product')
         self.assertEqual(len(prods), len(self.products),
                          'need to return all products')
@@ -57,7 +57,7 @@ class ProductTest(APITestCase):
         """Make sure partial product list works"""
         response = self.c.get(reverse('api.views.product_show'),
                               {'product': 'odd'})
-        xmldoc = parseString(response.content)
+        xmldoc = minidom.parseString(response.content)
         prods = xmldoc.getElementsByTagName('product')
         self.assertEqual(len(prods), len(self.products)/2,
                          'need to return partial product list')
@@ -68,7 +68,7 @@ class ProductTest(APITestCase):
 
         response = self.c.post(reverse('api.views.product_add'),
                                {'product': new_prod})
-        xmldoc = parseString(response.content)
+        xmldoc = minidom.parseString(response.content)
 
         all_products = Product.objects.all()
         self.assertEqual(len(all_products), len(self.products)+1,
@@ -87,7 +87,7 @@ class ProductTest(APITestCase):
 
         response = self.c.post(reverse('api.views.product_add'),
                                {'product': new_prod})
-        xmldoc = parseString(response.content)
+        xmldoc = minidom.parseString(response.content)
 
         all_products = Product.objects.all()
         self.assertEquals(len(all_products), len(self.products),
@@ -99,4 +99,53 @@ class ProductTest(APITestCase):
                         'existing product id returned')
         self.assertEqual(prods[0].childNodes[0].data, new_prod,
                           'product name returned')
+
+    def test_product_delete_byname(self):
+        """Delete a product by name"""
+        response = self.c.post(reverse('api.views.product_delete'),
+                               {'product': self.products[0].name})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('success')
+        self.assertEqual(len(msg), 1, 'Delete successful')
+
+        all_products = Product.objects.all()
+        self.assertEquals(len(all_products), len(self.products)-1,
+                         'product was deleted')
+
+        response = self.c.post(reverse('api.views.product_delete'),
+                               {'product': self.products[0].name})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        self.assertEqual(len(msg), 1, 'Delete is only successful once')
+
+        all_products = Product.objects.all()
+        self.assertEquals(len(all_products), len(self.products)-1,
+                         'product was deleted only once')
+
+    def test_product_delete_byid(self):
+        """Delete a product by ID"""
+        response = self.c.post(reverse('api.views.product_delete'),
+                               {'product_id': self.products[0].pk})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('success')
+        self.assertEqual(len(msg), 1, 'Delete successful')
+
+        all_products = Product.objects.all()
+        self.assertEquals(len(all_products), len(self.products)-1,
+                         'product was deleted')
+
+        response = self.c.post(reverse('api.views.product_delete'),
+                               {'product_id': self.products[0].pk})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        self.assertEqual(len(msg), 1, 'Delete is only successful once')
+
+        all_products = Product.objects.all()
+        self.assertEquals(len(all_products), len(self.products)-1,
+                         'product was deleted only once')
+
 

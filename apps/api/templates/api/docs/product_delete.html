@@ -1,0 +1,27 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Delete a product from the database.
+
+Note: The product must not be associated with any locations.
+{% endblock %}
+
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
+
+{% block post_required %}
+One of:
+
+* ``product_id``: Database ID of product to be deleted
+* ``product``: Product name to delete, e.g. Firefox-3.0.5. Case-sensitive.
+{% endblock %}
+
+{% block example %}
+Success:
+
+    <success>Deleted product: Product-1-odd</success>
+
+Failure:
+
+    <error>Either product_id or product is required.</error>
+{% endblock %}
+
