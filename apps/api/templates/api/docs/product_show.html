@@ -7,6 +7,8 @@ Display a list of products in the database.
 {% block get_optional %}
 * ``product``: (Part of) a product name to narrow the list down to. If not
   provided, list will contain all products.
+* ``fuzzy``: If not empty/undefined, name search will be case-insensitive.
+  Defaults to off (exact name match).
 {% endblock %}
 
 {% block example %}

@@ -56,11 +56,17 @@ class ProductTest(APITestCase):
     def test_product_show_partial(self):
         """Make sure partial product list works"""
         response = self.c.get(reverse('api.views.product_show'),
-                              {'product': 'odd'})
+                              {'product': 'odd', 'fuzzy': True})
         xmldoc = minidom.parseString(response.content)
         prods = xmldoc.getElementsByTagName('product')
         self.assertEqual(len(prods), len(self.products)/2,
                          'need to return partial product list')
+
+        response = self.c.get(reverse('api.views.product_show'),
+                              {'product': 'odd'})
+        xmldoc = minidom.parseString(response.content)
+        prods = xmldoc.getElementsByTagName('product')
+        self.assertEqual(len(prods), 0, 'exact name matching of product names')
 
     def test_product_add_new(self):
         """Add a new product through the API"""

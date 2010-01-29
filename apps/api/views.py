@@ -1,5 +1,5 @@
 import os
-import xml.dom.minidom
+from xml.dom import minidom
 
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
@@ -65,11 +65,15 @@ def uptake(request):
 @logged_in_or_basicauth(HTTP_AUTH_REALM)
 def product_show(request):
     product = request.GET.get('product', None)
+    fuzzy = request.GET.get('fuzzy', False)
     if product:
-        products = Product.objects.filter(name__icontains=product) \
-            .order_by('name')
+        if fuzzy:
+            products = Product.objects.filter(name__icontains=product)
+        else:
+            products = Product.objects.filter(name__exact=product)
     else:
-        products = Product.objects.order_by('name')
+        products = Product.objects
+    products = products.order_by('name')
     xml = XMLRenderer()
     xml.prepare_products(products)
     return xml.render()
@@ -131,7 +135,7 @@ class XMLRenderer(object):
     """Render API data as XML"""
 
     def __init__(self):
-        self.doc = xml.dom.minidom.Document()
+        self.doc = minidom.Document()
 
     def toxml(self):
         return self.doc.toxml(encoding='utf-8')
