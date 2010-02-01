@@ -79,8 +79,8 @@ class Location(models.Model):
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(max_length=255)
-    lang = models.CharField(max_length=30, unique=True,
-                            choices=LANG_CHOICES, verbose_name='Language')
+    lang = models.CharField(max_length=30, null=True, choices=LANG_CHOICES,
+                            verbose_name='Language')
 
     class Meta:
         db_table = 'mirror_locations'

@@ -5,6 +5,7 @@ urlpatterns = patterns('',
     (r'^docs/(?P<command>\w+)/$', 'api.views.docs'),
 
     (r'^location_show/$', 'api.views.location_show'),
+    (r'^location_add/$', 'api.views.location_add'),
     (r'^product_show/$', 'api.views.product_show'),
     (r'^product_add/$', 'api.views.product_add'),
     (r'^product_delete/$', 'api.views.product_delete'),

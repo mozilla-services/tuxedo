@@ -22,8 +22,6 @@ class APITestCase(test.TestCase):
         self.c = test.client.Client()
         self.c.login(username=username, password=pw)
 
-    def tearDown(self):
-        self.user.delete()
 
 class ProductTestCase(APITestCase):
     """TestCase publishing some default products"""
@@ -39,10 +37,6 @@ class ProductTestCase(APITestCase):
             p.save()
             self.products.append(p)
 
-    def tearDown(self):
-        for p in self.products:
-            p.delete()
-        super(ProductTestCase, self).tearDown()
 
 class LocationTestCase(ProductTestCase):
     """TestCase publishing some default locations"""
@@ -50,7 +44,8 @@ class LocationTestCase(ProductTestCase):
     def setUp(self):
         super(LocationTestCase, self).setUp()
 
-        locales = LocaleDetails().get_locale_codes()
+        self.locales = LocaleDetails().get_locale_codes()
+        locales = self.locales[:]
 
         # OSes
         for os in ['win', 'osx', 'linux']:
@@ -71,9 +66,4 @@ class LocationTestCase(ProductTestCase):
                 loc.save()
 
                 self.locations[p.name].append(loc)
-
-    def tearDown(self):
-        Location.objects.all().delete()
-        OS.objects.all().delete()
-        super(LocationTestCase, self).tearDown()
 

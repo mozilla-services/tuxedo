@@ -1,8 +1,9 @@
+import random
 from xml.dom import minidom
 
 from django.core.urlresolvers import reverse
 
-from mirror.models import Location
+from mirror.models import Location, OS
 
 import testcases
 
@@ -37,4 +38,40 @@ class LocationTest(testcases.LocationTestCase):
             locations = prod.getElementsByTagName('location')
             self.assertEqual(len(locations), len(self.locations[prodname]),
                              'return all locations for this product')
+
+    def test_location_add_new(self):
+        """Add a new location through the API"""
+        myproduct = self.products[0]
+        myos = OS.objects.get(name='win')
+        mypath = '/abc/def/file.bin'
+        mylang = random.choice(self.locales + [''])
+
+        response = self.c.post(reverse('api.views.location_add'),
+                               {'product': myproduct.name,
+                                'os': myos.name,
+                                'path': mypath,
+                                'lang': mylang,
+                               })
+        xmldoc = minidom.parseString(response.content)
+        prod = xmldoc.getElementsByTagName('product')
+        loc = prod[0].getElementsByTagName('location')
+
+        self.assertEqual(prod[0].getAttribute('name'), myproduct.name,
+                         'chosen product returned')
+        self.assertTrue(int(loc[0].getAttribute('id')) > 0,
+                        'new location id returned')
+        self.assertEqual(loc[0].getAttribute('lang'), mylang,
+                         'chosen language returned')
+        self.assertEqual(loc[0].getAttribute('os'), myos.name,
+                         'chosen os returned')
+        self.assertEqual(loc[0].childNodes[0].data, mypath,
+                        'location path returned')
+
+        try:
+            new_location = Location.objects.get(product=myproduct,
+                                                os=myos,
+                                                lang=mylang)
+        except Location.DoesNotExist:
+            new_location = None
+        self.assert_(new_location, 'new location was added to DB')
 

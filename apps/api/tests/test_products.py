@@ -44,7 +44,7 @@ class ProductTest(testcases.ProductTestCase):
 
         all_products = Product.objects.all()
         self.assertEqual(len(all_products), len(self.products)+1,
-                        'new product as added')
+                        'new product was added')
 
         prods = xmldoc.getElementsByTagName('product')
         self.assertEqual(len(prods), 1, 'one product added and returned')

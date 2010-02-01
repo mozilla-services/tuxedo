@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from lib.product_details import LocaleDetails
 from mirror.models import Location, OS, Product
 
 from .decorators import is_staff_or_basicauth, logged_in_or_basicauth
@@ -31,6 +32,15 @@ def docs(request, command):
     if command not in _get_command_list():
         raise Http404
     data = {'command': command}
+    
+    # XXX special cases are ugly
+    if command == 'location_add':
+        langs = LocaleDetails().get_locale_codes()
+        oses = OS.objects.order_by('name')
+        os_list = [os.name for os in oses]
+        data.update({'languages': langs,
+                     'oses': os_list})
+
     return render_to_response('api/docs/%s.html' % command, data,
                               context_instance=RequestContext(request))
 
@@ -153,6 +163,50 @@ def location_show(request):
     return xml.render()
 
 
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def location_add(request):
+    """
+    Add a new location to the DB
+    Will return the single product on success
+    """
+    xml = XMLRenderer()
+
+    prodname = request.POST.get('product', None)
+    osname = request.POST.get('os', None)
+    path = request.POST.get('path', None)
+    if not (prodname and osname and path):
+        return xml.error('product, os, and path are required POST parameters.')
+
+    lang = request.POST.get('lang', None)
+    locales = LocaleDetails().get_locale_codes()
+    if not lang:
+        lang = None
+    elif lang not in locales:
+        return xml.error('invalid language code')
+
+    try:
+        product = Product.objects.get(name=prodname)
+        os = OS.objects.get(name=osname)
+    except (Product.DoesNotExist, OS.DoesNotExist), e:
+        return xml.error(e)
+
+    # do not make duplicates
+    dupes = Location.objects.filter(product=product, os=os, lang=lang).count()
+    if dupes:
+        return xml.error('The specified location already exists.')
+
+    try:
+        location = Location(product=product, os=os, path=path, lang=lang)
+        location.save(force_insert=True)
+    except Exception, e:
+        return xml.error(e)
+    locations = Location.objects.filter(pk=location.pk)
+
+    # success: return the single new location to the user
+    xml.prepare_locations(product, locations)
+    return xml.render()
+
+
 class XMLRenderer(object):
     """Render API data as XML"""
 
@@ -190,8 +244,8 @@ class XMLRenderer(object):
         for location in locations:
             locnode = self.doc.createElement('location')
             locnode.setAttribute('id', str(location.pk))
-            locnode.setAttribute('os', location.os.name)
-            locnode.setAttribute('lang', location.lang)
+            locnode.setAttribute('os', str(location.os.name))
+            locnode.setAttribute('lang', location.lang or '')
             locnode.appendChild(self.doc.createTextNode(location.path))
             prodnode.appendChild(locnode)
 
