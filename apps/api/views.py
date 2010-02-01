@@ -207,6 +207,29 @@ def location_add(request):
     return xml.render()
 
 
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def location_delete(request):
+    """Remove a location from the DB"""
+    xml = XMLRenderer()
+
+    loc_id = request.POST.get('location_id', None)
+    if not loc_id:
+        return xml.error('location_id is required.')
+    try:
+        location = Location.objects.get(pk=loc_id)
+    except Location.DoesNotExist:
+        return xml.error('No location found.')
+    except Exception, e:
+        return xml.error(e)
+
+    try:
+        location.delete()
+    except Exception, e:
+        return xml.error(e)
+
+    return xml.success('Deleted location: %s' % location)
+
+
 class XMLRenderer(object):
     """Render API data as XML"""
 

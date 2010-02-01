@@ -1,0 +1,22 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Delete a location from the database.
+{% endblock %}
+
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
+
+{% block post_required %}
+* ``location_id``: Database ID of location to be deleted
+{% endblock %}
+
+{% block example %}
+Success:
+
+    <success>Deleted product: Product-1-odd</success>
+
+Failure:
+
+    <error>product_id is required.</error>
+{% endblock %}
+

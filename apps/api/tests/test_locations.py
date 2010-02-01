@@ -75,3 +75,26 @@ class LocationTest(testcases.LocationTestCase):
             new_location = None
         self.assert_(new_location, 'new location was added to DB')
 
+    def test_location_delete(self):
+        """Delete a location by ID"""
+        myloc = Location.objects.all()[0]
+        response = self.c.post(reverse('api.views.location_delete'),
+                               {'location_id': myloc.pk})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('success')
+        self.assertEqual(len(msg), 1, 'Delete successful')
+
+        try:
+            this_location = Location.objects.get(pk=myloc.pk)
+        except Location.DoesNotExist:
+            this_location = None
+        self.assertFalse(this_location, 'location was deleted')
+
+        response = self.c.post(reverse('api.views.location_delete'),
+                               {'location_id': myloc.pk})
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        self.assertEqual(len(msg), 1, 'Delete is only successful once')
+
