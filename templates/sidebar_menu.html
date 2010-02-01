@@ -5,10 +5,10 @@
     <li><a href="{% url mirror.views.uptake %}">Product Uptake on Mirrors</a></li>
     <li><a href="{% url mirror.views.memcache_status %}">Memcache Status</a></li>
 </ul>
-
+{% endif %}
+{% if user.is_authenticated %}
 <h3>API</h3>
 <ul>
     <li><a href="{% url api.views.docindex %}">Documentation</a></li>
 </ul>
 {% endif %}
-
