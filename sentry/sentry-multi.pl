@@ -3,25 +3,11 @@
 # Given a bunch of IP's figure out how fast you can look up their
 #   regions and then determine how good we are at this.
 
-use locale;
 use DBI;
-use Data::Dumper;
-use LWP;
-use LWP::UserAgent;
-use Net::DNS;
-use URI;
 
 my $start_timestamp = time;
-my $ua = LWP::UserAgent->new;
-$ua->timeout(4);
-$ua->agent("Mozilla Mirror Monitor/1.0");
-
-my $netres = Net::DNS::Resolver->new();
-$netres->tcp_timeout(5);
 
 my $DEBUG = 1;
-my %products = ();
-my %oss = ();
 
 # Some db credentials (defaults)
 $host = '';
