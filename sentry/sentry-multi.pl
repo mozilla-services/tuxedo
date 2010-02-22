@@ -56,7 +56,11 @@ while (my $location = $location_sth->fetchrow_hashref() ) {
 
 $mirror_sth->execute();
 
+# find sentry directory
+$0=~/^(.+[\\\/])[^\\\/]+[\\\/]*$/;
+$cgidir= $1 || "./";
+
 while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
-    system ("/usr/bin/perl -I/data/sentry /data/sentry/sentry.pl checknow " . $mirror->{id} . " &");
+    system ("/usr/bin/perl -I$cgidir $cgidir/sentry.pl checknow " . $mirror->{id} . " &");
     sleep 1; # wait a second between each spawn so we don't hose the system by spawning 150 at once
 }
