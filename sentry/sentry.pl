@@ -86,22 +86,22 @@ my $updaterating_sth = $dbh->prepare($updaterating_sql);
 # populate a product and os hash if we're debugging stuff
 # this way we don't have to make too many selects against the DB
 if ( $DEBUG ) {
-	my $product_sql = qq{SELECT * FROM mirror_products};
-	my $oss_sql = qq{SELECT * FROM mirror_os};
+    my $product_sql = qq{SELECT * FROM mirror_products};
+    my $oss_sql = qq{SELECT * FROM mirror_os};
 
-	my $product_sth = $dbh->prepare($product_sql);
-	$product_sth->execute();
+    my $product_sth = $dbh->prepare($product_sql);
+    $product_sth->execute();
 
-	while ( my $product = $product_sth->fetchrow_hashref() ) {
-		$products{$product->{id}} = $product->{name};
-	}
+    while ( my $product = $product_sth->fetchrow_hashref() ) {
+        $products{$product->{id}} = $product->{name};
+    }
 
-	$oss_sth = $dbh->prepare($oss_sql);
-        $oss_sth->execute();
+    $oss_sth = $dbh->prepare($oss_sql);
+    $oss_sth->execute();
 
-        while ( my $os = $oss_sth->fetchrow_hashref() ) {
-                $oss{$os->{id}} = $os->{name};
-        }
+    while ( my $os = $oss_sth->fetchrow_hashref() ) {
+        $oss{$os->{id}} = $os->{name};
+    }
 }
 
 # let's build the location information
@@ -109,13 +109,13 @@ $location_sth->execute();
 my @locations = ();
 
 while (my $location = $location_sth->fetchrow_hashref() ) {
-	push(@locations, $location);
+    push(@locations, $location);
 }
 
 $mirror_sth->execute();
 
 while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
-	my $ok = 1;
+    my $ok = 1;
 
     # parse domain out of the mirror's base uri
     my $domain = URI->new($mirror->{baseurl})->authority;
@@ -144,7 +144,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
     # we do not allow simple_request because the root of a mirror could return a redirect
-	my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
+    my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
     my $mirrorRes = $ua->request($mirrorReq);
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
@@ -194,44 +194,45 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         next;
     }
 
-	foreach my $location (@locations) {
+    foreach my $location (@locations) {
 
-		my $filepath = $location->{path};
-                if (($filepath =~ m!/firefox/!)
-                     && ($filepath !~ m!/namoroka/!)
-                     && ($filepath !~ m!3\.6b1!)
-                     && ($filepath !~ m!wince\-arm!)
-                   ) {
-			$filepath =~ s@/en-US/@/zh-TW/@;
-		}
-		if ($filepath =~ m!/thunderbird/!) {
-			$filepath =~ s@/en-US/@/uk/@;
-		}
-		if ($filepath =~ m!/seamonkey/!) {
-			$filepath =~ s@/en-US/@/tr/@;
-		}
-		log_this "Checking $filepath... ";
-		my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
-		my $res = $ua->simple_request($req);
+        my $filepath = $location->{path};
+        if (($filepath =~ m!/firefox/!)
+            && ($filepath !~ m!/namoroka/!)
+            && ($filepath !~ m!/devpreview/!)
+            && ($filepath !~ m!3\.6b1!)
+            && ($filepath !~ m!wince\-arm!)
+        ) {
+            $filepath =~ s@/en-US/@/zh-TW/@;
+        }
+        if ($filepath =~ m!/thunderbird/!) {
+            $filepath =~ s@/en-US/@/uk/@;
+        }
+        if ($filepath =~ m!/seamonkey/!) {
+            $filepath =~ s@/en-US/@/tr/@;
+        }
+        log_this "Checking $filepath... ";
+        my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
+        my $res = $ua->simple_request($req);
 
-		if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
-			log_this "okay.\n";
-			$update_sth->execute($location->{id}, $mirror->{id}, '1');
-		}
-		else {
-			log_this "FAILED. rc=" . $res->{_rc} . "\n";
-			$update_sth->execute($location->{id}, $mirror->{id}, '0');
-		}
+        if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
+            log_this "okay.\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '1');
+        }
+        else {
+            log_this "FAILED. rc=" . $res->{_rc} . "\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '0');
+        }
 
-		# content-type == text/plain hack here for Mac dmg's
-		if ($res->{_rc} == 200) {
-                    foreach my $exten (keys %content_type) {
-			if ( $location->{path} =~ m/.*\.$exten$/ && $res->{_headers}->{'content-type'} !~ /\Q$content_type{$exten}\E/ ) {
-				log_this " -> FAILED due to content-type mis-match, expected '$content_type{$exten}', got '$res->{_headers}->{'content-type'}'\n";
-	                    $update_sth->execute($location->{id}, $mirror->{id}, '0');
-			}
-                    }
-		}
-	}
-        $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
+        # content-type == text/plain hack here for Mac dmg's
+        if ($res->{_rc} == 200) {
+            foreach my $exten (keys %content_type) {
+                if ( $location->{path} =~ m/.*\.$exten$/ && $res->{_headers}->{'content-type'} !~ /\Q$content_type{$exten}\E/ ) {
+                    log_this " -> FAILED due to content-type mis-match, expected '$content_type{$exten}', got '$res->{_headers}->{'content-type'}'\n";
+                    $update_sth->execute($location->{id}, $mirror->{id}, '0');
+                }
+            }
+        }
+    }
+    $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
 }
