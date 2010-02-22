@@ -202,6 +202,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             && ($filepath !~ m!/devpreview/!)
             && ($filepath !~ m!3\.6b1!)
             && ($filepath !~ m!wince\-arm!)
+            && ($filepath !~ m!EUballot!)
         ) {
             $filepath =~ s@/en-US/@/zh-TW/@;
         }
@@ -210,6 +211,9 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         }
         if ($filepath =~ m!/seamonkey/!) {
             $filepath =~ s@/en-US/@/tr/@;
+        }
+        if ($filepath =~ m!-euballot/!i) {
+            $filepath =~ s@/en-US/@/sv-SE/@;
         }
         log_this "Checking $filepath... ";
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
