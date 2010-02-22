@@ -15,6 +15,9 @@ $user = '';
 $pass = '';
 $db = '';
 
+# number of children to fork at a time
+my $num_children = 16;
+
 # load the config
 do "sentry.cfg";
 
@@ -37,7 +40,7 @@ $location_sth->execute();
 my @locations = ();
 
 while (my $location = $location_sth->fetchrow_hashref() ) {
-	push(@locations, $location);
+    push(@locations, $location);
 }
 
 $mirror_sth->execute();
@@ -46,7 +49,21 @@ $mirror_sth->execute();
 $0=~/^(.+[\\\/])[^\\\/]+[\\\/]*$/;
 $cgidir= $1 || "./";
 
+my $forked_children = 0; # forked children count
 while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
-    system ("/usr/bin/perl -I$cgidir $cgidir/sentry.pl checknow " . $mirror->{id} . " &");
-    sleep 1; # wait a second between each spawn so we don't hose the system by spawning 150 at once
+    my $pid = fork();
+    if ($pid > 0) { # parent
+    } elsif ($pid == 0) { # child
+        @ARGV = ('checknow', $mirror->{id});
+        do "sentry.pl";
+        exit 0;
+    } else {
+        die "couldn't fork: $!\n";
+    }
+    sleep 1; # wait a second between each spawn so we don't hose the system by spawning all children at once
+
+    # if max. number was reached, wait before forking more children
+    if (++$forked_children >= $num_children) {
+        waitpid(-1, WNOHANG);
+    }
 }
