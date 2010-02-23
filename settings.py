@@ -96,6 +96,9 @@ TEMPLATE_DIRS = (
     path('templates')
 )
 
+# path to mozilla product details
+PRODUCT_DETAILS = path('inc', 'product-details')
+
 INSTALLED_APPS = (
     'api',
     'mirror',
@@ -113,8 +116,10 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
 )
 
-# path to mozilla product details
-PRODUCT_DETAILS = path('inc', 'product-details')
+# the location_check management command can check for stale locations on a
+# reference mirror and let you disable the ones that are not present there.
+# Define your reference base url here.
+REFERENCE_BASEURL = 'http://ftp.mozilla.org/pub/mozilla.org'
 
 # override this with local settings
 try:
