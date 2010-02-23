@@ -104,6 +104,7 @@ INSTALLED_APPS = (
     'mirror',
     'geoip',
     'lib',
+    'php', # enable this if you want to run tests on the bounce script
     'users',
 
     'south',
@@ -120,6 +121,10 @@ INSTALLED_APPS = (
 # reference mirror and let you disable the ones that are not present there.
 # Define your reference base url here.
 REFERENCE_BASEURL = 'http://ftp.mozilla.org/pub/mozilla.org'
+
+# the php app black box tests the bounce script. Set it up at a URL somewhere,
+# point it to the same DB, and enter the URL here.
+BOUNCER_PHP_URL = ''
 
 # override this with local settings
 try:
