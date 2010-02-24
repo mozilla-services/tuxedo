@@ -41,6 +41,15 @@ Finally, run the following steps to initialize Django and South:
     ./manage.py migrate mirror 0001 --fake   # initialize South
     ./manage.py migrate   # apply all existing migrations
 
+Tuxedo API and mod_wsgi
+-----------------------
+There are multiple ways to deploy a Django project on a web server. If you
+want to use Apache with mod_wsgi, make sure to set it up so it passes
+[HTTP Basic Auth credentials][userauth] on to the application, otherwise
+the Tuxedo API won't work.
+
+[userauth]: http://code.google.com/p/modwsgi/wiki/ConfigurationGuidelines#User_Authentication
+
 Language and Product Details
 ----------------------------
 The list of known languages is provided by ``languages.json`` in the directory
