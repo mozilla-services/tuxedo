@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django import test
 
 from lib.product_details import LocaleDetails
-from mirror.models import Location, OS, Product
+from mirror.models import Location, LocationMirrorMap, Mirror, OS, Product
 
 
 class APITestCase(test.TestCase):
@@ -66,4 +66,28 @@ class LocationTestCase(ProductTestCase):
                 loc.save()
 
                 self.locations[p.name].append(loc)
+
+
+class UptakeTestCase(LocationTestCase):
+    """TestCase publishing some default mirrors"""
+
+    def setUp(self):
+        super(UptakeTestCase, self).setUp()
+
+        # mirrors
+        self.mirrors = []
+        for i in range(1, 6):
+            name = 'Mirror-%d' % i
+            m = Mirror(name=name, rating=0, active=True)
+            m.save()
+            self.mirrors.append(m)
+
+        # locationmirrormap
+        for m in self.mirrors:
+            for p, locs in self.locations.items():
+                for l in locs:
+                    # make half of them active
+                    lmm = LocationMirrorMap(location=l, mirror=m,
+                                            active=(l.id%2))
+                    lmm.save()
 

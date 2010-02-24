@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from mirror.models import Location, OS
 
-import testcases
+from . import testcases
 
 
 class LocationTest(testcases.LocationTestCase):
@@ -97,4 +97,32 @@ class LocationTest(testcases.LocationTestCase):
 
         msg = xmldoc.getElementsByTagName('error')
         self.assertEqual(len(msg), 1, 'Delete is only successful once')
+
+
+class UptakeTest(testcases.UptakeTestCase):
+
+    def test_fuzzy(self):
+        """List product uptake on mirrors"""
+        testprod = self.products[0]
+
+        # without fuzzy product matching
+        response = self.c.get(reverse('api.views.uptake'),
+                              {'product': testprod.name[:-3]})
+        xmldoc = minidom.parseString(response.content)
+        items = xmldoc.getElementsByTagName('item')
+        self.assertEquals(len(items), 0, 'no fuzzy matching unless requested')
+
+        response = self.c.get(reverse('api.views.uptake'),
+                              {'product': testprod.name})
+        xmldoc = minidom.parseString(response.content)
+        items = xmldoc.getElementsByTagName('item')
+        self.assertTrue(len(items) > 0, 'exact product matching')
+
+        # with fuzzy product matching
+        response = self.c.get(reverse('api.views.uptake'),
+                              {'product': testprod.name[:-3],
+                               'fuzzy': True})
+        xmldoc = minidom.parseString(response.content)
+        items = xmldoc.getElementsByTagName('item')
+        self.assertTrue(len(items) > 0, 'fuzzy product matching')
 

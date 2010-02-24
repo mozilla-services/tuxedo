@@ -13,6 +13,7 @@ from .decorators import is_staff_or_basicauth, logged_in_or_basicauth
 
 HTTP_AUTH_REALM = 'Bouncer API'
 
+
 def _get_command_list():
     templates = os.listdir(os.path.join(os.path.dirname(__file__), 'templates',
                                         'api', 'docs'))
@@ -21,11 +22,13 @@ def _get_command_list():
     commands.sort()
     return commands
 
+
 def docindex(request):
     """API Doc Index"""
     data = {'commands': _get_command_list()}
     return render_to_response('api/index.html', data, context_instance=
                               RequestContext(request))
+
 
 def docs(request, command):
     """Individual API docs"""
@@ -44,30 +47,43 @@ def docs(request, command):
     return render_to_response('api/docs/%s.html' % command, data,
                               context_instance=RequestContext(request))
 
+
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def uptake(request):
     """ping mirror uptake"""
     product = request.GET.get('product', None)
     os = request.GET.get('os', None)
+    fuzzy = request.GET.get('fuzzy', False)
     if not product and not os:
         return HttpResponseBadRequest('product and/or os are required GET '\
                                       'parameters.')
 
+    xml = XMLRenderer()
+
     if product:
-        products = Product.objects.filter(name__icontains=product)
+        if fuzzy:
+            products = Product.objects.filter(name__icontains=product)
+        else:
+            products = Product.objects.filter(name__exact=product)
         pids = [ p.id for p in products ]
+        if not pids:
+            return xml.error('No products found')
     else:
         pids = None
 
     if os:
-        oses = OS.objects.filter(name__icontains=os)
+        if fuzzy:
+            oses = OS.objects.filter(name__icontains=os)
+        else:
+            oses = OS.objects.filter(name__exact=os)
         osids = [ o.id for o in oses ]
+        if not osids:
+            return xml.error('No OSes found')
     else:
         osids = None
 
     uptake = Location.get_mirror_uptake(products=pids, oses=osids)
 
-    xml = XMLRenderer()
     xml.prepare_uptake(uptake)
     return xml.render()
 

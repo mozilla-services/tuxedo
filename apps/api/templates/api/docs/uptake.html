@@ -13,6 +13,11 @@ At least one of:
 * ``os``: (Part of) a platform name to display the uptake for
 {% endblock %}
 
+{% block get_optional %}
+* ``fuzzy``: If not empty/undefined, product and os searches will be
+  partial and case-insensitive. Defaults to off (exact match).
+{% endblock %}
+
 {% block example %}
     <?xml version="1.0" encoding="utf-8"?>
     <mirror_uptake>

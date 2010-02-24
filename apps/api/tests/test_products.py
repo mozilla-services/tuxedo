@@ -4,10 +4,8 @@ from django.core.urlresolvers import reverse
 
 from mirror.models import Product
 
-import testcases
+from . import testcases
 
-
-# TODO uptake test
 
 class ProductTest(testcases.ProductTestCase):
 
@@ -119,5 +117,3 @@ class ProductTest(testcases.ProductTestCase):
         all_products = Product.objects.all()
         self.assertEquals(len(all_products), len(self.products)-1,
                          'product was deleted only once')
-
-
