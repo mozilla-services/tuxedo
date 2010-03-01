@@ -10,6 +10,11 @@ Delete a location from the database.
 * ``location_id``: Database ID of location to be deleted
 {% endblock %}
 
+{% block errorcodes %}
+* ``101``: missing required input
+* ``102``: location not found
+{% endblock %}
+
 {% block example %}
 Success:
 

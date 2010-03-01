@@ -88,7 +88,10 @@ class ProductTest(testcases.ProductTestCase):
         xmldoc = minidom.parseString(response.content)
 
         msg = xmldoc.getElementsByTagName('error')
-        self.assertEqual(len(msg), 1, 'Delete is only successful once')
+        errno = msg[0].getAttribute('number')
+        self.assertEqual(len(msg), 1, 'Delete must only be successful once')
+        self.assertEqual(int(errno), 102,
+                         'must return product not found error')
 
         all_products = Product.objects.all()
         self.assertEquals(len(all_products), len(self.products)-1,
@@ -112,7 +115,10 @@ class ProductTest(testcases.ProductTestCase):
         xmldoc = minidom.parseString(response.content)
 
         msg = xmldoc.getElementsByTagName('error')
-        self.assertEqual(len(msg), 1, 'Delete is only successful once')
+        errno = msg[0].getAttribute('number')
+        self.assertEqual(len(msg), 1, 'Delete must only be successful once')
+        self.assertEqual(int(errno), 102,
+                         'must return product not found error')
 
         all_products = Product.objects.all()
         self.assertEquals(len(all_products), len(self.products)-1,

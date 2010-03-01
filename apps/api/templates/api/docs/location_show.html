@@ -13,6 +13,10 @@ Display a list of locations in the database.
   Defaults to off (exact name match).
 {% endblock %}
 
+{% block errorcodes %}
+* ``101``: missing required input
+{% endblock %}
+
 {% block example %}
     <locations>
         <product id="184" name="Firefox-2.0.0.1">

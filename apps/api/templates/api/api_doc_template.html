@@ -32,6 +32,15 @@ Optional POST Parameters:
 -------------------------
 {% block post_optional %}*None.*{% endblock %}
 
+Error Codes:
+------------
+Error code *0* denotes a general error (e.g., a general exception due
+to server misconfiguration). The error text gives more information.
+
+Tuxedo-specific error codes for this command:
+
+{% block errorcodes %}*None.*{% endblock %}
+
 Returns:
 --------
 {% block returns %}XML{% endblock %}

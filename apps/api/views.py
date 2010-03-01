@@ -55,8 +55,8 @@ def uptake(request):
     os = request.GET.get('os', None)
     fuzzy = request.GET.get('fuzzy', False)
     if not product and not os:
-        return HttpResponseBadRequest('product and/or os are required GET '\
-                                      'parameters.')
+        return xml.error('product and/or os are required GET parameters.',
+                         errno=101)
 
     xml = XMLRenderer()
 
@@ -67,7 +67,7 @@ def uptake(request):
             products = Product.objects.filter(name__exact=product)
         pids = [ p.id for p in products ]
         if not pids:
-            return xml.error('No products found')
+            return xml.error('No products found', errno=102)
     else:
         pids = None
 
@@ -78,7 +78,7 @@ def uptake(request):
             oses = OS.objects.filter(name__exact=os)
         osids = [ o.id for o in oses ]
         if not osids:
-            return xml.error('No OSes found')
+            return xml.error('No OSes found', errno=102)
     else:
         osids = None
 
@@ -115,7 +115,7 @@ def product_add(request):
 
     prodname = request.POST.get('product', None)
     if not prodname:
-        return xml.error('Cannot add an empty product name')
+        return xml.error('Cannot add an empty product name', errno=103)
     products = Product.objects.filter(name__exact=prodname)
     if not products:
         try:
@@ -138,14 +138,14 @@ def product_delete(request):
     prod_id = request.POST.get('product_id', None)
     prodname = request.POST.get('product', None)
     if not (prod_id or prodname):
-        return xml.error('Either product_id or product is required.')
+        return xml.error('Either product_id or product is required.', errno=101)
     try:
         if prod_id:
             prod = Product.objects.get(pk=prod_id)
         else:
             prod = Product.objects.get(name=prodname)
     except Product.DoesNotExist:
-        return xml.error('No product found.')
+        return xml.error('No product found.', errno=102)
     except Exception, e:
         return xml.error(e)
 
@@ -164,7 +164,7 @@ def location_show(request):
     prodname = request.GET.get('product', None)
     fuzzy = request.GET.get('fuzzy', False)
     if not prodname:
-        return xml.error('The GET parameter product is required')
+        return xml.error('The GET parameter product is required', errno=103)
 
     if fuzzy:
         products = Product.objects.filter(name__icontains=prodname)
@@ -191,14 +191,15 @@ def location_add(request):
     osname = request.POST.get('os', None)
     path = request.POST.get('path', None)
     if not (prodname and osname and path):
-        return xml.error('product, os, and path are required POST parameters.')
+        return xml.error('product, os, and path are required POST parameters.',
+                         errno=101)
 
     lang = request.POST.get('lang', None)
     locales = LocaleDetails().get_locale_codes()
     if not lang:
         lang = None
     elif lang not in locales:
-        return xml.error('invalid language code')
+        return xml.error('invalid language code', errno=103)
 
     try:
         product = Product.objects.get(name=prodname)
@@ -209,7 +210,7 @@ def location_add(request):
     # do not make duplicates
     dupes = Location.objects.filter(product=product, os=os, lang=lang).count()
     if dupes:
-        return xml.error('The specified location already exists.')
+        return xml.error('The specified location already exists.', errno=104)
 
     try:
         location = Location(product=product, os=os, path=path, lang=lang)
@@ -230,11 +231,11 @@ def location_delete(request):
 
     loc_id = request.POST.get('location_id', None)
     if not loc_id:
-        return xml.error('location_id is required.')
+        return xml.error('location_id is required.', errno=101)
     try:
         location = Location.objects.get(pk=loc_id)
     except Location.DoesNotExist:
-        return xml.error('No location found.')
+        return xml.error('No location found.', errno=102)
     except Exception, e:
         return xml.error(e)
 
@@ -309,15 +310,18 @@ class XMLRenderer(object):
         """Prepare a success message"""
         return self.message(message, type='success', render=render)
 
-    def error(self, message, render=True):
+    def error(self, message, errno=0, render=True):
         """Prepare an error message"""
-        return self.message(message, type='error', render=render, status=400)
+        return self.message(message, type='error', number=errno,
+                            render=render, status=400)
 
-    def message(self, message, type='info', render=True, status=200):
+    def message(self, message, type='info', number=None, render=True,
+                status=200):
         """Prepare a single message"""
         root = self.doc.createElement(type)
         root.appendChild(self.doc.createTextNode(str(message)))
+        if number:
+            root.setAttribute('number', str(number))
         self.doc.appendChild(root)
         if render:
             return self.render(status)
-

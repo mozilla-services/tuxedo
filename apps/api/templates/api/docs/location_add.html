@@ -21,6 +21,12 @@ Add a new location to the database.
   {{ languages|join:", " }})
 {% endblock %}
 
+{% block errorcodes %}
+* ``101``: missing required input
+* ``103``: invalid input
+* ``104``: location already exists
+{% endblock %}
+
 {% block example %}
 Success:
 
