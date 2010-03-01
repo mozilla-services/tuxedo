@@ -15,8 +15,8 @@ $user = '';
 $pass = '';
 $db = '';
 
-# number of children to fork at a time
-my $num_children = 16;
+# default number of children to fork at a time
+$num_children = 16;
 
 # load the config
 do "sentry.cfg";
