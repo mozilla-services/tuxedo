@@ -19,6 +19,20 @@ to install the required Python libraries.
 
 [virtualenv]: http://pypi.python.org/pypi/virtualenv
 
+### git submodules
+The list of known languages is provided by ``languages.json`` in the directory
+``inc/product-details/json`` and imported as a [git submodule][git-submodule].
+The source of the data is the [Mozilla product-details library][prod-details].
+
+To initialize the submodule (or pull updates from it), run this from the tuxedo
+root directory:
+
+    git submodule update --init
+
+[git-submodule]: http://www.kernel.org/pub/software/scm/git/docs/git-submodule.html
+[prod-details]: http://svn.mozilla.org/libs/product-details/
+
+
 ### Initial Database Setup
 If you're installing a new copy of Bouncer, run ``./manage.py syncdb``
 followed by ``./manage.py migrate`` (see "Database Migrations" below).
@@ -49,15 +63,6 @@ want to use Apache with mod_wsgi, make sure to set it up so it passes
 the Tuxedo API won't work.
 
 [userauth]: http://code.google.com/p/modwsgi/wiki/ConfigurationGuidelines#User_Authentication
-
-Language and Product Details
-----------------------------
-The list of known languages is provided by ``languages.json`` in the directory
-``inc/product-details/json``. The source of the data is the [Mozilla
-product-details library][prod-details]. Feel free to update the JSON files
-from there.
-
-[prod-details]: http://svn.mozilla.org/libs/product-details/
 
 Why "tuxedo"?
 -------------
