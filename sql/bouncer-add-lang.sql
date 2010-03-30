@@ -62,6 +62,40 @@ INSERT INTO `mirror_langs` (`lang_id`, `lang`) VALUES
 (44, 'zh-CN'),
 (45, 'zh-TW');
 
+-- seconds set of languages, 2010/03/30
+INSERT INTO `mirror_langs` (`lang`) VALUES
+('af'),
+('as'),
+('bn-BD'),
+('bn-IN'),
+('hr'),
+('eo'),
+('et'),
+('gl'),
+('hi-IN'),
+('is'),
+('id'),
+('kn'),
+('kk'),
+('lv'),
+('ml'),
+('mr'),
+('oc'),
+('or'),
+('fa'),
+('pt-PT'),
+('rm'),
+('sr'),
+('si'),
+('es-CL'),
+('es-MX'),
+('ta'),
+('ta-LK'),
+('te'),
+('th'),
+('uk'),
+('vi'),
+('cy');
 
 -- set all existing locations' language to en-US
 UPDATE `mirror_locations` SET lang_id = 10;
