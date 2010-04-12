@@ -4,10 +4,11 @@ from mirror.models import Mirror, OS, Product, Location
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('product', 'os', 'lang', 'path')
-    list_filter = ('product', 'os', 'lang')
+    list_display = ('product', 'os', 'path')
+    list_filter = ('product', 'os')
     ordering = ('product',)
 admin.site.register(Location, LocationAdmin)
+
 
 class MirrorAdmin(admin.ModelAdmin):
     exclude = ('count',)
@@ -19,10 +20,12 @@ class MirrorAdmin(admin.ModelAdmin):
     ordering = ('active',)
 admin.site.register(Mirror, MirrorAdmin)
 
+
 class OSAdmin(admin.ModelAdmin):
     list_display = ('name', 'priority')
     ordering = ('priority',)
 admin.site.register(OS, OSAdmin)
+
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'priority', 'count', 'active', 'checknow')
@@ -38,4 +41,3 @@ class ProductAdmin(admin.ModelAdmin):
     mark_for_checknow.short_description = "Check selected projects now with " \
                                           "Sentry"
 admin.site.register(Product, ProductAdmin)
-

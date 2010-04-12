@@ -73,7 +73,7 @@ class Product(models.Model):
         db_table = 'mirror_products'
 
 
-class ProductLanguages(models.Model):
+class ProductLanguage(models.Model):
     """
     The languages a product is available in. No entries in this table means
     "all languages" or "not applicable".
@@ -87,7 +87,7 @@ class ProductLanguages(models.Model):
         unique_together = ('product', 'lang')
 
     def __unicode__(self):
-        return u"%s (%s)" % (product, lang)
+        return u"%s (%s)" % (self.product, self.lang)
 
 
 class Location(models.Model):

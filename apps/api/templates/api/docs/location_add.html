@@ -11,19 +11,16 @@ Add a new location to the database.
   associated with, e.g., ``Firefox-3.0.5``
 * ``os``: Platform name this location is associated with. (Known platforms:
   {{ oses|join:", " }})
-* ``path``: Path for this location, relative to the mirror root, e.g., 
-  ``/firefox/releases/3.0.5/win32/en-US/Firefox%20Setup%203.0.5.exe``
-{% endblock %}
+* ``path``: Path for this location, relative to the mirror root, e.g.,
+  ``/firefox/releases/3.0.5/win32/:lang/Firefox%20Setup%203.0.5.exe``
 
-{% block post_optional %}
-* ``lang``: Language code for this location. If undefined or empty, location is
-  is considered not language-specific. (Known languages:
-  {{ languages|join:", " }})
+  ``:lang`` is a special placeholder that will be replaced with the
+  requested locale when a user downloads this location (if the language
+  is valid for this product, or if the product is not language-specific).
 {% endblock %}
 
 {% block errorcodes %}
 * ``101``: missing required input
-* ``103``: invalid input
 * ``104``: location already exists
 {% endblock %}
 
@@ -32,15 +29,15 @@ Success:
 
     <locations>
         <product id="184" name="Firefox-2.0.0.1">
-            <location id="496" lang="en-US" os="osx">
-                /firefox/releases/2.0.0.1/mac/en-US/Firefox%202.0.0.1.dmg
+            <location id="496" os="osx">
+                /firefox/releases/2.0.0.1/mac/:lang/Firefox%202.0.0.1.dmg
             </location>
         </product>
     </locations>
 
 Failure:
 
-    <error>
+    <error number="104">
         The specified location already exists.
     </error>
 {% endblock %}

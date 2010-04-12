@@ -35,9 +35,10 @@ def docs(request, command):
     if command not in _get_command_list():
         raise Http404
     data = {'command': command}
-    
+
     # XXX special cases are ugly
-    if command == 'location_add':
+    if command in ('product_add', 'product_language_add',
+                   'product_language_delete'):
         langs = LocaleDetails().get_locale_codes()
         oses = OS.objects.order_by('name')
         os_list = [os.name for os in oses]
@@ -109,21 +110,33 @@ def product_show(request):
 def product_add(request):
     """
     Add a new product to the DB
-    Will return the single product on success, or if it already existed.
+    Will return the single product on success
     """
     xml = XMLRenderer()
 
     prodname = request.POST.get('product', None)
     if not prodname:
         return xml.error('Cannot add an empty product name', errno=103)
+
+    # check languages
+    langs = request.POST.getlist('languages')
+    locales = LocaleDetails().get_locale_codes()
+    if [ l for l in langs if l not in locales ]:
+        return xml.error('invalid language code(s)', errno=103)
+
+    # save new product
     products = Product.objects.filter(name__exact=prodname)
     if not products:
         try:
             prod = Product(name=prodname)
             prod.save()
+            for lang in langs:
+                prod.languages.create(lang=lang)
         except Exception, e:
             return xml.error(e)
         products = Product.objects.filter(pk=prod.pk)
+    else:
+        return xml.error('product already exists.', errno=104)
 
     # success: return the single product to the user
     xml.prepare_products(products)
@@ -155,6 +168,84 @@ def product_delete(request):
         return xml.error(e)
 
     return xml.success('Deleted product: %s' % prod.name)
+
+
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def product_language_add(request):
+    """
+    Add a language to a product.
+    Will return the single product on success
+    """
+    xml = XMLRenderer()
+
+    prodname = request.POST.get('product', None)
+    if not prodname:
+        return xml.error('Product name is required.', errno=101)
+
+    # find product
+    products = Product.objects.filter(name__exact=prodname)
+    if not products:
+        return xml.error('Product not found.', errno=102)
+    prod = products[0]
+
+    # check languages
+    langs = request.POST.getlist('languages')
+    locales = LocaleDetails().get_locale_codes()
+    if [ l for l in langs if l not in locales ]:
+        return xml.error('Invalid language code(s)', errno=103)
+    if prod.languages.filter(lang__in=langs):
+        return xml.error('Language(s) already exist(s)', errno=104)
+
+    # add languages
+    try:
+        for lang in langs:
+            prod.languages.create(lang=lang)
+    except Exception, e:
+        return xml.error(e)
+    products = Product.objects.filter(pk=prod.pk)
+
+    # success: return the single product to the user
+    xml.prepare_products(products)
+    return xml.render()
+
+
+@is_staff_or_basicauth(HTTP_AUTH_REALM)
+def product_language_delete(request):
+    """Delete a language from a product."""
+    xml = XMLRenderer()
+
+    prodname = request.POST.get('product', None)
+    if not prodname:
+        return xml.error('Product name is required.', errno=101)
+
+    # find product
+    products = Product.objects.filter(name__exact=prodname)
+    if not products:
+        return xml.error('Product not found.', errno=102)
+    prod = products[0]
+
+    # check and remove languages
+    langs = request.POST.getlist('languages')
+    if not langs:
+        return xml.error('At least one language is required.', errno=101)
+
+    # wildcard: remove all languages
+    if len(langs) == 1 and langs[0] == '*':
+        prod.languages.all().delete()
+        return xml.success('Deleted all languages from product %s' % prod.name)
+
+    locales = LocaleDetails().get_locale_codes()
+    if [ l for l in langs if l not in locales ]:
+        return xml.error('Invalid language code(s)', errno=103)
+
+    try:
+        prod.languages.filter(lang__in=langs).delete()
+    except Exception, e:
+        return xml.error(e)
+    products = Product.objects.filter(pk=prod.pk)
+
+    return xml.success('Deleted languages %s from product %s' % (
+        ', '.join(langs), prod.name))
 
 
 @logged_in_or_basicauth(HTTP_AUTH_REALM)
@@ -194,13 +285,6 @@ def location_add(request):
         return xml.error('product, os, and path are required POST parameters.',
                          errno=101)
 
-    lang = request.POST.get('lang', None)
-    locales = LocaleDetails().get_locale_codes()
-    if not lang:
-        lang = None
-    elif lang not in locales:
-        return xml.error('invalid language code', errno=103)
-
     try:
         product = Product.objects.get(name=prodname)
         os = OS.objects.get(name=osname)
@@ -208,12 +292,12 @@ def location_add(request):
         return xml.error(e)
 
     # do not make duplicates
-    dupes = Location.objects.filter(product=product, os=os, lang=lang).count()
+    dupes = Location.objects.filter(product=product, os=os).count()
     if dupes:
         return xml.error('The specified location already exists.', errno=104)
 
     try:
-        location = Location(product=product, os=os, path=path, lang=lang)
+        location = Location(product=product, os=os, path=path)
         location.save(force_insert=True)
     except Exception, e:
         return xml.error(e)
@@ -266,8 +350,12 @@ class XMLRenderer(object):
         self.doc.appendChild(root)
         for product in products:
             item = self.doc.createElement('product')
-            item.appendChild(self.doc.createTextNode(str(product.name)))
             item.setAttribute('id', str(product.id))
+            item.setAttribute('name', str(product.name))
+            for lang in product.languages.all():
+                lang_item = self.doc.createElement('language')
+                lang_item.setAttribute('locale', str(lang.lang))
+                item.appendChild(lang_item)
             root.appendChild(item)
 
     def prepare_locations(self, product, locations):
@@ -285,7 +373,6 @@ class XMLRenderer(object):
             locnode = self.doc.createElement('location')
             locnode.setAttribute('id', str(location.pk))
             locnode.setAttribute('os', str(location.os.name))
-            locnode.setAttribute('lang', location.lang or '')
             locnode.appendChild(self.doc.createTextNode(location.path))
             prodnode.appendChild(locnode)
 

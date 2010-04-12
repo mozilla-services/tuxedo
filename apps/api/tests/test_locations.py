@@ -44,13 +44,14 @@ class LocationTest(testcases.LocationTestCase):
         myproduct = self.products[0]
         myos = OS.objects.get(name='win')
         mypath = '/abc/def/file.bin'
-        mylang = random.choice(self.locales + [''])
+
+        # remove possible conflicts from fixture
+        myproduct.location_set.all().delete()
 
         response = self.c.post(reverse('api.views.location_add'),
                                {'product': myproduct.name,
                                 'os': myos.name,
                                 'path': mypath,
-                                'lang': mylang,
                                })
         xmldoc = minidom.parseString(response.content)
         prod = xmldoc.getElementsByTagName('product')
@@ -60,8 +61,6 @@ class LocationTest(testcases.LocationTestCase):
                          'chosen product returned')
         self.assertTrue(int(loc[0].getAttribute('id')) > 0,
                         'new location id returned')
-        self.assertEqual(loc[0].getAttribute('lang'), mylang,
-                         'chosen language returned')
         self.assertEqual(loc[0].getAttribute('os'), myos.name,
                          'chosen os returned')
         self.assertEqual(loc[0].childNodes[0].data, mypath,
@@ -69,8 +68,7 @@ class LocationTest(testcases.LocationTestCase):
 
         try:
             new_location = Location.objects.get(product=myproduct,
-                                                os=myos,
-                                                lang=mylang)
+                                                os=myos)
         except Location.DoesNotExist:
             new_location = None
         self.assert_(new_location, 'new location was added to DB')

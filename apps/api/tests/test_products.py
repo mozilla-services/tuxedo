@@ -1,4 +1,5 @@
 from xml.dom import minidom
+from xml.etree import ElementTree
 
 from django.core.urlresolvers import reverse
 
@@ -35,9 +36,10 @@ class ProductTest(testcases.ProductTestCase):
     def test_product_add_new(self):
         """Add a new product through the API"""
         new_prod = "Firefox"
+        langs = ('en-US', 'fr', 'de')
 
         response = self.c.post(reverse('api.views.product_add'),
-                               {'product': new_prod})
+                               {'product': new_prod, 'languages': langs})
         xmldoc = minidom.parseString(response.content)
 
         all_products = Product.objects.all()
@@ -48,27 +50,22 @@ class ProductTest(testcases.ProductTestCase):
         self.assertEqual(len(prods), 1, 'one product added and returned')
         self.assertTrue(int(prods[0].getAttribute('id')) > 0,
                         'new product id returned')
-        self.assertEqual(prods[0].childNodes[0].data, new_prod,
-                        'product name returned')
+        self.assertEqual(prods[0].getAttribute('name'),
+                         new_prod, 'product name returned')
+        self.assertEqual(len(prods[0].childNodes), len(langs),
+                         'all languages returned')
 
     def test_product_add_existing(self):
-        """Adding an existing product will be handled gracefully"""
+        """Adding an existing product should throw an error"""
         new_prod = self.products[0].name
 
         response = self.c.post(reverse('api.views.product_add'),
                                {'product': new_prod})
         xmldoc = minidom.parseString(response.content)
 
-        all_products = Product.objects.all()
-        self.assertEquals(len(all_products), len(self.products),
-                         'existing product not re-added')
-
-        prods = xmldoc.getElementsByTagName('product')
-        self.assertEqual(len(prods), 1, 'one product returned')
-        self.assertEqual(int(prods[0].getAttribute('id')), self.products[0].id,
-                        'existing product id returned')
-        self.assertEqual(prods[0].childNodes[0].data, new_prod,
-                          'product name returned')
+        err = xmldoc.getElementsByTagName('error')
+        self.assertEqual(len(err), 1)
+        self.assertEqual(int(err[0].getAttribute('number')), 104)
 
     def test_product_delete_byname(self):
         """Delete a product by name"""
@@ -123,3 +120,43 @@ class ProductTest(testcases.ProductTestCase):
         all_products = Product.objects.all()
         self.assertEquals(len(all_products), len(self.products)-1,
                          'product was deleted only once')
+
+    def test_product_language_add(self):
+        """Add some languages to an existing product."""
+        mylangs = ('en-US', 'de', 'fr')
+        response = self.c.post(reverse('api.views.product_language_add'),
+                               {'product': self.products[0].name,
+                                'languages': mylangs})
+        xmldoc = ElementTree.XML(response.content)
+        langs = xmldoc.findall('product/language')
+        self.assertEqual(len(langs), len(mylangs)+len(self.locales))
+        for lang in [ l.get('locale') for l in langs ]:
+            assert lang in mylangs or lang in self.locales
+
+    def test_product_language_delete(self):
+        """Delete some languages from an existing product."""
+        myprod = self.products[0]
+        remove_langs = [ l.lang for l in myprod.languages.all()[:2] ]
+
+        response = self.c.post(reverse('api.views.product_language_delete'),
+                               {'product': self.products[0].name,
+                                'languages': remove_langs})
+        xmldoc = ElementTree.XML(response.content)
+        self.assertEqual(xmldoc.tag, 'success')
+
+        for lang in remove_langs:
+            assert not myprod.languages.filter(lang=lang)
+
+    def test_product_language_delete_all(self):
+        """Delete all languages from a product via wildcard."""
+        myprod = self.products[0]
+        assert myprod.languages.count(), 'Test product needs languages.'
+
+        response = self.c.post(reverse('api.views.product_language_delete'),
+                               {'product': self.products[0].name,
+                                'languages': '*'})
+        xmldoc = ElementTree.XML(response.content)
+        self.assertEqual(xmldoc.tag, 'success')
+
+        assert not myprod.languages.count(), (
+            'Wildcard must delete all languages.')

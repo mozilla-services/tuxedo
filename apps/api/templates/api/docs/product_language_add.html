@@ -1,24 +1,25 @@
 {% extends "api/api_doc_template.html" %}
 
 {% block description %}
-Add a new product to the database.
+Add a language to an existing product.
+
+On success, shows the updated product info.
 {% endblock %}
 
 {% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
 
 {% block post_required %}
-* ``product``: Product name to add to the DB, e.g. Firefox-3.0.5
-{% endblock %}
-
-{% block post_optional %}
+* ``product``: Product name to add language to, e.g. Firefox-3.0.5.
+  Case-sensitive.
 * ``languages``: Language code for this product. Add this parameter multiple
-  times for multiple languages. If undefined or empty, location is is considered
-  not language-specific. (Known languages: {{ languages|join:", " }})
+  times for multiple languages. (Known languages: {{ languages|join:", " }})
 {% endblock %}
 
 {% block errorcodes %}
+* ``101``: missing required input
+* ``102``: no match found
 * ``103``: invalid input
-* ``104``: product already exists
+* ``104``: language already exists
 {% endblock %}
 
 {% block example %}
@@ -34,8 +35,8 @@ Success:
 
 Failure:
 
-    <error number="103">
-        Cannot add an empty product name
+    <error number="101">
+        Product not found.
     </error>
 {% endblock %}
 

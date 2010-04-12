@@ -7,9 +7,13 @@ urlpatterns = patterns('api.views',
     (r'^location_show/?$', 'location_show'),
     (r'^location_add/?$', 'location_add'),
     (r'^location_delete/?$', 'location_delete'),
+
     (r'^product_show/?$', 'product_show'),
     (r'^product_add/?$', 'product_add'),
     (r'^product_delete/?$', 'product_delete'),
+    (r'^product_language_add/?$', 'product_language_add'),
+    (r'^product_language_delete/?$', 'product_language_delete'),
+
     (r'^uptake/?$', 'uptake'),
 )
 

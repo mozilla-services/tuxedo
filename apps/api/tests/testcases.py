@@ -29,12 +29,18 @@ class ProductTestCase(APITestCase):
     def setUp(self):
         super(ProductTestCase, self).setUp()
 
+        self.locales = ('ar', 'da', 'vi')
+
         # products
         self.products = []
         for i in range(1, 11):
             name = 'Product-%s-%s' % (i, i%2 and 'odd' or 'even')
             p = Product(name=name)
             p.save()
+
+            for lang in self.locales:
+                p.languages.create(lang=lang)
+
             self.products.append(p)
 
 
@@ -44,9 +50,6 @@ class LocationTestCase(ProductTestCase):
     def setUp(self):
         super(LocationTestCase, self).setUp()
 
-        self.locales = LocaleDetails().get_locale_codes()
-        locales = self.locales[:]
-
         # OSes
         for os in ['win', 'osx', 'linux']:
             OS.objects.create(name=os)
@@ -54,15 +57,11 @@ class LocationTestCase(ProductTestCase):
         # locations
         self.locations = {}
         for p in self.products:
-            random.shuffle(locales)
             self.locations[p.name] = []
-            for i in range(1, 6):
-                os = OS.objects.order_by('?')[0]
-                lang = locales[i]
-                locales.remove(lang)
-                path = '/%s/location-%s.%s.%s.bin' % (p.name, i, lang, os)
+            for os in OS.objects.all():
+                path = '/%s/location.%s.bin' % (p.name, os)
 
-                loc = Location(product=p, os=os, lang=lang, path=path)
+                loc = Location(product=p, os=os, path=path)
                 loc.save()
 
                 self.locations[p.name].append(loc)
