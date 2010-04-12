@@ -10,7 +10,7 @@ from lib.product_details import LocaleDetails
 LANG_CHOICES = LocaleDetails().get_model_choices()
 
 class Mirror(models.Model):
-    """represents a single mirror"""
+    """A single mirror."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=64, unique=True, verbose_name='Host Name')
     baseurl = models.CharField(max_length=255, verbose_name='Base URL')
@@ -41,7 +41,7 @@ class Mirror(models.Model):
 
 
 class OS(models.Model):
-    """represents a platform, e.g., osx"""
+    """A platform, e.g., osx."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=32, unique=True)
     priority = models.IntegerField(default=0)
@@ -55,7 +55,7 @@ class OS(models.Model):
 
 
 class Product(models.Model):
-    """represents a single product, e.g., Firefox-3.5.6"""
+    """A single product, e.g., Firefox-3.5.6."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True,
                             verbose_name='Product Name')
@@ -73,18 +73,33 @@ class Product(models.Model):
         db_table = 'mirror_products'
 
 
+class ProductLanguages(models.Model):
+    """
+    The languages a product is available in. No entries in this table means
+    "all languages" or "not applicable".
+    """
+    product = models.ForeignKey('Product', related_name='languages')
+    lang = models.CharField(max_length=30, choices=LANG_CHOICES,
+                            db_column='language', verbose_name='Language')
+
+    class Meta:
+        db_table = 'mirror_product_langs'
+        unique_together = ('product', 'lang')
+
+    def __unicode__(self):
+        return u"%s (%s)" % (product, lang)
+
+
 class Location(models.Model):
-    """represents a single location (i.e., file) on a mirror"""
+    """A single location (i.e., file) on a mirror."""
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(max_length=255)
-    lang = models.CharField(max_length=30, null=True, choices=LANG_CHOICES,
-                            verbose_name='Language')
 
     class Meta:
         db_table = 'mirror_locations'
-        unique_together = ('product', 'os', 'lang')
+        unique_together = ('product', 'os')
 
     def __unicode__(self):
         return self.path
