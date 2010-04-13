@@ -13,14 +13,16 @@ class Mirror(models.Model):
     """A single mirror."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=64, unique=True, verbose_name='Host Name')
-    baseurl = models.CharField(max_length=255, verbose_name='Base URL')
+    baseurl = models.CharField(max_length=255, verbose_name='Base URL',
+                               help_text='No trailing slash.')
     rating = models.IntegerField()
     active = models.BooleanField()
     count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
                                  db_index=True)
     regions = models.ManyToManyField('geoip.Region',
                                      db_table='geoip_mirror_region_map')
-    contacts = models.ManyToManyField(User, verbose_name="Admin Contact")
+    contacts = models.ManyToManyField(User, verbose_name="Admin Contact",
+                                      blank=True, null=True)
 
     class Meta:
         db_table = 'mirror_mirrors'
@@ -97,6 +99,7 @@ class Location(models.Model):
     os = models.ForeignKey('OS', verbose_name='OS')
     path = models.CharField(
         max_length=255, help_text=(
+            "Always use a leading slash.<br/>"
             'The placeholder :lang will be replaced with the requested '
             'language at download time.'))
 
