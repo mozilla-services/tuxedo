@@ -74,6 +74,12 @@ class Migration(SchemaMigration):
             'path': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'product': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['mirror.Product']"})
         },
+        'mirror.locationmirrorlanguageexception': {
+            'Meta': {'unique_together': "(('lmm', 'lang'),)", 'object_name': 'LocationMirrorLanguageException', 'db_table': "'mirror_lmm_lang_exceptions'"},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lang': ('django.db.models.fields.CharField', [], {'max_length': '30', 'db_column': "'language'"}),
+            'lmm': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'lang_exceptions'", 'db_column': "'location_mirror_map_id'", 'to': "orm['mirror.LocationMirrorMap']"})
+        },
         'mirror.locationmirrormap': {
             'Meta': {'object_name': 'LocationMirrorMap', 'db_table': "'mirror_location_mirror_map'"},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
@@ -107,8 +113,8 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '1'})
         },
-        'mirror.productlanguages': {
-            'Meta': {'unique_together': "(('product', 'lang'),)", 'object_name': 'ProductLanguages', 'db_table': "'mirror_product_langs'"},
+        'mirror.productlanguage': {
+            'Meta': {'unique_together': "(('product', 'lang'),)", 'object_name': 'ProductLanguage', 'db_table': "'mirror_product_langs'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lang': ('django.db.models.fields.CharField', [], {'max_length': '30', 'db_column': "'language'"}),
             'product': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'languages'", 'to': "orm['mirror.Product']"})

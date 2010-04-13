@@ -99,3 +99,13 @@ CHANGE `mirror_id` `mirror_id` INT( 11 ) NOT NULL DEFAULT '0';
 ALTER TABLE `mirror_products` CHANGE `id` `id` INT( 11 ) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `mirror_users` CHANGE `user_id` `user_id` INT( 11 ) NOT NULL AUTO_INCREMENT ;
 
+-- language exceptions for location/mirror mappings (bug 558731)
+CREATE TABLE `mirror_lmm_lang_exceptions` (
+    `id` INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `location_mirror_map_id` INT( 11 ) NOT NULL ,
+    `language` VARCHAR( 30 ) NOT NULL
+) ENGINE = InnoDB;
+ALTER TABLE `mirror_lmm_lang_exceptions` ADD UNIQUE (
+    `location_mirror_map_id` ,
+    `language`
+);

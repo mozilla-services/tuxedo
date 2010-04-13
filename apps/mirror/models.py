@@ -95,7 +95,10 @@ class Location(models.Model):
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
-    path = models.CharField(max_length=255)
+    path = models.CharField(
+        max_length=255, help_text=(
+            'The placeholder :lang will be replaced with the requested '
+            'language at download time.'))
 
     class Meta:
         db_table = 'mirror_locations'
@@ -144,3 +147,25 @@ class LocationMirrorMap(models.Model):
     class Meta:
         db_table = 'mirror_location_mirror_map'
 
+
+class LocationMirrorLanguageException(models.Model):
+    """
+    Exception from the rule that every available language is served by a
+    mirror.
+
+    We assume that mirrors that are listed in LocationMirrorMap as active
+    serve the respective location in all available languages. Entries in
+    this table mark the exceptions from that rule.
+    """
+    lmm = models.ForeignKey('LocationMirrorMap',
+                            related_name='lang_exceptions',
+                            db_column='location_mirror_map_id')
+    lang = models.CharField(max_length=30, choices=LANG_CHOICES,
+                            db_column='language', verbose_name='Language')
+
+    class Meta:
+        db_table = 'mirror_lmm_lang_exceptions'
+        unique_together = ('lmm', 'lang')
+
+    def __unicode__(self):
+        return u"%s (%s)" % (unicode(self.lmm), self.lang)

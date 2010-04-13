@@ -46,15 +46,15 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('mirror', ['Product'])
 
-        # Adding model 'ProductLanguages'
+        # Adding model 'ProductLanguage'
         db.create_table('mirror_product_langs', (
             ('lang', self.gf('django.db.models.fields.CharField')(max_length=30, db_column='language')),
             ('product', self.gf('django.db.models.fields.related.ForeignKey')(related_name='languages', to=orm['mirror.Product'])),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
-        db.send_create_signal('mirror', ['ProductLanguages'])
+        db.send_create_signal('mirror', ['ProductLanguage'])
 
-        # Adding unique constraint on 'ProductLanguages', fields ['product', 'lang']
+        # Adding unique constraint on 'ProductLanguage', fields ['product', 'lang']
         db.create_unique('mirror_product_langs', ['product_id', 'language'])
 
         # Adding model 'Location'
@@ -77,6 +77,17 @@ class Migration(SchemaMigration):
             ('location', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['mirror.Location'])),
         ))
         db.send_create_signal('mirror', ['LocationMirrorMap'])
+
+        # Adding model 'LocationMirrorLanguageException'
+        db.create_table('mirror_lmm_lang_exceptions', (
+            ('lang', self.gf('django.db.models.fields.CharField')(max_length=30, db_column='language')),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('lmm', self.gf('django.db.models.fields.related.ForeignKey')(related_name='lang_exceptions', db_column='location_mirror_map_id', to=orm['mirror.LocationMirrorMap'])),
+        ))
+        db.send_create_signal('mirror', ['LocationMirrorLanguageException'])
+
+        # Adding unique constraint on 'LocationMirrorLanguageException', fields ['lmm', 'lang']
+        db.create_unique('mirror_lmm_lang_exceptions', ['location_mirror_map_id', 'language'])
     
     
     def backwards(self, orm):
@@ -93,10 +104,10 @@ class Migration(SchemaMigration):
         # Deleting model 'Product'
         db.delete_table('mirror_products')
 
-        # Deleting model 'ProductLanguages'
+        # Deleting model 'ProductLanguage'
         db.delete_table('mirror_product_langs')
 
-        # Removing unique constraint on 'ProductLanguages', fields ['product', 'lang']
+        # Removing unique constraint on 'ProductLanguage', fields ['product', 'lang']
         db.delete_unique('mirror_product_langs', ['product_id', 'language'])
 
         # Deleting model 'Location'
@@ -107,6 +118,12 @@ class Migration(SchemaMigration):
 
         # Deleting model 'LocationMirrorMap'
         db.delete_table('mirror_location_mirror_map')
+
+        # Deleting model 'LocationMirrorLanguageException'
+        db.delete_table('mirror_lmm_lang_exceptions')
+
+        # Removing unique constraint on 'LocationMirrorLanguageException', fields ['lmm', 'lang']
+        db.delete_unique('mirror_lmm_lang_exceptions', ['location_mirror_map_id', 'language'])
     
     
     models = {
@@ -123,6 +140,12 @@ class Migration(SchemaMigration):
             'os': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['mirror.OS']"}),
             'path': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'product': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['mirror.Product']"})
+        },
+        'mirror.locationmirrorlanguageexception': {
+            'Meta': {'unique_together': "(('lmm', 'lang'),)", 'object_name': 'LocationMirrorLanguageException', 'db_table': "'mirror_lmm_lang_exceptions'"},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lang': ('django.db.models.fields.CharField', [], {'max_length': '30', 'db_column': "'language'"}),
+            'lmm': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'lang_exceptions'", 'db_column': "'location_mirror_map_id'", 'to': "orm['mirror.LocationMirrorMap']"})
         },
         'mirror.locationmirrormap': {
             'Meta': {'object_name': 'LocationMirrorMap', 'db_table': "'mirror_location_mirror_map'"},
@@ -156,8 +179,8 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '1'})
         },
-        'mirror.productlanguages': {
-            'Meta': {'unique_together': "(('product', 'lang'),)", 'object_name': 'ProductLanguages', 'db_table': "'mirror_product_langs'"},
+        'mirror.productlanguage': {
+            'Meta': {'unique_together': "(('product', 'lang'),)", 'object_name': 'ProductLanguage', 'db_table': "'mirror_product_langs'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lang': ('django.db.models.fields.CharField', [], {'max_length': '30', 'db_column': "'language'"}),
             'product': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'languages'", 'to': "orm['mirror.Product']"})
