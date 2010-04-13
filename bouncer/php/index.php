@@ -114,18 +114,26 @@ if (!empty($_GET['product'])) {
 
     $sdo = new SDO();
 
-    // get os and product IDs
+    // if we got a language, query for it, otherwise get US English
+    if (!empty($_GET['lang']))
+        $where_lang = $_GET['lang'];
+    else
+        $where_lang = 'en-US';
+
+    // get OS ID
     $os_id = $sdo->name_to_id('mirror_os','id','name',$os_name);
-    $product_id = $sdo->name_to_id('mirror_products','id','name',$product_name);
+
+    // get product for this language (if applicable)
+    $buf = $sdo->get_one("
+        SELECT prod.id FROM mirror_products AS prod
+        LEFT JOIN mirror_product_langs AS langs ON (prod.id = langs.product_id)
+        WHERE prod.name LIKE '%s'
+        AND (langs.language LIKE '%s' OR langs.language IS NULL)",
+        array($product_name, $where_lang), MYSQL_NUM);
+    if (!empty($buf[0])) $product_id = $buf[0]; else $product_id = null;
 
     // do we have a valid os and product?
-    if (!empty($os_id)&&!empty($product_id)) {
-        // if we got a language, query for it, otherwise get US English
-        if (!empty($_GET['lang']))
-            $where_lang = $_GET['lang'];
-        else
-            $where_lang = 'en-US';
-
+    if (!empty($os_id) && !empty($product_id)) {
         $location = $sdo->get_one("
             SELECT
                 id,
@@ -134,8 +142,7 @@ if (!empty($_GET['product'])) {
                 mirror_locations
             WHERE
                 product_id = %d AND 
-                os_id = %d AND
-                lang = '%s'",array($product_id, $os_id, $where_lang));
+                os_id = %d", array($product_id, $os_id));
 
         // did we get a valid location?
         if (!empty($location)) {
@@ -160,6 +167,8 @@ if (!empty($_GET['product'])) {
                             mirror_mirrors
                         JOIN
                             mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
+                        LEFT JOIN
+                            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
                         INNER JOIN
                             geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
                         WHERE
@@ -167,7 +176,8 @@ if (!empty($_GET['product'])) {
                             geoip_mirror_region_map.region_id = %d AND
                             mirror_mirrors.active='1' AND 
                             mirror_location_mirror_map.active ='1' 
-                        ORDER BY rating",array($location['id'], $client_region),MYSQL_ASSOC,'id');
+                        ORDER BY rating",
+                        array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
                 }
             }
 
@@ -181,12 +191,15 @@ if (!empty($_GET['product'])) {
                     FROM 
                         mirror_mirrors,
                         mirror_location_mirror_map
+                    LEFT JOIN
+                        mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
                     WHERE
                         mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
                         mirror_location_mirror_map.location_id = %d AND
                         mirror_mirrors.active='1' AND 
                         mirror_location_mirror_map.active ='1' 
-                    ORDER BY rating",array($location['id']),MYSQL_ASSOC,'id');
+                    ORDER BY rating",
+                    array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
             }
 
             $mirrors_rand = array();
@@ -209,16 +222,19 @@ if (!empty($_GET['product'])) {
                     $sdo->query("UPDATE mirror_products SET count=count+1 WHERE id = %d",array($product_id),false);
                 }
 
+                // replace :lang placeholder with requested language
+                $target_loc = str_replace(':lang', $where_lang, $location['path']);
+
                 // if we are just testing, then just print and exit.
                 if (!empty($_GET['print'])) {
                     show_no_cache_headers();
-                    print(htmlentities('Location: '.$mirror['baseurl'].$location['path']));
+                    print(htmlentities('Location: '.$mirror['baseurl'].$target_loc));
                     exit;
                 }
 
                 // otherwise, by default, redirect them and exit
                 show_no_cache_headers();
-                header('Location: '.$mirror['baseurl'].$location['path']);
+                header('Location: '.$mirror['baseurl'].$target_loc);
                 exit;
             }
         }
