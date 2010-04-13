@@ -22,27 +22,8 @@ $num_children = 16;
 do "sentry.cfg";
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
-my $checknow = "";
-if (defined($ARGV[0]) and $ARGV[0] eq 'checknow') {
-    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
-    ON mirror_locations.product_id = mirror_products.id WHERE
-    mirror_products.active='1' AND mirror_products.checknow=1};
-} else {
-    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.id WHERE mirror_products.active='1'};
-}
 $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
-
-my $location_sth = $dbh->prepare($location_sql);
 my $mirror_sth = $dbh->prepare($mirror_sql);
-
-# let's build the location information
-$location_sth->execute();
-my @locations = ();
-
-while (my $location = $location_sth->fetchrow_hashref() ) {
-    push(@locations, $location);
-}
-
 $mirror_sth->execute();
 
 # find sentry directory
@@ -54,7 +35,11 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     my $pid = fork();
     if ($pid > 0) { # parent
     } elsif ($pid == 0) { # child
-        @ARGV = ('checknow', $mirror->{id});
+        if ($ARGV[0] eq 'checkall') {
+            @ARGV = ('checkall', $mirror->{id});
+        } else {
+            @ARGV = ('checknow', $mirror->{id});
+        }
         do "sentry.pl";
         exit 0;
     } else {

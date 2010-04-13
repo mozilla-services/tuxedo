@@ -50,10 +50,14 @@ sub log_this {
 }
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
-if (defined($ARGV[0]) and $ARGV[0] eq 'checknow') {
+if (defined($ARGV[0]) and ($ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall')) {
     $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
-    ON mirror_locations.product_id = mirror_products.id WHERE
-    mirror_products.active='1' AND mirror_products.checknow=1};
+        ON mirror_locations.product_id = mirror_products.id WHERE
+        mirror_products.active='1'};
+    if ($ARGV[0] eq 'checknow') {
+        $location_sql .= qq{AND mirror_products.checknow=1};
+    }
+
     if (defined($ARGV[1])) {
         if ($ARGV[1] =~ /^\d+$/) {
             $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' AND id=$ARGV[1]};
@@ -204,16 +208,18 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             && ($filepath !~ m!wince\-arm!)
             && ($filepath !~ m!EUballot!)
         ) {
-            $filepath =~ s@/en-US/@/zh-TW/@;
+            $filepath =~ s@:lang@zh-TW@;
         }
-        if ($filepath =~ m!/thunderbird/!) {
-            $filepath =~ s@/en-US/@/uk/@;
+        elsif ($filepath =~ m!/thunderbird/!) {
+            $filepath =~ s@:lang@uk@;
         }
-        if ($filepath =~ m!/seamonkey/!) {
-            $filepath =~ s@/en-US/@/tr/@;
+        elsif ($filepath =~ m!/seamonkey/!) {
+            $filepath =~ s@:lang@tr@;
         }
-        if ($filepath =~ m!-euballot/!i) {
-            $filepath =~ s@/en-US/@/sv-SE/@;
+        elsif ($filepath =~ m!-euballot/!i) {
+            $filepath =~ s@:lang@sv-SE@;
+        } else {
+            $filepath =~ s@:lang@en-US@;
         }
         log_this "Checking $filepath... ";
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
