@@ -13,8 +13,11 @@ my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {});
 
 # [ product name, product regexp, throttle warn level, throttle critical level ]
 my @productlist = (
-  ["Firefox 3.5.3", "^Firefox-3\\.5\\.3", 45000, 35000],
-  ["Firefox 3.0.14", "^Firefox-3\\.0\\.14", 45000, 35000],
+  ["Firefox 3.6.2", "^Firefox-3\\.6\\.2(-|\$)", 15000, 8000],
+  ["Firefox 3.5.9", "^Firefox-3\\.5\\.9(-|\$)", 45000, 35000],
+  ["Firefox 3.0.19", "^Firefox-3\\.0\\.19(-|\$)", 45000, 35000],
+  ["SeaMonkey 2.0.4", "^Seamonkey-2\\.0\\.4(-|\$)", 15000, 8000],
+  ["Thunderbird 3.0.4", "^Thunderbird-3\\.0\\.4(-|\$)", 15000, 8000],
 );
 
 my $uptakequery = "SELECT MIN(t.available) from (SELECT 
@@ -46,8 +49,8 @@ my $uptakeqh = $dbh->prepare($uptakequery);
 
 my $query = "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(log_date) - (UNIX_TIMESTAMP(log_date) % 300))) AS log_run,
        check_time,
-       mirror_baseurl,
-       mirror_name,
+       baseurl,
+       name,
        sentry_log.mirror_id,
        sentry_log.mirror_active,
        sentry_log.mirror_rating,
