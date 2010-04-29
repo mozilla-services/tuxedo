@@ -13,7 +13,7 @@ my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {});
 
 # [ product name, product regexp, throttle warn level, throttle critical level ]
 my @productlist = (
-  ["Firefox 3.6.2", "^Firefox-3\\.6\\.2(-|\$)", 15000, 8000],
+  ["Firefox 3.6.3", "^Firefox-3\\.6\\.3(-|\$)", 15000, 8000],
   ["Firefox 3.5.9", "^Firefox-3\\.5\\.9(-|\$)", 45000, 35000],
   ["Firefox 3.0.19", "^Firefox-3\\.0\\.19(-|\$)", 45000, 35000],
   ["SeaMonkey 2.0.4", "^Seamonkey-2\\.0\\.4(-|\$)", 15000, 8000],
