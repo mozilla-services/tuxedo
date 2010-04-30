@@ -51,7 +51,7 @@ sub log_this {
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
 if (defined($ARGV[0]) and ($ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall')) {
-    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products
+    $location_sql = qq{SELECT mirror_locations.* FROM mirror_locations INNER JOIN mirror_products
         ON mirror_locations.product_id = mirror_products.id WHERE
         mirror_products.active='1'};
     if ($ARGV[0] eq 'checknow') {
@@ -68,7 +68,7 @@ if (defined($ARGV[0]) and ($ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall')) {
         $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
     }
 } else {
-    $location_sql = qq{SELECT * FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.id WHERE mirror_products.active='1'};
+    $location_sql = qq{SELECT mirror_locations.* FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.id WHERE mirror_products.active='1'};
     $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
 }
 $update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=?,active=?};
