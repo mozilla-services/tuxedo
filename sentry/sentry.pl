@@ -206,12 +206,17 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             && ($filepath !~ m!/devpreview/!)
             && ($filepath !~ m!3\.6b1!)
             && ($filepath !~ m!wince\-arm!)
-            && ($filepath !~ m!EUballot!)
+            && ($filepath !~ m!EUballot!i)
         ) {
             $filepath =~ s@:lang@zh-TW@;
         }
         elsif ($filepath =~ m!/thunderbird/!) {
-            $filepath =~ s@:lang@uk@;
+            if ($filepath =~ m!3\.1a1!) {
+                $filepath =~ s@:lang@tr@;
+            }
+            else {
+                $filepath =~ s@:lang@zh-TW@;
+            }
         }
         elsif ($filepath =~ m!/seamonkey/!) {
             $filepath =~ s@:lang@tr@;
