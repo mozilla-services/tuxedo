@@ -66,7 +66,7 @@ class Product(models.Model):
                                 verbose_name='Downloads')
     active = models.BooleanField(db_index=True, default=True)
     checknow = models.BooleanField(db_index=True, verbose_name='Check Now?',
-                                   default=False)
+                                   default=True)
 
     def __unicode__(self):
         return self.name

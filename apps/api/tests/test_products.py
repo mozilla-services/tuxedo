@@ -55,6 +55,16 @@ class ProductTest(testcases.ProductTestCase):
         self.assertEqual(len(prods[0].childNodes), len(langs),
                          'all languages returned')
 
+    def test_product_add_checknow(self):
+        """Newly added products must have checknow flag set (bug 566852)"""
+        new_prod = "Firefox-10.0"
+        response = self.c.post(reverse('api.views.product_add'),
+                               {'product': new_prod})
+        prod = Product.objects.get(name=new_prod)
+
+        self.assertTrue(prod.checknow, 'checknow must be enabled.')
+
+
     def test_product_add_existing(self):
         """Adding an existing product should throw an error"""
         new_prod = self.products[0].name
