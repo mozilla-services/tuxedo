@@ -10,39 +10,39 @@
 </head>
 <body>
 <div id="header">
-	<div id="logo">
-		<h1><a href="{% url mirror.views.index %}"><span>Bouncer</span> Mirror Management</a></h1>
-	</div>
-	<div id="menu">
-		<ul>
+    <div id="logo">
+        <h1><a href="{% url mirror.views.index %}"><span>Bouncer</span> Mirror Management</a></h1>
+    </div>
+    <div id="menu">
+        <ul>
             {% if user.is_authenticated %}
-			<li class="first"><a href="{% url users.views.profile %}">User Profile</a></li>
+            <li class="first"><a href="{% url users.views.profile %}">User Profile</a></li>
             {% if user.is_staff %}
-			<li><a href="{% url admin:index %}">Admin</a></li>
+            <li><a href="{% url admin:index %}">Admin</a></li>
             {% endif %}
-			<li><a href="{% url django.contrib.auth.views.logout %}">Log out</a></li>
+            <li><a href="{% url django.contrib.auth.views.logout %}">Log out</a></li>
             {% else %}
-			<li class="first"><a href="{% url django.contrib.auth.views.login %}">Log in</a></li>
+            <li class="first"><a href="{% url django.contrib.auth.views.login %}">Log in</a></li>
             {% endif %}
-		</ul>
-	</div>
+        </ul>
+    </div>
 </div>
 <div id="content">
     {% block content %}
-	<div id="colOne">
+    <div id="colOne">
         {% block main_content %}
-		<h1>Welcome to Bouncer!</h1>
+        <h1>Welcome to Bouncer!</h1>
         {% endblock %}
-	</div>
-	<div id="colTwo">
+    </div>
+    <div id="colTwo">
         {% block sidebar %}
         {% endblock %}
-	</div>
-	<div style="clear: both;">&nbsp;</div>
+    </div>
+    <div style="clear: both;">&nbsp;</div>
     {% endblock %}
 </div>
 <div id="footer">
-	<p>Copyright &copy; 1998&ndash;{% now "Y" %} Mozilla. Site design based on
+    <p>Copyright &copy; 1998&ndash;{% now "Y" %} Mozilla. Site design based on
     <a href="http://creativecommons.org/licenses/by/2.5/">CC-by licensed</a>
     work from <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
 </div>

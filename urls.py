@@ -1,8 +1,11 @@
 from django.conf import settings
-from django.conf.urls.defaults import patterns, include, handler404, handler500
+from django.conf.urls.defaults import patterns, include, handler404
 from django.contrib import admin
 
 admin.autodiscover()
+
+# 404 handler is fine by default
+handler500 = 'lib.views.server_error' # need MEDIA_URL in 500 error.
 
 urlpatterns = patterns('',
     (r'^$', 'mirror.views.index'),
