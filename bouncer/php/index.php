@@ -151,9 +151,10 @@ if (!empty($_GET['product'])) {
                 // determine the querying user's geographical region
                 if (defined('ALLOW_TEST_IP') && ALLOW_TEST_IP && isset($_GET['ip']))
                     $client_ip = $_GET['ip'];
-                elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-                    $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-                else
+                elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                    $client_ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+                    $client_ip = trim($client_ips[0]);
+                } else
                     $client_ip = $_SERVER['REMOTE_ADDR'];
                 $client_region = getRegionFromIP($client_ip);
                 
