@@ -4,6 +4,8 @@ from xml.dom import minidom
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
 from lib.product_details import LocaleDetails
 from mirror.models import Location, OS, Product
@@ -30,6 +32,7 @@ def docindex(request):
                               RequestContext(request))
 
 
+@require_GET
 def docs(request, command):
     """Individual API docs"""
     if command not in _get_command_list():
@@ -50,6 +53,7 @@ def docs(request, command):
 
 
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
+@require_GET
 def uptake(request):
     """ping mirror uptake"""
     product = request.GET.get('product', None)
@@ -89,6 +93,7 @@ def uptake(request):
     return xml.render()
 
 
+@require_GET
 @logged_in_or_basicauth(HTTP_AUTH_REALM)
 def product_show(request):
     product = request.GET.get('product', None)
@@ -106,6 +111,8 @@ def product_show(request):
     return xml.render()
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def product_add(request):
     """
@@ -143,6 +150,8 @@ def product_add(request):
     return xml.render()
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def product_delete(request):
     """Remove a product from the DB"""
@@ -170,6 +179,8 @@ def product_delete(request):
     return xml.success('Deleted product: %s' % prod.name)
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def product_language_add(request):
     """
@@ -209,6 +220,8 @@ def product_language_add(request):
     return xml.render()
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def product_language_delete(request):
     """Delete a language from a product."""
@@ -248,6 +261,7 @@ def product_language_delete(request):
         ', '.join(langs), prod.name))
 
 
+@require_GET
 @logged_in_or_basicauth(HTTP_AUTH_REALM)
 def location_show(request):
     xml = XMLRenderer()
@@ -270,6 +284,8 @@ def location_show(request):
     return xml.render()
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def location_add(request):
     """
@@ -308,6 +324,8 @@ def location_add(request):
     return xml.render()
 
 
+@require_POST
+@csrf_exempt
 @is_staff_or_basicauth(HTTP_AUTH_REALM)
 def location_delete(request):
     """Remove a location from the DB"""
