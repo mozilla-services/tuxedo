@@ -152,10 +152,22 @@ if (!empty($_GET['product'])) {
                 if (defined('ALLOW_TEST_IP') && ALLOW_TEST_IP && isset($_GET['ip']))
                     $client_ip = $_GET['ip'];
                 elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                    $client_ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-                    $client_ip = trim($client_ips[0]);
-                } else
-                    $client_ip = $_SERVER['REMOTE_ADDR'];
+                    $client_ip = null;
+                    $_forward_ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+
+                    if (defined('TRUSTED_PROXIES'))
+                        $proxies = explode(' ', TRUSTED_PROXIES);
+                    else
+                        $proxies = array();
+
+                    while ($_ip = trim(array_pop($_forward_ips))) {
+                        if (in_array($_ip, $proxies)) continue;
+                        $client_ip = $_ip;
+                        break;
+                    }
+                }
+
+                if (!$client_ip) $client_ip = $_SERVER['REMOTE_ADDR'];
                 $client_region = getRegionFromIP($client_ip);
                 
                 if ($client_region && !throttleGeoIPRegion($client_region)) {
