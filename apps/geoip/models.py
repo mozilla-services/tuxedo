@@ -1,7 +1,9 @@
 import ipaddr
 
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Sum
+from django.utils.html import escape
 
 
 class Country(models.Model):
@@ -51,6 +53,21 @@ class Region(models.Model):
                                              'higher the priority')
     throttle = models.IntegerField(verbose_name='GeoIP Throttle')
 
+    class Meta:
+        db_table = 'geoip_regions'
+
+    def __unicode__(self):
+        return self.name
+
+    def members(self):
+        """HTML list of mirrors contained in this region."""
+        mirrors = self.mirror_set.order_by('name')
+        mirror_list = ['<a href="%s">%s</a>' % (
+            reverse('admin:mirror_mirror_change', args=(m.pk,)),
+            escape(m.name)) for m in mirrors]
+        return '<br/>'.join(mirror_list) or ''
+    members.allow_tags = True
+
     def mirror_count(self):
         return self.mirror_set.count()
     mirror_count.short_description = 'Mirrors'
@@ -58,10 +75,3 @@ class Region(models.Model):
     def ratings(self):
         return self.mirror_set.aggregate(Sum('rating'))['rating__sum']
     ratings.short_description = 'Total Ratings'
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        db_table = 'geoip_regions'
-
