@@ -71,7 +71,7 @@ if (defined($ARGV[0]) and ($ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall')) {
     $location_sql = qq{SELECT mirror_locations.* FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.id WHERE mirror_products.active='1'};
     $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
 }
-$update_sql = qq{REPLACE mirror_location_mirror_map SET location_id=?,mirror_id=?,active=?};
+$update_sql = qq{INSERT INTO mirror_location_mirror_map (location_id, mirror_id, active) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE active=VALUES(active)};
 $failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET active='0' WHERE mirror_id=?};
 $log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
 $getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
