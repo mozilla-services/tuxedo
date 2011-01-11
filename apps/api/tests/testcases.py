@@ -3,7 +3,6 @@ import random
 from django.contrib.auth.models import User
 from django import test
 
-from lib.product_details import LocaleDetails
 from mirror.models import Location, LocationMirrorMap, Mirror, OS, Product
 
 

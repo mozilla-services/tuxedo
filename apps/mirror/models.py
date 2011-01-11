@@ -3,11 +3,12 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.html import escape
 
-from lib.product_details import LocaleDetails
+from product_details import product_details
 
 
 # get the possible languages from product details
-LANG_CHOICES = LocaleDetails().get_model_choices()
+LANG_CHOICES = [(key, "%s: %s" % (key, value['English']))
+                for key, value in product_details.languages.items()]
 
 class Mirror(models.Model):
     """A single mirror."""

@@ -99,16 +99,17 @@ TEMPLATE_DIRS = (
 )
 
 # path to mozilla product details
-PRODUCT_DETAILS = path('inc', 'product-details')
+PROD_DETAILS_DIR = path('inc', 'product-details', 'json')
 
 INSTALLED_APPS = (
     'api',
     'mirror',
     'geoip',
     'lib',
-    'php', # enable this if you want to run tests on the bounce script
+    #'php', # enable this if you want to run tests on the bounce script
     'users',
 
+    'product_details',
     'south',
 
     'django.contrib.admin',

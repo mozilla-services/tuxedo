@@ -13,11 +13,11 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
 from mirror.models import Location, Product
-from lib.product_details import LocaleDetails
+from product_details import product_details
 
 
 class BounceTestCase(TestCase):
-    fixtures = ['locations.json'] # Firefox 3.5 goodness
+    fixtures = ['locations.json']  # Firefox 3.5 goodness
 
     def setUp(self):
         if not settings.BOUNCER_PHP_URL:
@@ -59,7 +59,7 @@ class BounceTestCase(TestCase):
     def test_languages_and_oses(self):
         """Test all known locations"""
         locs = Location.objects.all()
-        langs = LocaleDetails().get_locale_codes()
+        langs = product_details.languages.keys()
 
         for loc in locs:
             for lang in langs:

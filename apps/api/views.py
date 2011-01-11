@@ -7,10 +7,10 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from lib.product_details import LocaleDetails
-from mirror.models import Location, OS, Product
+from product_details import product_details
 
-from .decorators import is_staff_or_basicauth, logged_in_or_basicauth
+from api.decorators import is_staff_or_basicauth, logged_in_or_basicauth
+from mirror.models import Location, OS, Product
 
 
 HTTP_AUTH_REALM = 'Bouncer API'
@@ -42,7 +42,7 @@ def docs(request, command):
     # XXX special cases are ugly
     if command in ('product_add', 'product_language_add',
                    'product_language_delete'):
-        langs = LocaleDetails().get_locale_codes()
+        langs = product_details.languages.keys()
         oses = OS.objects.order_by('name')
         os_list = [os.name for os in oses]
         data.update({'languages': langs,
@@ -127,7 +127,7 @@ def product_add(request):
 
     # check languages
     langs = request.POST.getlist('languages')
-    locales = LocaleDetails().get_locale_codes()
+    locales = product_details.languages.keys()
     if [ l for l in langs if l not in locales ]:
         return xml.error('invalid language code(s)', errno=103)
 
@@ -201,7 +201,7 @@ def product_language_add(request):
 
     # check languages
     langs = request.POST.getlist('languages')
-    locales = LocaleDetails().get_locale_codes()
+    locales = product_details.languages.keys()
     if [ l for l in langs if l not in locales ]:
         return xml.error('Invalid language code(s)', errno=103)
     if prod.languages.filter(lang__in=langs):
@@ -247,7 +247,7 @@ def product_language_delete(request):
         prod.languages.all().delete()
         return xml.success('Deleted all languages from product %s' % prod.name)
 
-    locales = LocaleDetails().get_locale_codes()
+    locales = product_details.languages.keys()
     if [ l for l in langs if l not in locales ]:
         return xml.error('Invalid language code(s)', errno=103)
 
