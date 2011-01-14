@@ -1,12 +1,15 @@
 # Django settings for tuxedo project.
+import logging
+import os
 
 # Make filepaths relative to settings.
-import os
 ROOT = os.path.dirname(os.path.abspath(__file__))
 path = lambda *a: os.path.join(ROOT, *a)
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+LOG_LEVEL = logging.DEBUG
+logging.basicConfig()
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
