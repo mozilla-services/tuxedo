@@ -5,4 +5,4 @@ Markdown==2.0.3
 texttable==0.7.0
 South>=0.6.2
 python-memcached==1.45
-git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+git+git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
