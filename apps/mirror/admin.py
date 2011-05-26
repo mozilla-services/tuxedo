@@ -18,6 +18,7 @@ class MirrorAdmin(admin.ModelAdmin):
     list_editable = ('active',)
     list_filter = ('active',)
     ordering = ('active',)
+    search_fields = ['name', 'baseurl']
 admin.site.register(Mirror, MirrorAdmin)
 
 
