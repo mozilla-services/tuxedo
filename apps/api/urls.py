@@ -15,5 +15,6 @@ urlpatterns = patterns('api.views',
     (r'^product_language_delete/?$', 'product_language_delete'),
 
     (r'^uptake/?$', 'uptake'),
+    (r'^mirror_list/?$', 'mirror_list'),
 )
 

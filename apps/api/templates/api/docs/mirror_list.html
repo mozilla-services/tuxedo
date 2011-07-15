@@ -1,0 +1,17 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Gives a list of active mirrors.
+{% endblock %}
+
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
+
+
+{% block example %}
+    <?xml version="1.0" encoding="utf-8"?>
+    <mirrors>
+      <mirror baseurl="http://mozilla.mirrors.skynet.be/pub/ftp.mozilla.org"/>
+      <mirror baseurl="http://ftp.spnet.net/mozilla"/>
+    </mirrors>
+{% endblock %}
+

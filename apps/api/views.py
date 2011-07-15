@@ -10,7 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 from product_details import product_details
 
 from api.decorators import is_staff_or_basicauth, logged_in_or_basicauth
-from mirror.models import Location, OS, Product
+from mirror.models import Location, Mirror, OS, Product
 
 
 HTTP_AUTH_REALM = 'Bouncer API'
@@ -89,6 +89,15 @@ def uptake(request):
     uptake = Location.get_mirror_uptake(products=pids, oses=osids)
 
     xml.prepare_uptake(uptake)
+    return xml.render()
+
+
+@require_GET
+@logged_in_or_basicauth(HTTP_AUTH_REALM)
+def mirror_list(request):
+    mirrors = Mirror.objects.filter(active=True)
+    xml = XMLRenderer()
+    xml.prepare_mirrors(mirrors)
     return xml.render()
 
 
@@ -373,6 +382,15 @@ class XMLRenderer(object):
                 lang_item = self.doc.createElement('language')
                 lang_item.setAttribute('locale', str(lang.lang))
                 item.appendChild(lang_item)
+            root.appendChild(item)
+
+    def prepare_mirrors(self, mirrors):
+        """Mirror List"""
+        root = self.doc.createElement('mirrors')
+        self.doc.appendChild(root)
+        for mirror in mirrors:
+            item = self.doc.createElement('mirror')
+            item.setAttribute('baseurl', str(mirror.baseurl))
             root.appendChild(item)
 
     def prepare_locations(self, product, locations):
