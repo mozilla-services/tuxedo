@@ -59,11 +59,10 @@ def uptake(request):
     product = request.GET.get('product', None)
     os = request.GET.get('os', None)
     fuzzy = request.GET.get('fuzzy', False)
+    xml = XMLRenderer()
     if not product and not os:
         return xml.error('product and/or os are required GET parameters.',
                          errno=101)
-
-    xml = XMLRenderer()
 
     if product:
         if fuzzy:
