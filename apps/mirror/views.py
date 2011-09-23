@@ -21,7 +21,7 @@ UPTAKE_LIST_HEADERS = (
     ('Total', None)
 )
 LOCATION_STATS_LIST_HEADERS = (
-    ('Status', 'active'),
+    ('Status', '-active'),
     ('Host Name', 'mirror__name'),
     ('Address', 'mirror__baseurl'),
     ('Path', 'location__path')
@@ -73,6 +73,7 @@ def uptake(request):
     return render_to_response('mirror/uptake.html', data, context_instance =
                               RequestContext(request))
 
+
 @staff_member_required
 def lstats(request):
     """Location Statistics"""
@@ -85,8 +86,9 @@ def lstats(request):
 
     if form.is_bound:
         sort_headers = SortHeaders(request, LOCATION_STATS_LIST_HEADERS)
-        products = [ int(p) for p in form.data.getlist('p') ]
+        products = [int(p) for p in form.data.getlist('p')]
         locations = LocationMirrorMap.objects \
+            .filter(active=True, mirror__active=True) \
             .filter(location__product__id__in=products) \
             .values('active', 'mirror__name', 'mirror__baseurl',
                     'location__path') \
@@ -95,8 +97,8 @@ def lstats(request):
                      'headers': list(sort_headers.headers()),
                      'use_sorttable': True,
                     })
-    return render_to_response('mirror/lstats.html', data, context_instance =
-                              RequestContext(request))
+    return render_to_response('mirror/lstats.html', data,
+                              context_instance=RequestContext(request))
 
 
 @staff_member_required
