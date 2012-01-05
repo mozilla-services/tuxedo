@@ -146,7 +146,10 @@ class LocationMirrorMap(models.Model):
     active = models.BooleanField()
 
     def __unicode__(self):
-        return "%s %s" % (self.location, self.mirror)
+        try:
+            return "%s - %s" % (self.location, self.mirror)
+        except Location.DoesNotExist:
+            return "Location %s - %s" % (self.location_id, self.mirror)
 
     class Meta:
         db_table = 'mirror_location_mirror_map'
