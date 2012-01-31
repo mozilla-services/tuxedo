@@ -147,9 +147,9 @@ class LocationMirrorMap(models.Model):
 
     def __unicode__(self):
         try:
-            return "%s - %s" % (self.location, self.mirror)
+            return u"%s - %s" % (self.location, self.mirror)
         except (Location.DoesNotExist, Mirror.DoesNotExist):
-            return "%s - %s" % (self.location_id, self.mirror_id)
+            return u"%s - %s" % (self.location_id, self.mirror_id)
 
     class Meta:
         db_table = 'mirror_location_mirror_map'
