@@ -107,6 +107,9 @@ class Location(models.Model):
     class Meta:
         db_table = 'mirror_locations'
         unique_together = ('product', 'os')
+	permissions = (
+	    ("view_uptake", "Can view mirror uptake"),
+	)
 
     def __unicode__(self):
         return self.path
