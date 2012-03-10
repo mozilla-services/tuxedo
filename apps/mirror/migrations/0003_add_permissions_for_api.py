@@ -22,7 +22,7 @@ class Migration(DataMigration):
 	for app, models in apps.iteritems():
 	    for model in models:
 		ct, created = orm['contenttypes.ContentType'].objects.get_or_create(
-		    model=model, app_label=app.lower())
+		    model=model.lower(), app_label=app.lower(), name=model)
 		for permission in ['add', 'change', 'delete']:
 		    codename = '%s_%s' % (permission, to_camel_case(model))
 		    name = u'Can %s %s' % (permission, to_camel_case(model, ' '))
