@@ -116,6 +116,25 @@ function getFallbackRegion($region_id) {
     }
 }
 
+function getGlobalFallbackProhibited($region_id) {
+    global $sdo;
+    
+    $fallback = $sdo->get_one("
+        SELECT
+            prevent_global_fallback
+        FROM
+            geoip_regions
+        WHERE
+            id = %d
+        ",array($region_id));
+        
+    if($fallback) {
+        return $fallback['prevent_global_fallback'];
+    } else {
+        return false;
+    }
+}
+
 
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
@@ -219,8 +238,10 @@ if (!empty($_GET['product'])) {
                         array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
                 }
             }
-
-            if (empty($mirrors)) {
+            
+            // If we're here we've fallen back to global
+            $fallback_global = getGlobalFallbackProhibited($client_region);
+            if (empty($mirrors) && !$fallback_global) {
                 // either no region chosen or no mirror found in the given region
                 $mirrors = $sdo->get("
                     SELECT

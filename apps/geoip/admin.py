@@ -25,7 +25,7 @@ class MirrorInline(admin.TabularInline):
 
 class RegionAdmin(admin.ModelAdmin):
     inlines = (MirrorInline,)
-    list_display = ('name', 'mirror_count', 'ratings', 'priority', 'throttle', 'fallback', 'members')
+    list_display = ('name', 'mirror_count', 'ratings', 'priority', 'throttle', 'fallback', 'prevent_global_fallback', 'members')
     list_filter = ('priority',)
     ordering = ('name',)
 admin.site.register(Region, RegionAdmin)
