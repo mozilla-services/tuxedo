@@ -52,6 +52,7 @@ class Region(models.Model):
     priority = models.IntegerField(help_text='The lower the number, the '
                                              'higher the priority')
     throttle = models.IntegerField(verbose_name='GeoIP Throttle')
+    fallback = models.ForeignKey('Region', null=True)
 
     class Meta:
         db_table = 'geoip_regions'
