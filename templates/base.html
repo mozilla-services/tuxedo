@@ -16,7 +16,7 @@
     <div id="menu">
         <ul>
             {% if user.is_authenticated %}
-            <li class="first"><a href="{% url users.views.profile %}">User Profile</a></li>
+	    <li class="first"><a href="{% url users.views.own_profile %}">User Profile</a></li>
             {% if user.is_staff %}
             <li><a href="{% url admin:index %}">Admin</a></li>
             {% endif %}

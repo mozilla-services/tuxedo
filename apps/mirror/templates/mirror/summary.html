@@ -13,7 +13,7 @@
         {% if user.get_profile.phone_number %}Phone: {{user.get_profile.phone_number}}<br/>{% endif %}
         {% if user.get_profile.ircnick %}IRC: {{user.get_profile.ircnick}}{% endif %}
     </p>
-    <p><small><a href="{% url users.views.profile %}">Edit your profile</a></small></p>
+    <p><small><a href="{% url users.views.own_profile %}">Edit your profile</a></small></p>
 </div>
 
 {% if mirrors %}
