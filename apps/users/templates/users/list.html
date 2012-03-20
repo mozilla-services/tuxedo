@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{% block title %}Edit User Profile{% endblock %}</h2>
+
+<ul>
+{% for user in users %}
+	<li><a href="{% url users.views.profile_edition user.pk %}">{{ user }}</a></li>
+{% endfor %}
+</ul>
+
+{% endblock %}

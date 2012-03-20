@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User as DjangoUser
 from django.http import HttpResponseForbidden
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
 from django.template import RequestContext
 
 from forms import DjangoUserForm, UserProfileForm
@@ -40,8 +40,15 @@ def own_profile(request):
 
 
 @permission_required('users.change_user')
-def profile_edition(request, username):
-    django_user = get_object_or_404(DjangoUser, username=username)
+def profile_edition(request, pk):
+    django_user = get_object_or_404(DjangoUser, pk=pk)
     if django_user.is_staff:
 	return HttpResponseForbidden(u'You don\'t have the permission to edit this user')
     return profile(request, django_user)
+
+
+@permission_required('users.change_user')
+def list(request):
+    users = get_list_or_404(DjangoUser, is_staff=False)
+
+    return render_to_response('users/list.html', {'users': users}, context_instance=RequestContext(request))
