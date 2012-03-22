@@ -97,6 +97,44 @@ function throttleGeoIPRegion($region_id) {
 
 }
 
+function getFallbackRegion($region_id) {
+    global $sdo;
+    
+    $fallback = $sdo->get_one("
+        SELECT
+            fallback_id
+        FROM
+            geoip_regions
+        WHERE
+            id = %d
+        ",array($region_id));
+        
+    if($fallback) {
+        return $fallback['fallback_id'];
+    } else {
+        return false;
+    }
+}
+
+function getGlobalFallbackProhibited($region_id) {
+    global $sdo;
+    
+    $fallback = $sdo->get_one("
+        SELECT
+            prevent_global_fallback
+        FROM
+            geoip_regions
+        WHERE
+            id = %d
+        ",array($region_id));
+        
+    if($fallback) {
+        return $fallback['prevent_global_fallback'];
+    } else {
+        return false;
+    }
+}
+
 
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
@@ -131,7 +169,6 @@ if (!empty($_GET['product'])) {
         AND (langs.language LIKE '%s' OR langs.language IS NULL)",
         array($product_name, $where_lang), MYSQL_NUM);
     if (!empty($buf[0])) $product_id = $buf[0]; else $product_id = null;
-
     // do we have a valid os and product?
     if (!empty($os_id) && !empty($product_id)) {
         $location = $sdo->get_one("
@@ -169,8 +206,16 @@ if (!empty($_GET['product'])) {
 
                 if (!$client_ip) $client_ip = $_SERVER['REMOTE_ADDR'];
                 $client_region = getRegionFromIP($client_ip);
+                $fallback_region = getFallbackRegion($client_region);
+                $use_this_region = throttleGeoIPRegion($client_region);
+                $region_id = false;
+                if($use_this_region && $client_region) {
+                    $region_id = $client_region;
+                } else if (!$use_this_region && $fallback_region) {
+                    $region_id = $fallback_region;
+                }
                 
-                if ($client_region && !throttleGeoIPRegion($client_region)) {
+                if ($region_id) {
                     $mirrors = $sdo->get("
                         SELECT
                             mirror_mirrors.id,
@@ -193,8 +238,10 @@ if (!empty($_GET['product'])) {
                         array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
                 }
             }
-
-            if (empty($mirrors)) {
+            
+            // If we're here we've fallen back to global
+            $fallback_global = getGlobalFallbackProhibited($client_region);
+            if (empty($mirrors) && !$fallback_global) {
                 // either no region chosen or no mirror found in the given region
                 $mirrors = $sdo->get("
                     SELECT
