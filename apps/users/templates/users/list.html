@@ -6,7 +6,7 @@
 
 <ul>
 {% for user in users %}
-	<li><a href="{% url users.views.profile_edition user.pk %}">{{ user }}</a></li>
+	<li><a href="{% url users.views.profile_edit user.pk %}">{{ user }}</a></li>
 {% endfor %}
 </ul>
 
