@@ -12,7 +12,7 @@
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url users.views.profile %}">
+<form method="post">
 <table class="formtable">
 {{ django_user_form.as_table }}
 {{ user_profile_form.as_table }}

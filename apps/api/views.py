@@ -9,7 +9,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from product_details import product_details
 
-from api.decorators import is_staff_or_basicauth, logged_in_or_basicauth
+from api.decorators import has_perm_or_basicauth, logged_in_or_basicauth
 from mirror.models import Location, Mirror, OS, Product
 
 
@@ -52,7 +52,7 @@ def docs(request, command):
                               context_instance=RequestContext(request))
 
 
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.view_uptake", HTTP_AUTH_REALM)
 @require_GET
 def uptake(request):
     """ping mirror uptake"""
@@ -121,7 +121,7 @@ def product_show(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.add_product", HTTP_AUTH_REALM)
 def product_add(request):
     """
     Add a new product to the DB
@@ -160,7 +160,7 @@ def product_add(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.delete_product", HTTP_AUTH_REALM)
 def product_delete(request):
     """Remove a product from the DB"""
     xml = XMLRenderer()
@@ -189,7 +189,7 @@ def product_delete(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.add_product_language", HTTP_AUTH_REALM)
 def product_language_add(request):
     """
     Add a language to a product.
@@ -230,7 +230,7 @@ def product_language_add(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.delete_product_language", HTTP_AUTH_REALM)
 def product_language_delete(request):
     """Delete a language from a product."""
     xml = XMLRenderer()
@@ -294,7 +294,7 @@ def location_show(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.add_location", HTTP_AUTH_REALM)
 def location_add(request):
     """
     Add a new location to the DB
@@ -334,7 +334,7 @@ def location_add(request):
 
 @require_POST
 @csrf_exempt
-@is_staff_or_basicauth(HTTP_AUTH_REALM)
+@has_perm_or_basicauth("mirror.delete_location", HTTP_AUTH_REALM)
 def location_delete(request):
     """Remove a location from the DB"""
     xml = XMLRenderer()
