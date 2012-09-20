@@ -1,5 +1,16 @@
 import os
 import site
+import sys
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+
+ALLDIRS = []
+
+ALLDIRS.append(os.path.abspath('%s/../vendor/lib/python' % current_dir))
+ALLDIRS.append(os.path.abspath('%s/../vendor/src' % current_dir))
+
+for item in ALLDIRS:
+    sys.path.append(item)
 
 import django.core.handlers.wsgi
 
