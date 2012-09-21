@@ -114,3 +114,4 @@ ALTER TABLE `mirror_lmm_lang_exceptions` ADD UNIQUE (
 ALTER TABLE `geoip_regions` ADD COLUMN `fallback_id` integer;
 ALTER TABLE `geoip_regions` ADD CONSTRAINT `fallback_id_refs_id_e6bfe66d` FOREIGN KEY (`fallback_id`) REFERENCES `geoip_regions` (`id`);
 CREATE INDEX `geoip_regions_e28329c2` ON `geoip_regions` (`fallback_id`);
+ALTER TABLE geoip_regions ADD COLUMN prevent_global_fallback int(1) NULL;
