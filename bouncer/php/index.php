@@ -148,15 +148,36 @@ if (!empty($_GET['product'])) {
     $os_name = trim(strtolower($_GET['os']));
     $product_name = trim(strtolower($_GET['product']));
 
-    require_once(LIB.'/sdo.php');
-
-    $sdo = new SDO();
-
     // if we got a language, query for it, otherwise get US English
     if (!empty($_GET['lang']))
         $where_lang = $_GET['lang'];
     else
         $where_lang = 'en-US';
+
+    // Special case for bug 398366
+    if ($product_name == 'firefox-latest') {
+        $string = file_get_contents(INC . '/product-details/json/firefox_versions.json');
+        $firefox_versions = json_decode($string);
+        $latest = $firefox_versions->{'LATEST_FIREFOX_VERSION'};
+
+        $redirect_url = WEBPATH . '?product=firefox-' . $latest .
+                        '&os=' . $os_name . '&lang=' . $where_lang;
+        // if we are just testing, then just print and exit.
+        if (!empty($_GET['print'])) {
+            show_no_cache_headers();
+            print(htmlentities('Location: ' . $redirect_url . '&print=1'));
+            exit;
+        }
+
+        // otherwise, by default, redirect them and exit
+        show_no_cache_headers();
+        header('Location: ' . $redirect_url);
+        exit;
+    }
+
+    require_once(LIB.'/sdo.php');
+
+    $sdo = new SDO();
 
     // get OS ID
     $os_id = $sdo->name_to_id('mirror_os','id','name',$os_name);
