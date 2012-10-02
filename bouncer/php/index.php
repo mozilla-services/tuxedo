@@ -135,6 +135,15 @@ function getGlobalFallbackProhibited($region_id) {
     }
 }
 
+function setHttpType($ssl_only) {
+    if ($ssl_only) {
+        $http_type = "https://";
+    } else {
+        $http_type = "http://";
+    }
+    return $http_type;
+}
+
 
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
@@ -184,12 +193,18 @@ if (!empty($_GET['product'])) {
 
     // get product for this language (if applicable)
     $buf = $sdo->get_one("
-        SELECT prod.id FROM mirror_products AS prod
+        SELECT prod.id, prod.ssl_only FROM mirror_products AS prod
         LEFT JOIN mirror_product_langs AS langs ON (prod.id = langs.product_id)
         WHERE prod.name LIKE '%s'
         AND (langs.language LIKE '%s' OR langs.language IS NULL)",
-        array($product_name, $where_lang), MYSQL_NUM);
-    if (!empty($buf[0])) $product_id = $buf[0]; else $product_id = null;
+        array($product_name, $where_lang), MYSQL_ASSOC);
+    if (!empty($buf['id'])) {
+         $product_id = $buf['id'];
+         $ssl_only = $buf['ssl_only'];
+    } else {
+        $product_id = null;
+        $ssl_only = 0;
+    }
     // do we have a valid os and product?
     if (!empty($os_id) && !empty($product_id)) {
         $location = $sdo->get_one("
@@ -201,6 +216,8 @@ if (!empty($_GET['product'])) {
             WHERE
                 product_id = %d AND 
                 os_id = %d", array($product_id, $os_id));
+
+        $client_ip = null;
 
         // did we get a valid location?
         if (!empty($location)) {
@@ -237,6 +254,7 @@ if (!empty($_GET['product'])) {
                 }
                 
                 if ($region_id) {
+                    $http_type = setHttpType($ssl_only);
                     $mirrors = $sdo->get("
                         SELECT
                             mirror_mirrors.id,
@@ -254,7 +272,8 @@ if (!empty($_GET['product'])) {
                             mirror_location_mirror_map.location_id = %d AND
                             geoip_mirror_region_map.region_id = %d AND
                             mirror_mirrors.active='1' AND 
-                            mirror_location_mirror_map.active ='1' 
+                            mirror_location_mirror_map.active ='1' AND
+                            mirror_mirrors.baseurl LIKE '$http_type%%'
                         ORDER BY rating",
                         array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
                 }
@@ -264,6 +283,7 @@ if (!empty($_GET['product'])) {
             $fallback_global = getGlobalFallbackProhibited($client_region);
             if (empty($mirrors) && !$fallback_global) {
                 // either no region chosen or no mirror found in the given region
+                $http_type = setHttpType($ssl_only);
                 $mirrors = $sdo->get("
                     SELECT
                         mirror_mirrors.id,
@@ -278,7 +298,8 @@ if (!empty($_GET['product'])) {
                         mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
                         mirror_location_mirror_map.location_id = %d AND
                         mirror_mirrors.active='1' AND 
-                        mirror_location_mirror_map.active ='1' 
+                        mirror_location_mirror_map.active ='1' AND
+                        mirror_mirrors.baseurl LIKE '$http_type%%'
                     ORDER BY rating",
                     array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
             }

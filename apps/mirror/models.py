@@ -68,7 +68,9 @@ class Product(models.Model):
     active = models.BooleanField(db_index=True, default=True)
     checknow = models.BooleanField(db_index=True, verbose_name='Check Now?',
                                    default=True)
-
+    ssl_only = models.BooleanField(db_index=False, 
+                                   verbose_name='Serve Over SSL Only?',
+                                   default=True)
     def __unicode__(self):
         return self.name
 

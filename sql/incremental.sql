@@ -115,3 +115,7 @@ ALTER TABLE `geoip_regions` ADD COLUMN `fallback_id` integer;
 ALTER TABLE `geoip_regions` ADD CONSTRAINT `fallback_id_refs_id_e6bfe66d` FOREIGN KEY (`fallback_id`) REFERENCES `geoip_regions` (`id`);
 CREATE INDEX `geoip_regions_e28329c2` ON `geoip_regions` (`fallback_id`);
 ALTER TABLE geoip_regions ADD COLUMN prevent_global_fallback int(1) NULL;
+
+-- Add SSL only support (bug 796088)
+ALTER TABLE mirror_products ADD COLUMN `ssl_only` tinyint(1) NOT NULL DEFAULT 0;
+
