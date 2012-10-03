@@ -70,7 +70,7 @@ class Product(models.Model):
                                    default=True)
     ssl_only = models.BooleanField(db_index=False, 
                                    verbose_name='Serve Over SSL Only?',
-                                   default=True)
+                                   default=False)
     def __unicode__(self):
         return self.name
 
