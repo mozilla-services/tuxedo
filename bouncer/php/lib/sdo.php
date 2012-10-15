@@ -55,7 +55,7 @@ class SDO {
 
         $details = $this->db_details[$dbtype];
 
-        $db = @mysql_connect($details['host'],$details['user'],$details['pass']);
+        $db = @mysql_pconnect($details['host'],$details['user'],$details['pass']);
         if (is_resource($db) && !@mysql_db_name($db)) { 
             @mysql_select_db($details['name'],$db);
             $this->$dbtype = $db;

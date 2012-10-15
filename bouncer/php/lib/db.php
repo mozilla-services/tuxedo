@@ -16,7 +16,7 @@ function db_connect($host='localhost',$user=null,$password=null)
 {
     static $dbh = null;
     if (!empty($host) && isset($user) && isset($password)) {
-        $dbh = @mysql_connect($host,$user,$password);
+        $dbh = @mysql_pconnect($host,$user,$password);
     }
     if (is_resource($dbh)) { 
         return $dbh; 
