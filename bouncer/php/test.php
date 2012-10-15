@@ -58,7 +58,7 @@ header('Pragma: no-cache');
 global $results;
 
 // Check Main Database
-    $dbh = @mysql_connect(DBHOST.':'.DBPORT,DBUSER,DBPASS);
+    $dbh = @mysql_pconnect(DBHOST.':'.DBPORT,DBUSER,DBPASS);
     testo('Connect to MAIN database ('.DBHOST.')', is_resource($dbh));
     testo('Select MAIN database ('.DBNAME.')', @mysql_select_db(DBNAME, $dbh));
     unset ($dbh);
