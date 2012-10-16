@@ -7,13 +7,14 @@ use locale;
 use DBI;
 use Data::Dumper;
 use LWP;
-use LWP::UserAgent;
+use LWP::UserAgent::Determined;
 use Net::DNS;
 use URI;
 
 use vars qw( $dbi::errstr );
 my $start_timestamp = time;
-my $ua = LWP::UserAgent->new;
+my %ua_options = ('keep_alive' => 5);
+my $ua = LWP::UserAgent::Determined->new(%ua_options);
 $ua->timeout(5);
 $ua->agent("Mozilla Mirror Monitor/1.0");
 
@@ -77,6 +78,7 @@ $log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror
 $getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
 $updatelog_sql = qq{UPDATE sentry_log SET reason=? WHERE log_date=FROM_UNIXTIME(?) AND mirror_id=?};
 $updaterating_sql = qq{UPDATE mirror_mirrors SET rating = ? WHERE id = ?};
+$logratingchange_sql = qq{INSERT INTO django_admin_log (action_time, user_id, content_type_id, object_id, object_repr, action_flag, change_message) VALUES (NOW(), 32, 16, ?, ?, 2, ?)};
 
 my $location_sth = $dbh->prepare($location_sql);
 my $mirror_sth = $dbh->prepare($mirror_sql);
@@ -86,6 +88,7 @@ my $log_sth = $dbh->prepare($log_sql);
 my $getlog_sth = $dbh->prepare($getlog_sql);
 my $updatelog_sth = $dbh->prepare($updatelog_sql);
 my $updaterating_sth = $dbh->prepare($updaterating_sql);
+my $logratingchange_sth = $dbh->prepare($logratingchange_sql);
 
 # populate a product and os hash if we're debugging stuff
 # this way we don't have to make too many selects against the DB
@@ -145,6 +148,13 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
         next;
     }
+    else {
+        my $answerpacket = $netres->query($domain);
+        my @answer = $answerpacket->answer;
+        foreach my $line (@answer) {
+            log_this $line->string . "\n";
+        }
+    }
 
     # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
     # we do not allow simple_request because the root of a mirror could return a redirect
@@ -174,6 +184,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
                 $newweight = $mirror->{rating} - int($mirror->{rating} * 0.10);
                 log_this "**** $mirror->{baseurl} Weight change $mirror->{rating} -> $newweight\n";
                 $updaterating_sth->execute($newweight, $mirror->{id});
+                $logratingchange_sth->execute($mirror->{id}, $mirror->{name}, "Changed rating to $newweight.");
             } else {
                 log_this "Pattern OK, leaving weight unchanged.\n";
             }
@@ -200,6 +211,12 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
     foreach my $location (@locations) {
 
+        if (($ARGV[0] eq 'checknow') && ((time - $start_timestamp) > 360)) {
+            log_this "*** $mirror->{baseurl} took longer than 6 minutes to execute file checks ... assuming host is overloaded and pulling it out.\n";
+            $failed_mirror_sth->execute($mirror->{id});
+            $log_sth->execute($start_timestamp, $mirror->{id}, '0', $mirror->{rating}, $output);
+            exit;
+        }
         my $filepath = $location->{path};
         if (($filepath =~ m!/firefox/!)
             && ($filepath !~ m!/namoroka/!)
@@ -219,7 +236,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             }
         }
         elsif ($filepath =~ m!/seamonkey/!) {
-	    if ($filepath =~ m!2\.0\.5!) {
+        if (($filepath =~ m!2\.0\.5!) || ($filepath =~ m!2\.0\.6!)) {
             	$filepath =~ s@:lang@zh-CN@;
 	    }
 	    else {
@@ -233,7 +250,11 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         }
         log_this "Checking $filepath... ";
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
-        my $res = $ua->simple_request($req);
+
+        # allow 1 redirect
+        $ua->max_redirect(1);
+
+        my $res = $ua->request($req);
 
         if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
             log_this "okay.\n";

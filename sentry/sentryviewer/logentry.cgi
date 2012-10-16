@@ -29,7 +29,7 @@ my $timestamp = $cgi->param("time");
 $::ENV{PATH} = "/usr/bin:/bin"; # for `` from taint mode
 my $timezone = `/bin/date +\%Z`;
 chomp $timezone;
-my $mqh = $dbh->prepare("SELECT name, baseurl FROM mirror_mirrors WHERE mirror_id=?");
+my $mqh = $dbh->prepare("SELECT name, baseurl FROM mirror_mirrors WHERE id=?");
 $mqh->execute($id);
 my ($mirror_name, $baseurl) = $mqh->fetchrow_array();
 my $qh = $dbh->prepare("SELECT reason FROM sentry_log WHERE mirror_id=? AND check_time=?");
