@@ -22,7 +22,7 @@ $num_children = 16;
 do "sentry.cfg";
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host",$user,$pass) or die "Connecting : $dbi::errstr\n";
-$mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
+$mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY rating DESC};
 my $mirror_sth = $dbh->prepare($mirror_sql);
 $mirror_sth->execute();
 
@@ -45,7 +45,6 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     } else {
         die "couldn't fork: $!\n";
     }
-    sleep 1; # wait a second between each spawn so we don't hose the system by spawning all children at once
 
     # if max. number was reached, wait before forking more children
     if (++$forked_children >= $num_children) {
