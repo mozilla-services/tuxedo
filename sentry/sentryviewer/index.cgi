@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl -w
 
 use DBI;
 use Date::Format;
@@ -10,42 +10,22 @@ my $dbuser = "";
 my $dbpass = "";
 my $dsn = "dbi:mysql:host=$host;database=$dbname";
 my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {});
+$dbh->do("SET NAMES utf8");
 
 # [ product name, product regexp, throttle warn level, throttle critical level ]
-my @productlist = (
-  ["Firefox 3.6.3", "^Firefox-3\\.6\\.3(-|\$)", 15000, 8000],
-  ["Firefox 3.5.9", "^Firefox-3\\.5\\.9(-|\$)", 45000, 35000],
-  ["Firefox 3.0.19", "^Firefox-3\\.0\\.19(-|\$)", 45000, 35000],
-  ["SeaMonkey 2.0.4", "^Seamonkey-2\\.0\\.4(-|\$)", 15000, 8000],
-  ["Thunderbird 3.0.4", "^Thunderbird-3\\.0\\.4(-|\$)", 15000, 8000],
-);
+# PRODUCT LIST IS NOW IN THE generateuptake.pl FILE
+$::ENV{PATH} = '/usr/bin:/bin';
+our ($productlist, $regions, $uptake);
+my $uptakedata = `cat /usr/share/nagios/sentry/currentuptake.txt`;
+#($uptakedata) = $uptakedata =~ /^(.*)$/;
+#print "DEBUG: $uptakedata\n";
+eval $uptakedata;
+my @productlist = @$productlist;
 
-my $uptakequery = "SELECT MIN(t.available) from (SELECT 
-    SUM( m.rating ) as available,
-    (
-        SELECT SUM( rating )
-        FROM mirror_mirrors
-        WHERE active = '1' 
-    ) as total,
-    (   100 * SUM( m.rating )/
-        (
-            SELECT SUM( rating )
-            FROM mirror_mirrors
-            WHERE active = '1' 
-        )
-    ) as percentage,
-    p.name as product_name,
-    o.name as os_name
-    FROM mirror_mirrors m
-    JOIN mirror_location_mirror_map lmm ON lmm.mirror_id = m.id
-    JOIN mirror_locations l ON l.id = lmm.location_id
-    JOIN mirror_products p ON p.id = l.product_id
-    JOIN mirror_os o ON o.id = l.os_id
-    WHERE lmm.active = '1' AND m.active = '1'
-    AND p.name REGEXP ?
-    AND o.name = 'win'
-    GROUP BY lmm.location_id) as t";
-my $uptakeqh = $dbh->prepare($uptakequery);
+#use Data::Dumper;
+#print Data::Dumper::Dumper(\@productlist);
+#exit;
+
 
 my $query = "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(log_date) - (UNIX_TIMESTAMP(log_date) % 300))) AS log_run,
        check_time,
@@ -54,7 +34,7 @@ my $query = "SELECT FROM_UNIXTIME((UNIX_TIMESTAMP(log_date) - (UNIX_TIMESTAMP(lo
        sentry_log.mirror_id,
        sentry_log.mirror_active,
        sentry_log.mirror_rating,
-       LEFT(reason,20)
+       LEFT(reason,160)
 FROM sentry_log
      INNER JOIN mirror_mirrors ON sentry_log.mirror_id = mirror_mirrors.id
 WHERE log_date > NOW() - INTERVAL 2 HOUR
@@ -103,11 +83,13 @@ Refresh: 150;
 <html>
 <head>
 <title>Sentry log overview</title>
+<link rel="shortcut icon" type="image/png" href="favicon.ico" />
 <style type="text/css"><!--
 table { border: solid black 1px; padding: 0px; }
 td { border: solid black 1px; font-family: sans-serif; font-size: xx-small; white-space: nowrap; }
 td.active { background-color: #9f9; }
 td.inactive { background-color: #f99; }
+td.redirected { background-color: #f9f; }
 td.dnsfail { background-color: #99f; }
 tr:hover td { border: solid yellow 1px; }
 td.good { background-color: #9f9; }
@@ -118,11 +100,57 @@ tr.divider td { background-color: black; height: 4px; font-size: 1px; }
 // --></style>
 </head>
 <body>
+<h3>Product Uptake</h3>
+
+<p>There are region overlaps, so the sum of all regions will be much higher than the global total.  For example, the CDN-type mirrors each serve multiple regions.</p>
+<p>
+<span style="background-color: #faa">Definitely not enough</span>
+<span style="background-color: yellow">Should probably consider throttling</span>
+<span style="background-color: #afa">Good for release traffic</span>
+</p>
+
+<table>
+EOF
+
+print "<tr><td><b>Product</b></td><td><b>Global</b></td>";
+for my $region (sort keys %$regions) {
+    print "<td><b>$region</b></td>";
+}
+print "</tr>\n";
+print "<tr><td><b>Percent of traffic remains in-region:</b></tf><td></td>";
+for my $region (sort keys %$regions) {
+    print "<td><b>" . $regions->{$region}->{'throttle'} . "</b></td>";
+}
+print "<tr><td><b>Active and available aggregate weight:</b></td><td></td>";
+for my $region (sort keys %$regions) {
+    print "<td><b>" . $regions->{$region}->{'activeweight'} . "</b></td>";
+}
+print "</tr>\n";
+for my $productitem (@productlist) {
+  my ($product, $productregexp, $throttlewarn, $throttlecrit) = @$productitem;
+  my $thisuptake = $uptake->{$product}->{'Global'};
+  print "</tr>\n<tr><td>$product Uptake ($throttlewarn to stay unthrottled)</td>";
+  {
+    my $class = "good";
+    if ($thisuptake < $throttlewarn) { $class = "ok" };
+    if ($thisuptake < $throttlecrit) { $class = "poor" };
+    print qq{<td class="$class" title="$class">} . $thisuptake . "</td>";
+  }
+  foreach my $region (sort keys %$regions) {
+    my ($uptakebyregion) = $uptake->{$product}->{$region} || "";
+    print qq{<td>$uptakebyregion</td>};
+  }
+  print "</tr>\n";
+}
+
+print <<EOF;
+</table>
 <h3>Sentry check stats for the last 2 hours</h3>
 <p>Newest checks are on the left.  Note that the most-recent column is often incomplete if checks are still running.  The number inside the colored square is that server's weight at the time of the check.</p>
 <p>
 <span style="background-color: #faa">Response timeout or connection failure</span>
 <span style="background-color: #aaf">DNS lookup failure</span>
+<span style="background-color: #faf">Server redirects us somewhere else</span>
 <span style="background-color: #afa">Active and responsive</span>
 </p>
 <table>
@@ -148,24 +176,8 @@ foreach my $timestamp (reverse sort keys %seentime) {
   if ($activeweight{$timestamp} < $productlist[0][3]) { $class = "poor" };
   print qq{<td class="$class" title="$class">} . $activeweight{$timestamp} . "</td>";
 }
-for my $productitem (@productlist) {
-  my ($product, $productregexp, $throttlewarn, $throttlecrit) = @$productitem;
-  $uptakeqh->execute($productregexp);
-  my ($uptake) = $uptakeqh->fetchrow_array();
-  print "</tr>\n<tr><td>$product Uptake ($throttlewarn to stay unthrottled)</td>";
-  {
-    my $class = "good";
-    if ($uptake < $throttlewarn) { $class = "ok" };
-    if ($uptake < $throttlecrit) { $class = "poor" };
-    print qq{<td class="$class" title="$class">} . $uptake . "</td>";
-  }
-  my $colcount = scalar(keys %seentime);
-  $colcount--;
-  print "<td>&nbsp;</td>" x $colcount;
-  print "</tr>\n";
-}
+
 print qq{</tr>\n<tr class="divider"><td>&nbsp;</td>};
-print "<td>&nbsp;</td>" x scalar(keys %seentime);
 print "</tr>\n";
 
 foreach my $url (reverse sort { $weight{$a} <=> $weight{$b} } keys %byhost) {
@@ -178,6 +190,12 @@ foreach my $url (reverse sort { $weight{$a} <=> $weight{$b} } keys %byhost) {
       my $reason = $byhost{$url}->{$timestamp}->{"reason"} || "Active and responsive";
       my $rating = $byhost{$url}->{$timestamp}->{"rating"};
       if ($byhost{$url}->{$timestamp}->{reason} =~ /DNS/i) { $class = "dnsfail" }
+      if ($byhost{$url}->{$timestamp}->{reason} =~ /returned error 3/im) {
+        $class = "redirected";
+        $reason =~ s/^.*?returned error 3\d\d \(//;
+        $reason =~ s/\).*/ - click for details/s;
+        $reason =~ s/redirect to/redirects to/;
+      }
       if ($class eq 'active') {
         $reason = "Click for full report";
       }

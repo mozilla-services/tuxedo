@@ -7,6 +7,7 @@ dbuser = "";
 dbpass = "";
 
 print "Content-type: text/csv; charset=utf-8"
+print "Content-disposition: attachment; name=mozillamirrors.csv"
 print
 print "# mirror_id, mirror_name, mirror_baseurl, mirror_rating, mirror_active"
 
