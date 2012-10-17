@@ -236,12 +236,12 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             }
         }
         elsif ($filepath =~ m!/seamonkey/!) {
-        if (($filepath =~ m!2\.0\.5!) || ($filepath =~ m!2\.0\.6!)) {
-            	$filepath =~ s@:lang@zh-CN@;
-	    }
-	    else {
-		$filepath =~ s@:lang@tr@;
-	    }
+            if (($filepath =~ m!2\.0\.5!) || ($filepath =~ m!2\.0\.6!)) {
+                $filepath =~ s@:lang@zh-CN@;
+	        }
+	        else {
+                $filepath =~ s@:lang@tr@;
+	        }
         }
         elsif ($filepath =~ m!-euballot/!i) {
             $filepath =~ s@:lang@sv-SE@;

@@ -45,8 +45,6 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     } else {
         die "couldn't fork: $!\n";
     }
-    # don't need to sleep anymore because of the $num_children check.
-    #sleep 1; # wait a second between each spawn so we don't hose the system by spawning all children at once
 
     # if max. number was reached, wait before forking more children
     if (++$forked_children >= $num_children) {
