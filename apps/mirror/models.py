@@ -149,6 +149,7 @@ class LocationMirrorMap(models.Model):
     location = models.ForeignKey('Location')
     mirror = models.ForeignKey('Mirror')
     active = models.BooleanField()
+    healthy = models.BooleanField()
 
     def __unicode__(self):
         try:

@@ -119,3 +119,5 @@ ALTER TABLE geoip_regions ADD COLUMN prevent_global_fallback int(1) NULL;
 -- Add SSL only support (bug 796088)
 ALTER TABLE mirror_products ADD COLUMN `ssl_only` tinyint(1) NOT NULL DEFAULT 0;
 
+-- Add healthy column for additional bouncer support (bug 804347)
+ALTER TABLE mirror_location_mirror_map ADD COLUMN healthy tinyint(4) NOT NULL DEFAULT 1;

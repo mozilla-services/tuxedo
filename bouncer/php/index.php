@@ -273,9 +273,35 @@ if (!empty($_GET['product'])) {
                             geoip_mirror_region_map.region_id = %d AND
                             mirror_mirrors.active='1' AND 
                             mirror_location_mirror_map.active ='1' AND
+                            mirror_location_mirror_map.healthy = '1' AND
                             mirror_mirrors.baseurl LIKE '$http_type%%'
                         ORDER BY rating",
                         array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
+                    
+                        if (!$mirrors) {
+                            $mirrors = $sdo->get("
+                                SELECT
+                                    mirror_mirrors.id,
+                                    baseurl,
+                                    rating
+                                FROM 
+                                    mirror_mirrors
+                                JOIN
+                                    mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
+                                LEFT JOIN
+                                    mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
+                                INNER JOIN
+                                    geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
+                                WHERE
+                                    mirror_location_mirror_map.location_id = %d AND
+                                    geoip_mirror_region_map.region_id = %d AND
+                                    mirror_mirrors.active='1' AND 
+                                    mirror_location_mirror_map.active ='1' AND
+                                    mirror_location_mirror_map.healthy = '0' AND
+                                    mirror_mirrors.baseurl LIKE '$http_type%%'
+                                ORDER BY rating",
+                                array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
+                        }
                 }
             }
             
@@ -299,9 +325,32 @@ if (!empty($_GET['product'])) {
                         mirror_location_mirror_map.location_id = %d AND
                         mirror_mirrors.active='1' AND 
                         mirror_location_mirror_map.active ='1' AND
+                        mirror_location_mirror_map.healthy = '1' AND
                         mirror_mirrors.baseurl LIKE '$http_type%%'
                     ORDER BY rating",
                     array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
+                
+                if(!$mirrors) {
+                    $mirrors = $sdo->get("
+                        SELECT
+                            mirror_mirrors.id,
+                            baseurl,
+                            rating
+                        FROM 
+                            mirror_mirrors,
+                            mirror_location_mirror_map
+                        LEFT JOIN
+                            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
+                        WHERE
+                            mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
+                            mirror_location_mirror_map.location_id = %d AND
+                            mirror_mirrors.active='1' AND 
+                            mirror_location_mirror_map.active ='1' AND
+                            mirror_location_mirror_map.healthy = '0' AND
+                            mirror_mirrors.baseurl LIKE '$http_type%%'
+                        ORDER BY rating",
+                        array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
+                }
             }
 
             $mirrors_rand = array();

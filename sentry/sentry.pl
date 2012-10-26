@@ -72,8 +72,8 @@ if (defined($ARGV[0]) and ($ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall')) {
     $location_sql = qq{SELECT mirror_locations.* FROM mirror_locations INNER JOIN mirror_products ON mirror_locations.product_id = mirror_products.id WHERE mirror_products.active='1'};
     $mirror_sql = qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
 }
-$update_sql = qq{INSERT INTO mirror_location_mirror_map (location_id, mirror_id, active) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE active=VALUES(active)};
-$failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET active='0' WHERE mirror_id=?};
+$update_sql = qq{INSERT INTO mirror_location_mirror_map (location_id, mirror_id, active, healthy) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active=VALUES(active), healthy=VALUES(healthy)};
+$failed_mirror_sql = qq{UPDATE mirror_location_mirror_map SET healthy='0' WHERE mirror_id=?};
 $log_sql = qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
 $getlog_sql = qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
 $updatelog_sql = qq{UPDATE sentry_log SET reason=? WHERE log_date=FROM_UNIXTIME(?) AND mirror_id=?};
@@ -133,6 +133,8 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     #
     # we also only want to check the domain if the host is NOT a straight IP address
     # since for some reason Net::DNS::query still tries to resolve IP addresses (dumb).
+    #
+    # Unhealthy, not fatal.
     if ($domain !~ m($ipregex) && !$netres->query($domain)) {
         log_this "DNS resolution for $mirror->{mirror_name} FAILED!  Moving on to next mirror.\n";
         $failed_mirror_sth->execute($mirror->{id});
@@ -162,6 +164,8 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     my $mirrorRes = $ua->request($mirrorReq);
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
+    #
+    # Unhealthy, not fatal.
     if ( $mirrorRes->{_rc}>=500 ) {
         if ( $mirrorRes->{_rc} == 500 ) {
             log_this "$mirror->{baseurl} sent no response after " . $ua->timeout() . " seconds!  Checking recent history...\n";
@@ -258,22 +262,17 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
         if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
             log_this "okay.\n";
-            $update_sth->execute($location->{id}, $mirror->{id}, '1');
+            $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
+        }
+        elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
+            $deactivate_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
             log_this "FAILED. rc=" . $res->{_rc} . "\n";
-            $update_sth->execute($location->{id}, $mirror->{id}, '0');
+            $update_sth->execute($location->{id}, $mirror->{id}, '1', '0');
         }
 
         # content-type == text/plain hack here for Mac dmg's
-        if ($res->{_rc} == 200) {
-            foreach my $exten (keys %content_type) {
-                if ( $location->{path} =~ m/.*\.$exten$/ && $res->{_headers}->{'content-type'} !~ /\Q$content_type{$exten}\E/ ) {
-                    log_this " -> FAILED due to content-type mis-match, expected '$content_type{$exten}', got '$res->{_headers}->{'content-type'}'\n";
-                    $update_sth->execute($location->{id}, $mirror->{id}, '0');
-                }
-            }
-        }
     }
     $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
 }
