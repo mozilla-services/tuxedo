@@ -1,5 +1,5 @@
 <?php
-// $Id: parse_error_test.php,v 1.4 2007/05/08 22:08:06 lastcraft Exp $
+// $Id: parse_error_test.php 1509 2007-05-08 22:11:49Z lastcraft $
 require_once('../unit_tester.php');
 require_once('../reporter.php');
 
