@@ -10,8 +10,9 @@ require_once('./cfg/config.php');  // config file that defines constants
  * Echo proper headers for ensuring no caching of redirects.
  */
 function show_no_cache_headers() {
-    header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0, private');
-    header('Pragma: no-cache');
+    //    header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0, private');
+    //    header('Pragma: no-cache');
+    header('Cache-Control: max-age=15');
 }
 
 /**
