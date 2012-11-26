@@ -15,7 +15,7 @@ use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my %ua_options = ('keep_alive' => 5);
 my $ua = LWP::UserAgent::Determined->new(%ua_options);
-$ua->timeout(5);
+$ua->timeout(10);
 $ua->agent("Mozilla Mirror Monitor/1.0");
 
 my $netres = Net::DNS::Resolver->new();
