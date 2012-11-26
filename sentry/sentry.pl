@@ -265,6 +265,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
         }
         elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
+            log_this "FAILED. rc=" . $res->{_rc} . "\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
