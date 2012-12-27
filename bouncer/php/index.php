@@ -219,7 +219,8 @@ if (!empty($_GET['product'])) {
                 os_id = %d", array($product_id, $os_id));
 
         $client_ip = null;
-
+        $fallback_global = FALSE; // False means we WILL fall back.
+        
         // did we get a valid location?
         if (!empty($location)) {
             $mirrors = false;
@@ -304,11 +305,15 @@ if (!empty($_GET['product'])) {
                                 array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
                         }
                 }
+                
+                
             }
             
             // If we're here we've fallen back to global
-            $fallback_global = getGlobalFallbackProhibited($client_region);
             if (empty($mirrors) && !$fallback_global) {
+                if (GEOIP) {
+                    $fallback_global = getGlobalFallbackProhibited($client_region);
+                }
                 // either no region chosen or no mirror found in the given region
                 $http_type = setHttpType($ssl_only);
                 $mirrors = $sdo->get("
