@@ -15,7 +15,7 @@ use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my %ua_options = ('keep_alive' => 5);
 my $ua = LWP::UserAgent::Determined->new(%ua_options);
-$ua->timeout(5);
+$ua->timeout(10);
 $ua->agent("Mozilla Mirror Monitor/1.0");
 
 my $netres = Net::DNS::Resolver->new();
@@ -265,7 +265,8 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
         }
         elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
-            $deactivate_sth->execute($location->{id}, $mirror->{id}, '0', '0');
+            log_this "FAILED. rc=" . $res->{_rc} . "\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
             log_this "FAILED. rc=" . $res->{_rc} . "\n";

@@ -5,6 +5,7 @@
  *	@subpackage pub
  */
 require_once('./cfg/config.php');  // config file that defines constants
+
 require_once('./functions.php'); // The functions
 
 // if we don't have an os, make it windows, playing the odds
