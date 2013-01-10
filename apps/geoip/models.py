@@ -33,12 +33,20 @@ class IPBlock(models.Model):
     def ip_start_addr(self):
         return ipaddr.IPAddress(self.ip_start).compressed
 
+    @ip_start_addr.setter
+    def ip_start_addr(self, value):
+        self.ip_start = int(ipaddr.IPAddress(value))
+
     @property
     def ip_end_addr(self):
         return ipaddr.IPAddress(self.ip_end).compressed
 
+    @ip_end_addr.setter
+    def ip_end_addr(self, value):
+        self.ip_end = int(ipaddr.IPAddress(value))
+
     def __unicode__(self):
-       return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
+        return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
 
     class Meta:
         db_table = 'geoip_ip_to_country'
