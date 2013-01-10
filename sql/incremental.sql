@@ -121,3 +121,6 @@ ALTER TABLE mirror_products ADD COLUMN `ssl_only` tinyint(1) NOT NULL DEFAULT 0;
 
 -- Add healthy column for additional bouncer support (bug 804347)
 ALTER TABLE mirror_location_mirror_map ADD COLUMN healthy tinyint(4) NOT NULL DEFAULT 1;
+
+-- more space for sentry logs (bug 777516)
+ALTER TABLE `sentry_log` MODIFY `reason` MEDIUMTEXT;
