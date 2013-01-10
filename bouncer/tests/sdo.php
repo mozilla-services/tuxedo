@@ -120,6 +120,6 @@ class SDOTest extends UnitTestCase {
     }
 }
 
-$test = &new SDOTest();
+$test = new SDOTest();
 $test->run(new TextReporter());
 ?>

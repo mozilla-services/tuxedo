@@ -6,145 +6,7 @@
  */
 require_once('./cfg/config.php');  // config file that defines constants
 
-/**
- * Echo proper headers for ensuring no caching of redirects.
- */
-function show_no_cache_headers() {
-    //    header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0, private');
-    //    header('Pragma: no-cache');
-    header('Cache-Control: max-age=15');
-}
-
-/**
- * Get a random element from an array based on weighted array values.
- * @param array $array array of val => weight pairings
- * @param int $sum total of added weightings
- * @return bool value of randomly selected element
- */
-function getRandElement( $array, $sum ) {
-    $tot_prob = $sum;
-    foreach ( $array as $element => $element_prob ) {
-        if ( mt_rand( 1, $tot_prob ) <= $element_prob ) {
-            return $element;
-        } else {
-            $tot_prob -= $element_prob;
-        }
-    }
-    return 0;
-}
-
-/**
- * GeoIP: For a given IP address, get the associated region ID it is in.
- * @param string $ip IP address in dotted quad format
- * @return mixed region ID (int) or false if no region assigned or error
- */
-function getRegionFromIP($ip) {
-    global $sdo;
-
-    $region = $sdo->get_one("
-        SELECT
-            cty.region_id
-        FROM
-            geoip_country_to_region AS cty
-        INNER JOIN
-            geoip_ip_to_country AS ip
-            ON 
-            ip.country_code = cty.country_code AND
-            ip_end = ( SELECT MIN(ip_end) FROM geoip_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
-            ip_start <= INET_ATON('%s')
-        ",array($ip, $ip));
-    
-    if ($region)
-        return $region['region_id'];
-    else
-        return false;
-}
-
-/**
- * GeoIP: For a given region id do any throttling for the region
- * @param int $region_id a region id
- * @return boolean should this request come from the clients region? false = yes true = no
- */
-function throttleGeoIPRegion($region_id) {
-    global $sdo;
-
-    $region_throttle = $sdo->get_one("
-        SELECT
-            throttle
-        FROM
-            geoip_regions
-        WHERE
-            id = %d
-        ",array($region_id));
-    
-    $region_throttle = $region_throttle['throttle'];
-
-    // Don't throttle the user if the throttle is invalid.
-    if ( $region_throttle == 100 || $region_throttle > 100 || $region_throttle < 0 ) {
-        return false;
-    } else {
-        /* Ex: Thottle is at 25% GeoIP
-          A random number from 1 to 100 will be less than or equal to 25 25% or the time.
-          100 will always be greater than or equal to a random number between 1 and 100
-          0 will never be greater than or equal to a random number between 1 and 100
-        */
-        if ( $region_throttle >= mt_rand(1,100) ) {
-            return false;
-        } else {
-            return true;
-        }
-        
-    }
-
-}
-
-function getFallbackRegion($region_id) {
-    global $sdo;
-    
-    $fallback = $sdo->get_one("
-        SELECT
-            fallback_id
-        FROM
-            geoip_regions
-        WHERE
-            id = %d
-        ",array($region_id));
-        
-    if($fallback) {
-        return $fallback['fallback_id'];
-    } else {
-        return false;
-    }
-}
-
-function getGlobalFallbackProhibited($region_id) {
-    global $sdo;
-    
-    $fallback = $sdo->get_one("
-        SELECT
-            prevent_global_fallback
-        FROM
-            geoip_regions
-        WHERE
-            id = %d
-        ",array($region_id));
-        
-    if($fallback) {
-        return $fallback['prevent_global_fallback'];
-    } else {
-        return false;
-    }
-}
-
-function setHttpType($ssl_only) {
-    if ($ssl_only) {
-        $http_type = "https://";
-    } else {
-        $http_type = "http://";
-    }
-    return $http_type;
-}
-
+require_once('./functions.php'); // The functions
 
 // if we don't have an os, make it windows, playing the odds
 if (empty($_GET['os'])) {
@@ -245,9 +107,9 @@ if (!empty($_GET['product'])) {
                 }
 
                 if (!$client_ip) $client_ip = $_SERVER['REMOTE_ADDR'];
-                $client_region = getRegionFromIP($client_ip);
-                $fallback_region = getFallbackRegion($client_region);
-                $use_this_region = throttleGeoIPRegion($client_region);
+                $client_region = getRegionFromIP($sdo, $client_ip);
+                $fallback_region = getFallbackRegion($sdo, $client_region);
+                $use_this_region = throttleGeoIPRegion($sdo, $client_region);
                 $region_id = false;
                 if($use_this_region && $client_region) {
                     $region_id = $client_region;
@@ -257,106 +119,18 @@ if (!empty($_GET['product'])) {
                 
                 if ($region_id) {
                     $http_type = setHttpType($ssl_only);
-                    $mirrors = $sdo->get("
-                        SELECT
-                            mirror_mirrors.id,
-                            baseurl,
-                            rating
-                        FROM 
-                            mirror_mirrors
-                        JOIN
-                            mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
-                        LEFT JOIN
-                            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
-                        INNER JOIN
-                            geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
-                        WHERE
-                            mirror_location_mirror_map.location_id = %d AND
-                            geoip_mirror_region_map.region_id = %d AND
-                            mirror_mirrors.active='1' AND 
-                            mirror_location_mirror_map.active ='1' AND
-                            mirror_location_mirror_map.healthy = '1' AND
-                            mirror_mirrors.baseurl LIKE '$http_type%%'
-                        ORDER BY rating",
-                        array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
-                    
-                        if (!$mirrors) {
-                            $mirrors = $sdo->get("
-                                SELECT
-                                    mirror_mirrors.id,
-                                    baseurl,
-                                    rating
-                                FROM 
-                                    mirror_mirrors
-                                JOIN
-                                    mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
-                                LEFT JOIN
-                                    mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
-                                INNER JOIN
-                                    geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
-                                WHERE
-                                    mirror_location_mirror_map.location_id = %d AND
-                                    geoip_mirror_region_map.region_id = %d AND
-                                    mirror_mirrors.active='1' AND 
-                                    mirror_location_mirror_map.active ='1' AND
-                                    mirror_location_mirror_map.healthy = '0' AND
-                                    mirror_mirrors.baseurl LIKE '$http_type%%'
-                                ORDER BY rating",
-                                array($where_lang, $location['id'], $client_region), MYSQL_ASSOC, 'id');
-                        }
+                    $mirrors = queryForMirrors($sdo, $http_type, $where_lang, $location['id'], $client_region);
                 }
-                
-                
             }
             
             // If we're here we've fallen back to global
             if (empty($mirrors) && !$fallback_global) {
                 if (GEOIP) {
-                    $fallback_global = getGlobalFallbackProhibited($client_region);
+                    $fallback_global = getGlobalFallbackProhibited($sdo, $client_region);
                 }
                 // either no region chosen or no mirror found in the given region
                 $http_type = setHttpType($ssl_only);
-                $mirrors = $sdo->get("
-                    SELECT
-                        mirror_mirrors.id,
-                        baseurl,
-                        rating
-                    FROM 
-                        mirror_mirrors,
-                        mirror_location_mirror_map
-                    LEFT JOIN
-                        mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
-                    WHERE
-                        mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
-                        mirror_location_mirror_map.location_id = %d AND
-                        mirror_mirrors.active='1' AND 
-                        mirror_location_mirror_map.active ='1' AND
-                        mirror_location_mirror_map.healthy = '1' AND
-                        mirror_mirrors.baseurl LIKE '$http_type%%'
-                    ORDER BY rating",
-                    array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
-                
-                if(!$mirrors) {
-                    $mirrors = $sdo->get("
-                        SELECT
-                            mirror_mirrors.id,
-                            baseurl,
-                            rating
-                        FROM 
-                            mirror_mirrors,
-                            mirror_location_mirror_map
-                        LEFT JOIN
-                            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
-                        WHERE
-                            mirror_mirrors.id = mirror_location_mirror_map.mirror_id AND
-                            mirror_location_mirror_map.location_id = %d AND
-                            mirror_mirrors.active='1' AND 
-                            mirror_location_mirror_map.active ='1' AND
-                            mirror_location_mirror_map.healthy = '0' AND
-                            mirror_mirrors.baseurl LIKE '$http_type%%'
-                        ORDER BY rating",
-                        array($where_lang, $location['id']), MYSQL_ASSOC, 'id');
-                }
+                $mirrors = queryForMirrors($sdo, $http_type, $where_lang, $location['id']);
             }
 
             $mirrors_rand = array();
