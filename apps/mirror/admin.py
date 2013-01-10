@@ -34,8 +34,8 @@ class ProductLanguageInline(admin.TabularInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'priority', 'count', 'active', 'checknow')
-    list_filter = ('active', 'checknow')
+    list_display = ('name', 'priority', 'count', 'active', 'checknow', 'ssl_only')
+    list_filter = ('active', 'checknow', 'ssl_only')
     ordering = ('name',)
     actions = ('mark_for_checknow',)
     inlines = [ProductLanguageInline]
