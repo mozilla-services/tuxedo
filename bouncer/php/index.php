@@ -5,7 +5,6 @@
  *	@subpackage pub
  */
 require_once('./cfg/config.php');  // config file that defines constants
-
 require_once('./functions.php'); // The functions
 
 // if we don't have an os, make it windows, playing the odds
@@ -46,21 +45,29 @@ if (!empty($_GET['product'])) {
         header('Location: ' . $redirect_url);
         exit;
     }
-
-    require_once(LIB.'/sdo.php');
-
-    $sdo = new SDO();
+    
+    require_once(LIB.'/sdo2.php');
+    require_once(LIB.'/memcaching.php');
+    $mc = new Memcaching();
+    
+    $dbwrite = array(
+        'host' => DBHOST,
+        'name' => DBNAME,
+        'user' => DBUSER,
+        'pass' => DBPASS,
+    );
+    $sdo = new SDO2($mc, $dbwrite);
 
     // get OS ID
-    $os_id = $sdo->name_to_id('mirror_os','id','name',$os_name);
+    $os_id = name_to_id($sdo, 'mirror_os','id','name',$os_name);
 
     // get product for this language (if applicable)
     $buf = $sdo->get_one("
         SELECT prod.id, prod.ssl_only FROM mirror_products AS prod
         LEFT JOIN mirror_product_langs AS langs ON (prod.id = langs.product_id)
-        WHERE prod.name LIKE '%s'
-        AND (langs.language LIKE '%s' OR langs.language IS NULL)",
-        array($product_name, $where_lang), MYSQL_ASSOC);
+        WHERE prod.name LIKE ?
+        AND (langs.language LIKE ? OR langs.language IS NULL)",
+        array($product_name, $where_lang), SDO2::FETCH_ASSOC);
     if (!empty($buf['id'])) {
          $product_id = $buf['id'];
          $ssl_only = $buf['ssl_only'];
@@ -77,8 +84,8 @@ if (!empty($_GET['product'])) {
             FROM
                 mirror_locations
             WHERE
-                product_id = %d AND 
-                os_id = %d", array($product_id, $os_id));
+                product_id = ? AND 
+                os_id = ?", array($product_id, $os_id));
 
         $client_ip = null;
         $fallback_global = FALSE; // False means we WILL fall back.
@@ -149,8 +156,8 @@ if (!empty($_GET['product'])) {
 
                 // if logging is enabled, insert log
                 if (LOGGING) {
-                    $sdo->query("UPDATE mirror_mirrors SET count=count+1 WHERE id = %d",array($mirror['id']),false);
-                    $sdo->query("UPDATE mirror_products SET count=count+1 WHERE id = %d",array($product_id),false);
+                    $sdo->query("UPDATE mirror_mirrors SET count=count+1 WHERE id = ?",array($mirror['id']),false);
+                    $sdo->query("UPDATE mirror_products SET count=count+1 WHERE id = ?",array($product_id),false);
                 }
 
                 // replace :lang placeholder with requested language

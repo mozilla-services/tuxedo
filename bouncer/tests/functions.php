@@ -15,6 +15,7 @@ require_once(SIMPLE_TEST . 'reporter.php');
 require_once('../php/cfg/config.php');
 require_once('../php/lib/memcaching.php');
 require_once('../php/lib/sdo.php');
+require_once('../php/lib/sdo2.php');
 require_once('../php/functions.php');
 
 # Include the mocks
