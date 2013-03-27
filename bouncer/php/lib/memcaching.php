@@ -37,11 +37,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+interface Memcache_Interface {}
+
 /**
  * This model is an interface to Memcache.
  * It's called Memcaching to not interfere with the actual Memcache class.
  */
-class Memcaching {
+class Memcaching implements Memcache_Interface {
     var $cache;             // holds the memcache object
     var $memcacheConnected; // did we find a valid memcache server?
 

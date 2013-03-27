@@ -43,8 +43,8 @@ function getRegionFromIP($sdo, $ip) {
             geoip_ip_to_country AS ip
             ON 
             ip.country_code = cty.country_code AND
-            ip_end = ( SELECT MIN(ip_end) FROM geoip_ip_to_country WHERE ip_end >=  INET_ATON('%s') LIMIT 1 ) AND
-            ip_start <= INET_ATON('%s')
+            ip_end = ( SELECT MIN(ip_end) FROM geoip_ip_to_country WHERE ip_end >=  INET_ATON(?) LIMIT 1 ) AND
+            ip_start <= INET_ATON(?)
         ",array($ip, $ip));
     
     if ($region)
@@ -66,7 +66,7 @@ function throttleGeoIPRegion($sdo, $region_id) {
         FROM
             geoip_regions
         WHERE
-            id = %d
+            id = ?
         ",array($region_id));
     
     $region_throttle = $region_throttle['throttle'];
@@ -98,7 +98,7 @@ function getFallbackRegion($sdo, $region_id) {
         FROM
             geoip_regions
         WHERE
-            id = %d
+            id = ?
         ",array($region_id));
         
     if($fallback) {
@@ -116,7 +116,7 @@ function getGlobalFallbackProhibited($sdo, $region_id) {
         FROM
             geoip_regions
         WHERE
-            id = %d
+            id = ?
         ",array($region_id));
         
     if($fallback) {
@@ -140,7 +140,7 @@ function queryForMirrors($sdo, $http_type, $where_lang, $location_id, $client_re
     
     // If we are using GEOIP, we need to customize the SQL accordingly.
     if($client_region) {
-        $cr_sql = ' geoip_mirror_region_map.region_id = %d AND ';
+        $cr_sql = ' geoip_mirror_region_map.region_id = ? AND ';
         $arguments[] = $client_region;
     } else {
         $cr_sql = null;
@@ -167,19 +167,18 @@ function queryForMirrors($sdo, $http_type, $where_lang, $location_id, $client_re
         JOIN
             mirror_location_mirror_map ON mirror_mirrors.id = mirror_location_mirror_map.mirror_id
         LEFT JOIN
-            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = '%s')
+            mirror_lmm_lang_exceptions AS lang_exc ON (mirror_location_mirror_map.id = lang_exc.location_mirror_map_id AND NOT lang_exc.language = ?)
         INNER JOIN
             geoip_mirror_region_map ON (geoip_mirror_region_map.mirror_id = mirror_mirrors.id)
         WHERE
-            mirror_location_mirror_map.location_id = %d AND
+            mirror_location_mirror_map.location_id = ? AND
             $cr_sql
             mirror_mirrors.active='1' AND 
             mirror_location_mirror_map.active ='1' AND
-            mirror_location_mirror_map.healthy = '%d' AND
-            mirror_mirrors.baseurl LIKE '$http_type%%'
+            mirror_location_mirror_map.healthy = ? AND
+            mirror_mirrors.baseurl LIKE '$http_type%'
         ORDER BY rating",
-        $arguments, MYSQL_ASSOC, 'id');
-
+        $arguments, SDO2::FETCH_NAMED, 'id');
     // If we found no mirrors and we are not in the second execution of this
     // function, let's try finding some unhealthy mirrors.
     if(!$mirrors && !$recurse) {
@@ -187,4 +186,17 @@ function queryForMirrors($sdo, $http_type, $where_lang, $location_id, $client_re
     }
     
     return $mirrors;
+}
+
+/**
+ *  Get an ID based on name.
+ *  @param string $table
+ *  @param string $id_col
+ *  @param string $name_col
+ *  @param string $name
+ */
+function name_to_id($sdo, $table,$id_col,$name_col,$name)
+{
+    $buf = $sdo->get_one("SELECT {$id_col} FROM {$table} WHERE {$name_col} = ?", array($name), SDO2::FETCH_NUM);
+    return $buf[0];
 }
