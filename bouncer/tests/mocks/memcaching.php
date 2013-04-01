@@ -6,7 +6,7 @@ require LIB . '/memcaching.php';
  * This model is an interface to Memcache.
  * It's called Memcaching to not interfere with the actual Memcache class.
  */
-class Memcaching_Mock implements Memcache_Interface {
+class Memcaching_Mock implements Cache_Interface {
 
     function get($key) {
         return false;

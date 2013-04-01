@@ -37,17 +37,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-interface Memcache_Interface {}
+require 'cache_interface.php';
 
 /**
  * This model is an interface to Memcache.
  * It's called Memcaching to not interfere with the actual Memcache class.
  */
-class Memcaching implements Memcache_Interface {
+class Memcaching implements Cache_Interface {
     var $cache;             // holds the memcache object
     var $memcacheConnected; // did we find a valid memcache server?
 
-    function Memcaching() {
+    function __construct() {
         global $memcache_config;
 
         if (class_exists('Memcache') && defined('CACHE') && CACHE)

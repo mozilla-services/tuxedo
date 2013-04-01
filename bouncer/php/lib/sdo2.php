@@ -34,7 +34,7 @@ class SDO2 {
     protected $db_read;
     protected $db_details;
 
-    public function __construct(Memcache_Interface $mc, array $dbwrite = array(), array $dbread = array()) {
+    public function __construct(Cache_Interface $mc, array $dbwrite = array(), array $dbread = array()) {
         $this->mc = $mc;
         if(empty($dbwrite) && empty($dbread)) {
             throw new Exception('No credentials supplied for database connection');
