@@ -276,7 +276,6 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
         # content-type == text/plain hack here for Mac dmg's
     }
-    $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
-
     log_this "Finished. Elapsed time: " . (time - $start_timestamp) . ".\n";
+    $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
 }
