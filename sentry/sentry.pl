@@ -4,6 +4,7 @@
 #   regions and then determine how good we are at this.
 
 use locale;
+use POSIX;
 use DBI;
 use Data::Dumper;
 use LWP;
@@ -252,7 +253,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         } else {
             $filepath =~ s@:lang@en-US@;
         }
-        log_this "Checking $filepath... ";
+        log_this "[" . strftime("%F %T %z", localtime) . "] $filepath... ";
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
 
         # allow 1 redirect
@@ -276,4 +277,6 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         # content-type == text/plain hack here for Mac dmg's
     }
     $log_sth->execute($start_timestamp, $mirror->{id}, '1', $mirror->{rating}, $output);
+
+    log_this "Finished. Elapsed time: " . (time - $start_timestamp) . ".\n";
 }
