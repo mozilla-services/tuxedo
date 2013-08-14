@@ -124,3 +124,11 @@ ALTER TABLE mirror_location_mirror_map ADD COLUMN healthy tinyint(4) NOT NULL DE
 
 -- more space for sentry logs (bug 777516)
 ALTER TABLE `sentry_log` MODIFY `reason` MEDIUMTEXT;
+
+-- create table for aliases (bug 863381)
+CREATE TABLE `mirror_aliases` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `alias` varchar(255) NOT NULL UNIQUE,
+    `related_product` varchar(255) NOT NULL
+);
+ALTER TABLE mirror_aliases ADD CONSTRAINT uniq_alias UNIQUE (alias);

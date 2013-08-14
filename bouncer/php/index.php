@@ -24,27 +24,6 @@ if (!empty($_GET['product'])) {
         $where_lang = $_GET['lang'];
     else
         $where_lang = 'en-US';
-
-    // Special case for bug 398366
-    if ($product_name == 'firefox-latest') {
-        $string = file_get_contents(INC . '/product-details/json/firefox_versions.json');
-        $firefox_versions = json_decode($string);
-        $latest = $firefox_versions->{'LATEST_FIREFOX_VERSION'};
-
-        $redirect_url = WEBPATH . '?product=firefox-' . $latest .
-                        '&os=' . $os_name . '&lang=' . $where_lang;
-        // if we are just testing, then just print and exit.
-        if (!empty($_GET['print'])) {
-            show_no_cache_headers();
-            print(htmlentities('Location: ' . $redirect_url . '&print=1'));
-            exit;
-        }
-
-        // otherwise, by default, redirect them and exit
-        show_no_cache_headers();
-        header('Location: ' . $redirect_url);
-        exit;
-    }
     
     require_once(LIB.'/sdo2.php');
     require_once(LIB.'/memcaching.php');
@@ -58,6 +37,16 @@ if (!empty($_GET['product'])) {
     );
     $sdo = new SDO2($mc, $dbwrite);
 
+
+    // New alias code for bug 863381
+    $alias_sql = 'SELECT * FROM mirror_aliases WHERE alias = ?';
+    $alias = $sdo->get_one($alias_sql, array($product_name), SDO2::FETCH_ASSOC);
+    if ($alias) {
+        // We have a product name, we'll swap it in for the $product_name variable
+        // and move on.
+        $product_name = $alias['related_product'];
+    }
+    
     // get OS ID
     $os_id = name_to_id($sdo, 'mirror_os','id','name',$os_name);
 
