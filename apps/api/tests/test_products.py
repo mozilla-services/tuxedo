@@ -4,6 +4,7 @@ from xml.etree import ElementTree
 from django.core.urlresolvers import reverse
 
 from mirror.models import Product
+from mirror.forms import ProductAliasForm
 
 from . import testcases
 
@@ -170,3 +171,65 @@ class ProductTest(testcases.ProductTestCase):
 
         assert not myprod.languages.count(), (
             'Wildcard must delete all languages.')
+
+    def test_create_update_alias(self):
+
+        Product.objects.create(name='MyTestProduct')
+
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': 'my-test-alias',
+                                'related_product': 'MyTestProduct'})
+
+        self.assertEqual(response.status_code, 200,
+                         'Status code should be 200 when alias created')
+
+    def test_create_update_alias_requires_alias_name(self):
+        Product.objects.create(name='MyTestProduct')
+
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': '',
+                                'related_product': 'MyTestProduct'})
+
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        errno = msg[0].getAttribute('number')
+        self.assertEqual(int(errno), ProductAliasForm.E_ALIAS_REQUIRED,
+                         'alias is a required field')
+
+    def test_create_update_alias_requires_valid_product_name(self):
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': 'my-test-alias',
+                                'related_product': ''})
+
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        errno = msg[0].getAttribute('number')
+
+        self.assertEqual(int(errno), ProductAliasForm.E_RELATED_NAME_REQUIRED,
+                         'related_product is a required field')
+
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': 'my-test-alias',
+                                'related_product': 'MyTestProduct'})
+
+        xmldoc = minidom.parseString(response.content)
+
+        msg = xmldoc.getElementsByTagName('error')
+        errno = msg[0].getAttribute('number')
+
+        self.assertEqual(int(errno), ProductAliasForm.E_PRODUCT_DOESNT_EXIST,
+                         'Must provide a valid product name')
+
+        Product.objects.create(name='MyTestProduct')
+
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': 'myMyTestProduct',
+                                'related_product': 'MyTestProduct'})
+
+        xmldoc = minidom.parseString(response.content)
+        msg = xmldoc.getElementsByTagName('error')
+        errno = msg[0].getAttribute('number')
+        self.assertEqual(int(errno), ProductAliasForm.E_ALIAS_PRODUCT_MATCH,
+                         'Cannot specify the same alias as a product name')
