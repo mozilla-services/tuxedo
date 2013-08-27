@@ -37,7 +37,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'priority', 'count', 'active', 'checknow', 'ssl_only')
     list_filter = ('active', 'checknow', 'ssl_only')
     ordering = ('name',)
-    actions = ('mark_for_checknow',)
+    actions = ('mark_for_checknow', 'unmark_for_checknow')
     inlines = [ProductLanguageInline]
 
     def mark_for_checknow(self, request, queryset):
@@ -46,6 +46,14 @@ class ProductAdmin(admin.ModelAdmin):
         msg = "%s project(s) marked for Sentry checking."
         self.message_user(request, msg % rows_updated)
 
+    def unmark_for_checknow(self, request, queryset):
+        """Custom action to unmark a list of products for sentry checking"""
+        rows_updated = queryset.update(checknow=False)
+        msg = "%s project(s) no longer marked for Sentry checking."
+        self.message_user(request, msg % rows_updated)
+
     mark_for_checknow.short_description = (
-        "Check selected products now with Sentry")
+        "Set Check Now on selected products")
+    unmark_for_checknow.short_description = (
+        "Remove Check Now on selected products")
 admin.site.register(Product, ProductAdmin)
