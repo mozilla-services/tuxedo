@@ -1,0 +1,33 @@
+{% extends "api/api_doc_template.html" %}
+
+{% block description %}
+Create or update a product alias
+{% endblock %}
+
+{% block auth %}Needs HTTP authentication. Staff members only.{% endblock %}
+
+{% block post_required %}
+* ``alias``: The alias that you wish to create or update.
+* ``related_product``: The product name you wish to have the alias redirect
+{% endblock %}
+
+{% block errorcodes %}
+* ``101``: Unknown validation error occurred
+* ``102``: Alias name not provided
+* ``103``: Related product name not provided
+* ``104``: The product name specified was not a valid product name
+* ``105``: The alias name specified matches the name of an existing product and must be different
+{% endblock %}
+
+{% block example %}
+Success:
+
+    <success>Created/updated alias firefox-latest</success>
+
+Failure:
+
+    <error number="101">
+        alias name is required.
+    </error>
+{% endblock %}
+

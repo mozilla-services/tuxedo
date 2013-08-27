@@ -16,5 +16,7 @@ urlpatterns = patterns('api.views',
 
     (r'^uptake/?$', 'uptake'),
     (r'^mirror_list/?$', 'mirror_list'),
+    
+    (r'^create_update_alias/?$', 'create_update_alias'),
 )
 

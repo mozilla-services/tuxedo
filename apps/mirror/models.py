@@ -88,6 +88,16 @@ class Product(models.Model):
         db_table = 'mirror_products'
 
 
+class ProductAlias(models.Model):
+    """An alias that will redirect a user to a valid product
+        (e.g. firefox-latest)"""
+    alias = models.SlugField(max_length=255, unique=True)
+    related_product = models.CharField(max_length=255, unique=False)
+
+    class Meta:
+        db_table = "mirror_aliases"
+
+
 class ProductLanguage(models.Model):
     """
     The languages a product is available in. No entries in this table means

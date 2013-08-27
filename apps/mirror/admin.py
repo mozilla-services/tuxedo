@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from mirror.models import Mirror, OS, Product, Location, ProductLanguage
+from mirror.models import (Mirror, OS, Product, Location, ProductLanguage,
+                           ProductAlias)
+from mirror.forms import ProductAliasForm
+
+
+class ProductAliasAdmin(admin.ModelAdmin):
+    list_display = ('alias', 'related_product')
+    form = ProductAliasForm
+admin.site.register(ProductAlias, ProductAliasAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
@@ -34,7 +42,8 @@ class ProductLanguageInline(admin.TabularInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'priority', 'count', 'active', 'checknow', 'ssl_only')
+    list_display = ('name', 'priority', 'count', 'active', 'checknow',
+                    'ssl_only')
     list_filter = ('active', 'checknow', 'ssl_only')
     ordering = ('name',)
     actions = ('mark_for_checknow', 'unmark_for_checknow')

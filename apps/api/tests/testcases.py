@@ -16,6 +16,7 @@ class APITestCase(test.TestCase):
         self.user = User.objects.create_user(
             username, 'lennon@thebeatles.com', pw
         )
+
         self.user.is_staff = True
         self.user.save()
         self.c = test.client.Client()

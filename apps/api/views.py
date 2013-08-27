@@ -10,11 +10,10 @@ from django.views.decorators.http import require_GET, require_POST
 from product_details import product_details
 
 from api.decorators import has_perm_or_basicauth, logged_in_or_basicauth
-from mirror.models import Location, Mirror, OS, Product
-
+from mirror.models import Location, Mirror, OS, Product, ProductAlias
+from mirror.forms import ProductAliasForm
 
 HTTP_AUTH_REALM = 'Bouncer API'
-
 
 def _get_command_list():
     templates = os.listdir(os.path.join(os.path.dirname(__file__), 'templates',
@@ -355,6 +354,65 @@ def location_delete(request):
         return xml.error(e)
 
     return xml.success('Deleted location: %s' % location)
+
+
+@require_POST
+@csrf_exempt
+@has_perm_or_basicauth("mirror.create_update_alias", HTTP_AUTH_REALM)
+def create_update_alias(request):
+    """Create or update an alias for a product"""
+
+    xml = XMLRenderer()
+
+    form = ProductAliasForm(request.POST)
+    if not form.is_valid():
+        if 'alias' in form.errors:
+            if 'required' in form.errors['alias'][0]:
+                return xml.error(
+                    'alias name is required.',
+                    errno=form.E_ALIAS_REQUIRED
+                )
+
+            if 'same name' in form.errors['alias'][0]:
+                return xml.error(
+                    'You cannot create an alias with the same name as a product',
+                    errno=form.E_ALIAS_PRODUCT_MATCH
+                )
+        if 'related_product' in form.errors:
+            if 'required' in form.errors['related_product'][0]:
+                return xml.error(
+                    'related_product name is required.',
+                    errno=form.E_RELATED_NAME_REQUIRED
+                )
+            if 'same name as an existing' in form.errors['related_product'][0]:
+                return xml.error(
+                    'You cannot create alias with the same name as a product',
+                    errno=form.E_ALIAS_PRODUCT_MATCH
+                )
+            if 'invalid' in form.errors['related_product'][0]:
+                return xml.error(
+                    'You must specify a valid product to match with an alias',
+                    errno=form.E_PRODUCT_DOESNT_EXIST
+                )
+
+        return xml.error(
+            'There was a problem validating the data provided',
+            errno=form.E_ALIAS_GENERAL_VALIDATION_ERROR
+        )
+
+    alias = form.cleaned_data['alias']
+    redirect = form.cleaned_data['related_product']
+
+    alias_obj, created = ProductAlias.objects.get_or_create(
+        alias=alias,
+        defaults={'related_product': redirect}
+    )
+
+    if not created:
+        alias_obj.related_product = redirect
+        alias_obj.save()
+
+    return xml.success('Created/updated alias %s' % alias)
 
 
 class XMLRenderer(object):
