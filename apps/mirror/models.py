@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.html import escape
+from django.forms import TextInput
 
 from product_details import product_details
 
@@ -9,6 +10,15 @@ from product_details import product_details
 # get the possible languages from product details
 LANG_CHOICES = [(key, "%s: %s" % (key, value['English']))
                 for key, value in product_details.languages.items()]
+
+# This is to get a longer input box when entering locations
+class LongDisplayCharField(models.CharField):
+    def formfield(self, **kwargs):
+         kwargs.update(
+            {"widget": TextInput(attrs={'style': 'width: 60em;'})}
+         )
+         return super(LongDisplayCharField, self).formfield(**kwargs)
+
 
 class Mirror(models.Model):
     """A single mirror."""
@@ -100,7 +110,7 @@ class Location(models.Model):
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
-    path = models.CharField(
+    path = LongDisplayCharField(
         max_length=255, help_text=(
             "Always use a leading slash.<br/>"
             'The placeholder :lang will be replaced with the requested '
