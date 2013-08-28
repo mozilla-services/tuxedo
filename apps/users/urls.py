@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'^login/$', 'django.contrib.auth.views.login'),
     (r'^logout/$', 'django.contrib.auth.views.logout'),
     (r'^profile/$', 'users.views.own_profile'),
@@ -17,4 +18,3 @@ urlpatterns = patterns('',
     (r'^profile/pwreset/complete/$',
         'django.contrib.auth.views.password_reset_complete'),
 )
-

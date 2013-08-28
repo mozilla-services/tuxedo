@@ -36,4 +36,3 @@ class ConversionBackend(ModelBackend):
         newuser.save()
 
         return newuser
-

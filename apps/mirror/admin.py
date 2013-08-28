@@ -52,17 +52,17 @@ class ProductAdmin(admin.ModelAdmin):
     def mark_for_checknow(self, request, queryset):
         """Custom action to mark a list of products for sentry checking"""
         rows_updated = queryset.update(checknow=True)
-        msg = "%s project(s) marked for Sentry checking."
+        msg = '%s project(s) marked for Sentry checking.'
         self.message_user(request, msg % rows_updated)
 
     def unmark_for_checknow(self, request, queryset):
         """Custom action to unmark a list of products for sentry checking"""
         rows_updated = queryset.update(checknow=False)
-        msg = "%s project(s) no longer marked for Sentry checking."
+        msg = '%s project(s) no longer marked for Sentry checking.'
         self.message_user(request, msg % rows_updated)
 
     mark_for_checknow.short_description = (
-        "Set Check Now on selected products")
+        'Set Check Now on selected products')
     unmark_for_checknow.short_description = (
-        "Remove Check Now on selected products")
+        'Remove Check Now on selected products')
 admin.site.register(Product, ProductAdmin)

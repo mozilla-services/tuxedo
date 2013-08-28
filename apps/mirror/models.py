@@ -11,25 +11,27 @@ from product_details import product_details
 LANG_CHOICES = [(key, "%s: %s" % (key, value['English']))
                 for key, value in product_details.languages.items()]
 
+
 # This is to get a longer input box when entering locations
 class LongDisplayCharField(models.CharField):
     def formfield(self, **kwargs):
-         kwargs.update(
+        kwargs.update(
             {"widget": TextInput(attrs={'style': 'width: 60em;'})}
-         )
-         return super(LongDisplayCharField, self).formfield(**kwargs)
+        )
+        return super(LongDisplayCharField, self).formfield(**kwargs)
 
 
 class Mirror(models.Model):
     """A single mirror."""
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=64, unique=True, verbose_name='Host Name')
+    name = models.CharField(max_length=64, unique=True,
+                            verbose_name='Host Name')
     baseurl = models.CharField(max_length=255, verbose_name='Base URL',
                                help_text='No trailing slash.')
     rating = models.IntegerField()
     active = models.BooleanField()
     count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
-                                 db_index=True)
+                                db_index=True)
     regions = models.ManyToManyField('geoip.Region',
                                      db_table='geoip_mirror_region_map')
     contacts = models.ManyToManyField(User, verbose_name="Admin Contact",
@@ -45,11 +47,11 @@ class Mirror(models.Model):
         """get the administrative contacts for this mirror as HTML"""
         contacts = self.contacts.order_by('last_name', 'first_name')
         contacts = ['<a href="%s">%s</a>' % (
-                        reverse('admin:auth_user_change', args=(c.pk,)),
-                        escape('%s: %s' % (c.get_full_name() or c.username,
-                                           c.email))
+                    reverse('admin:auth_user_change', args=(c.pk,)),
+                    escape('%s: %s' % (c.get_full_name() or c.username,
+                           c.email))
                     ) for c in contacts]
-        return "<br/>".join(contacts) or ''
+        return '<br/>'.join(contacts) or ''
     admin_contacts.allow_tags = True
 
 
@@ -78,9 +80,10 @@ class Product(models.Model):
     active = models.BooleanField(db_index=True, default=True)
     checknow = models.BooleanField(db_index=True, verbose_name='Check Now?',
                                    default=True)
-    ssl_only = models.BooleanField(db_index=False, 
+    ssl_only = models.BooleanField(db_index=False,
                                    verbose_name='Serve Over SSL Only?',
                                    default=False)
+
     def __unicode__(self):
         return self.name
 
@@ -95,7 +98,7 @@ class ProductAlias(models.Model):
     related_product = models.CharField(max_length=255, unique=False)
 
     class Meta:
-        db_table = "mirror_aliases"
+        db_table = 'mirror_aliases'
 
 
 class ProductLanguage(models.Model):
@@ -122,16 +125,16 @@ class Location(models.Model):
     os = models.ForeignKey('OS', verbose_name='OS')
     path = LongDisplayCharField(
         max_length=255, help_text=(
-            "Always use a leading slash.<br/>"
+            'Always use a leading slash.<br/>'
             'The placeholder :lang will be replaced with the requested '
             'language at download time.'))
 
     class Meta:
         db_table = 'mirror_locations'
         unique_together = ('product', 'os')
-	permissions = (
-	    ("view_uptake", "Can view mirror uptake"),
-	)
+    permissions = (
+        ('view_uptake', 'Can view mirror uptake'),
+    )
 
     def __unicode__(self):
         return self.path
@@ -158,7 +161,7 @@ class Location(models.Model):
 
         # calculate totals
         total = Mirror.objects.filter(active=True) \
-                .aggregate(total=models.Sum('rating'))['total']
+            .aggregate(total=models.Sum('rating'))['total']
         for location in locations:
             location.update({'total': total})
         return locations

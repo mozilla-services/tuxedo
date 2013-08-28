@@ -1,6 +1,6 @@
 from django import forms
 from models import Product, ProductAlias
-from django.core import validators
+
 
 class UptakeForm(forms.Form):
     p = forms.ModelMultipleChoiceField(
@@ -10,7 +10,7 @@ class UptakeForm(forms.Form):
 
 class ProductAliasForm(forms.ModelForm):
 
-    E_ALIAS_GENERAL_VALIDATION_ERROR= 101
+    E_ALIAS_GENERAL_VALIDATION_ERROR = 101
     E_ALIAS_REQUIRED = 102
     E_PRODUCT_DOESNT_EXIST = 103
     E_ALIAS_PRODUCT_MATCH = 104
@@ -22,7 +22,7 @@ class ProductAliasForm(forms.ModelForm):
     def clean_alias(self):
         if Product.objects.filter(name=self.cleaned_data['alias']).exists():
             raise forms.ValidationError(
-                "Your alias cannot share the same name as an existing product!"
+                'Your alias cannot share the same name as an existing product!'
             )
         return self.cleaned_data['alias']
 
@@ -30,6 +30,6 @@ class ProductAliasForm(forms.ModelForm):
         if not Product.objects.filter(
                 name=self.cleaned_data['related_product']).exists():
             raise forms.ValidationError(
-                "The product you entered was invalid"
+                'The product you entered was invalid'
             )
         return self.cleaned_data['related_product']

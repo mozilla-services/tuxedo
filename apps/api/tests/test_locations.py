@@ -1,4 +1,3 @@
-import random
 from xml.dom import minidom
 
 from django.core.urlresolvers import reverse
@@ -51,8 +50,7 @@ class LocationTest(testcases.LocationTestCase):
         response = self.c.post(reverse('api.views.location_add'),
                                {'product': myproduct.name,
                                 'os': myos.name,
-                                'path': mypath,
-                               })
+                                'path': mypath, })
         xmldoc = minidom.parseString(response.content)
         prod = xmldoc.getElementsByTagName('product')
         loc = prod[0].getElementsByTagName('location')
@@ -64,7 +62,7 @@ class LocationTest(testcases.LocationTestCase):
         self.assertEqual(loc[0].getAttribute('os'), myos.name,
                          'chosen os returned')
         self.assertEqual(loc[0].childNodes[0].data, mypath,
-                        'location path returned')
+                         'location path returned')
 
         try:
             new_location = Location.objects.get(product=myproduct,
@@ -123,4 +121,3 @@ class UptakeTest(testcases.UptakeTestCase):
         xmldoc = minidom.parseString(response.content)
         items = xmldoc.getElementsByTagName('item')
         self.assertTrue(len(items) > 0, 'fuzzy product matching')
-
