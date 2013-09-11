@@ -67,8 +67,7 @@ def uptake(request):
             products, order_by=sort_headers.get_order_by())
         data.update({'locations': uptake,
                      'headers': list(sort_headers.headers()),
-                     'use_sorttable': True,
-                    })
+                     'use_sorttable': True, })
 
     return render_to_response('mirror/uptake.html', data,
                               context_instance=RequestContext(request))
@@ -95,8 +94,7 @@ def lstats(request):
             .order_by(sort_headers.get_order_by())
         data.update({'locations': locations,
                      'headers': list(sort_headers.headers()),
-                     'use_sorttable': True,
-                    })
+                     'use_sorttable': True, })
     return render_to_response('mirror/lstats.html', data,
                               context_instance=RequestContext(request))
 
@@ -116,7 +114,7 @@ def memcache_status(request):
 
     # get all memcached URIs
     m = re.match(
-        "memcached://([^/]*)/?$", settings.CACHE_BACKEND
+        'memcached://([^/]*)/?$', settings.CACHE_BACKEND
     )
     if m:
         servers = m.group(1).split(';')
@@ -126,20 +124,20 @@ def memcache_status(request):
         for server in servers:
             host = memcache._Host(server)
             host.connect()
-            host.send_cmd("stats")
+            host.send_cmd('stats')
 
             stats[server] = {}
             while True:
                 line = host.readline().split(None, 2)
-                if line[0] == "END":
+                if line[0] == 'END':
                     break
                 stat, key, value = line
                 try:
                     # convert to native type, if possible
                     value = int(value)
-                    if key == "uptime":
+                    if key == 'uptime':
                         value = datetime.timedelta(seconds=value)
-                    elif key == "time":
+                    elif key == 'time':
                         value = datetime.datetime.fromtimestamp(value)
                 except ValueError:
                     pass

@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('api.views',
+urlpatterns = patterns(
+    'api.views',
     (r'^docs/?$', 'docindex'),
     (r'^docs/(?P<command>\w+)/?$', 'docs'),
 
@@ -16,7 +17,6 @@ urlpatterns = patterns('api.views',
 
     (r'^uptake/?$', 'uptake'),
     (r'^mirror_list/?$', 'mirror_list'),
-    
+
     (r'^create_update_alias/?$', 'create_update_alias'),
 )
-

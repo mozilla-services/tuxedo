@@ -25,7 +25,7 @@ class ProductTest(testcases.ProductTestCase):
                               {'product': 'odd', 'fuzzy': True})
         xmldoc = minidom.parseString(response.content)
         prods = xmldoc.getElementsByTagName('product')
-        self.assertEqual(len(prods), len(self.products)/2,
+        self.assertEqual(len(prods), len(self.products) / 2,
                          'need to return partial product list')
 
         response = self.c.get(reverse('api.views.product_show'),
@@ -44,8 +44,8 @@ class ProductTest(testcases.ProductTestCase):
         xmldoc = minidom.parseString(response.content)
 
         all_products = Product.objects.all()
-        self.assertEqual(len(all_products), len(self.products)+1,
-                        'new product was added')
+        self.assertEqual(len(all_products), len(self.products) + 1,
+                         'new product was added')
 
         prods = xmldoc.getElementsByTagName('product')
         self.assertEqual(len(prods), 1, 'one product added and returned')
@@ -58,13 +58,12 @@ class ProductTest(testcases.ProductTestCase):
 
     def test_product_add_checknow(self):
         """Newly added products must have checknow flag set (bug 566852)"""
-        new_prod = "Firefox-10.0"
-        response = self.c.post(reverse('api.views.product_add'),
-                               {'product': new_prod})
+        new_prod = 'Firefox-10.0'
+        self.c.post(reverse('api.views.product_add'),
+                    {'product': new_prod})
         prod = Product.objects.get(name=new_prod)
 
         self.assertTrue(prod.checknow, 'checknow must be enabled.')
-
 
     def test_product_add_existing(self):
         """Adding an existing product should throw an error"""
@@ -88,8 +87,8 @@ class ProductTest(testcases.ProductTestCase):
         self.assertEqual(len(msg), 1, 'Delete successful')
 
         all_products = Product.objects.all()
-        self.assertEquals(len(all_products), len(self.products)-1,
-                         'product was deleted')
+        self.assertEquals(len(all_products), len(self.products) - 1,
+                          'product was deleted')
 
         response = self.c.post(reverse('api.views.product_delete'),
                                {'product': self.products[0].name})
@@ -102,8 +101,8 @@ class ProductTest(testcases.ProductTestCase):
                          'must return product not found error')
 
         all_products = Product.objects.all()
-        self.assertEquals(len(all_products), len(self.products)-1,
-                         'product was deleted only once')
+        self.assertEquals(len(all_products), len(self.products) - 1,
+                          'product was deleted only once')
 
     def test_product_delete_byid(self):
         """Delete a product by ID"""
@@ -115,8 +114,8 @@ class ProductTest(testcases.ProductTestCase):
         self.assertEqual(len(msg), 1, 'Delete successful')
 
         all_products = Product.objects.all()
-        self.assertEquals(len(all_products), len(self.products)-1,
-                         'product was deleted')
+        self.assertEquals(len(all_products), len(self.products) - 1,
+                          'product was deleted')
 
         response = self.c.post(reverse('api.views.product_delete'),
                                {'product_id': self.products[0].pk})
@@ -129,8 +128,8 @@ class ProductTest(testcases.ProductTestCase):
                          'must return product not found error')
 
         all_products = Product.objects.all()
-        self.assertEquals(len(all_products), len(self.products)-1,
-                         'product was deleted only once')
+        self.assertEquals(len(all_products), len(self.products) - 1,
+                          'product was deleted only once')
 
     def test_product_language_add(self):
         """Add some languages to an existing product."""
@@ -140,14 +139,14 @@ class ProductTest(testcases.ProductTestCase):
                                 'languages': mylangs})
         xmldoc = ElementTree.XML(response.content)
         langs = xmldoc.findall('product/language')
-        self.assertEqual(len(langs), len(mylangs)+len(self.locales))
-        for lang in [ l.get('locale') for l in langs ]:
+        self.assertEqual(len(langs), len(mylangs) + len(self.locales))
+        for lang in [l.get('locale') for l in langs]:
             assert lang in mylangs or lang in self.locales
 
     def test_product_language_delete(self):
         """Delete some languages from an existing product."""
         myprod = self.products[0]
-        remove_langs = [ l.lang for l in myprod.languages.all()[:2] ]
+        remove_langs = [l.lang for l in myprod.languages.all()[:2]]
 
         response = self.c.post(reverse('api.views.product_language_delete'),
                                {'product': self.products[0].name,

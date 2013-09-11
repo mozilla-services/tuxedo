@@ -10,9 +10,9 @@ class DjangoUserForm(forms.ModelForm):
         model = DjangoUser
         fields = ['first_name', 'last_name', 'email']
 
+
 class UserProfileForm(forms.ModelForm):
     """Form to change additional user profile data"""
     class Meta:
         model = UserProfile
         fields = ['address', 'phone_number', 'ircnick']
-

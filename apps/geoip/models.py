@@ -38,7 +38,7 @@ class IPBlock(models.Model):
         return ipaddr.IPAddress(self.ip_end).compressed
 
     def __unicode__(self):
-       return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
+        return u"%s -- %s" % (self.ip_start_addr, self.ip_end_addr)
 
     class Meta:
         db_table = 'geoip_ip_to_country'

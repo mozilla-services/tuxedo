@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
-from mirror.models import Location, Product
+from mirror.models import Location
 from product_details import product_details
 
 
@@ -70,6 +70,10 @@ class BounceTestCase(TestCase):
                 self.conn.request('HEAD', '%s?%s' % (self.parsed_url.path,
                                                      urllib.urlencode(data)))
                 req = self.conn.getresponse()
-                self.assertEqual(req.status, 302, 'Require redirect for %s' % str(data))
+                self.assertEqual(
+                    req.status,
+                    302,
+                    'Require redirect for %s' % str(data)
+                )
                 self.assertTrue(req.getheader('Location', '').endswith(
                     self._lang_placeholder(loc.path, lang)))

@@ -15,9 +15,9 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     verbose_name = 'User Profile'
 
+
 class UserAdmin(DjangoUserAdmin):
     """subclass for Django's built-in user admin, to include user profile"""
-    inlines = [ UserProfileInline ]
-admin.site.unregister(User) # remove built-in admin
+    inlines = [UserProfileInline]
+admin.site.unregister(User)  # remove built-in admin
 admin.site.register(User, UserAdmin)
-

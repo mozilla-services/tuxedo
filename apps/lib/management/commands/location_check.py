@@ -6,7 +6,7 @@ from urlparse import urlparse
 from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
 
-from mirror.models import Location, Mirror, OS, Product
+from mirror.models import Location, OS, Product
 
 
 class Command(NoArgsCommand):
@@ -37,16 +37,19 @@ class Command(NoArgsCommand):
 
         filter_for = {}
         if options['product']:
-            products = Product.objects.filter(name__icontains=options['product'])
-            filter_for['product__in'] = [ p.id for p in products ]
+            products = Product.objects.filter(
+                name__icontains=options['product']
+            )
+            filter_for['product__in'] = [p.id for p in products]
         if options['os']:
             oses = OS.objects.filter(name__icontains=options['os'])
-            filter_for['os__in'] = [ o.id for o in oses ]
+            filter_for['os__in'] = [o.id for o in oses]
         if not options['full']:
             filter_for['product__checknow'] = True
         locations = Location.objects.filter(**filter_for)
 
-        print "Checking %d locations against %s ..." % (len(locations), baseurl)
+        print ("Checking %d locations against %s ..."
+               % (len(locations), baseurl))
         conn = httplib.HTTPConnection(urlparse(baseurl).netloc)
 
         linecount = 0
@@ -74,7 +77,8 @@ class Command(NoArgsCommand):
 
         print
         print
-        print "Found %d unavailable location(s) on reference mirror." % len(failed)
+        print ("Found %d unavailable location(s) on reference mirror."
+               % len(failed))
         if failed:
             print
             print
@@ -86,4 +90,3 @@ class Command(NoArgsCommand):
                 for location in failed:
                     print "Deleting %s..." % location.path
                     location.delete()
-

@@ -1,7 +1,7 @@
 import os
 from xml.dom import minidom
 
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
@@ -15,11 +15,12 @@ from mirror.forms import ProductAliasForm
 
 HTTP_AUTH_REALM = 'Bouncer API'
 
+
 def _get_command_list():
     templates = os.listdir(os.path.join(os.path.dirname(__file__), 'templates',
                                         'api', 'docs'))
     # cut out the command names only
-    commands = [ t[:-5] for t in templates if t.endswith('.html') ]
+    commands = [t[:-5] for t in templates if t.endswith('.html')]
     commands.sort()
     return commands
 
@@ -51,7 +52,7 @@ def docs(request, command):
                               context_instance=RequestContext(request))
 
 
-@has_perm_or_basicauth("mirror.view_uptake", HTTP_AUTH_REALM)
+@has_perm_or_basicauth('mirror.view_uptake', HTTP_AUTH_REALM)
 @require_GET
 def uptake(request):
     """ping mirror uptake"""
@@ -68,7 +69,7 @@ def uptake(request):
             products = Product.objects.filter(name__icontains=product)
         else:
             products = Product.objects.filter(name__exact=product)
-        pids = [ p.id for p in products ]
+        pids = [p.id for p in products]
         if not pids:
             return xml.error('No products found', errno=102)
     else:
@@ -79,7 +80,7 @@ def uptake(request):
             oses = OS.objects.filter(name__icontains=os)
         else:
             oses = OS.objects.filter(name__exact=os)
-        osids = [ o.id for o in oses ]
+        osids = [o.id for o in oses]
         if not osids:
             return xml.error('No OSes found', errno=102)
     else:
@@ -120,7 +121,7 @@ def product_show(request):
 
 @require_POST
 @csrf_exempt
-@has_perm_or_basicauth("mirror.add_product", HTTP_AUTH_REALM)
+@has_perm_or_basicauth('mirror.add_product', HTTP_AUTH_REALM)
 def product_add(request):
     """
     Add a new product to the DB
@@ -135,7 +136,7 @@ def product_add(request):
     # check languages
     langs = request.POST.getlist('languages')
     locales = product_details.languages.keys()
-    if [ l for l in langs if l not in locales ]:
+    if [l for l in langs if l not in locales]:
         return xml.error('invalid language code(s)', errno=103)
 
     # save new product
@@ -159,7 +160,7 @@ def product_add(request):
 
 @require_POST
 @csrf_exempt
-@has_perm_or_basicauth("mirror.delete_product", HTTP_AUTH_REALM)
+@has_perm_or_basicauth('mirror.delete_product', HTTP_AUTH_REALM)
 def product_delete(request):
     """Remove a product from the DB"""
     xml = XMLRenderer()
@@ -167,7 +168,10 @@ def product_delete(request):
     prod_id = request.POST.get('product_id', None)
     prodname = request.POST.get('product', None)
     if not (prod_id or prodname):
-        return xml.error('Either product_id or product is required.', errno=101)
+        return xml.error(
+            'Either product_id or product is required.',
+            errno=101
+        )
     try:
         if prod_id:
             prod = Product.objects.get(pk=prod_id)
@@ -188,7 +192,7 @@ def product_delete(request):
 
 @require_POST
 @csrf_exempt
-@has_perm_or_basicauth("mirror.add_product_language", HTTP_AUTH_REALM)
+@has_perm_or_basicauth('mirror.add_product_language', HTTP_AUTH_REALM)
 def product_language_add(request):
     """
     Add a language to a product.
@@ -209,7 +213,7 @@ def product_language_add(request):
     # check languages
     langs = request.POST.getlist('languages')
     locales = product_details.languages.keys()
-    if [ l for l in langs if l not in locales ]:
+    if [l for l in langs if l not in locales]:
         return xml.error('Invalid language code(s)', errno=103)
     if prod.languages.filter(lang__in=langs):
         return xml.error('Language(s) already exist(s)', errno=104)
@@ -255,7 +259,7 @@ def product_language_delete(request):
         return xml.success('Deleted all languages from product %s' % prod.name)
 
     locales = product_details.languages.keys()
-    if [ l for l in langs if l not in locales ]:
+    if [l for l in langs if l not in locales]:
         return xml.error('Invalid language code(s)', errno=103)
 
     try:
@@ -375,7 +379,8 @@ def create_update_alias(request):
 
             if 'same name' in form.errors['alias'][0]:
                 return xml.error(
-                    'You cannot create an alias with the same name as a product',
+                    ('You cannot create an alias with the same name as a '
+                     'product'),
                     errno=form.E_ALIAS_PRODUCT_MATCH
                 )
         if 'related_product' in form.errors:
