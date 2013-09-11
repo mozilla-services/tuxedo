@@ -1,6 +1,7 @@
 ORDER_VAR = 'sort'
 ORDER_TYPE_VAR = 'dir'
 
+
 class SortHeaders:
     """
     Handles generation of an argument for the Django ORM's
@@ -12,7 +13,7 @@ class SortHeaders:
     functionality.
     """
     def __init__(self, request, headers, default_order_field=None,
-            default_order_type='asc', additional_params=None):
+                 default_order_type='asc', additional_params=None):
         """
         request
             The request currently being processed - the current sort
@@ -47,15 +48,21 @@ class SortHeaders:
                     default_order_field = i
                     break
         if default_order_field is None:
-            raise AttributeError('No default_order_field was specified and none of the header definitions given were sortable.')
+            raise AttributeError(
+                'No default_order_field was specified and none of the header '
+                'definitions given were sortable.')
         if default_order_type not in ('asc', 'desc'):
-            raise AttributeError('If given, default_order_type must be one of \'asc\' or \'desc\'.')
-        if additional_params is None: additional_params = {}
+            raise AttributeError(
+                'If given, default_order_type must be one of \'asc\' or '
+                '\'desc\'.')
+        if additional_params is None:
+            additional_params = {}
 
         self.request = request
         self.header_defs = headers
         self.additional_params = additional_params
-        self.order_field, self.order_type = default_order_field, default_order_type
+        self.order_field = default_order_field
+        self.order_type = default_order_type
 
         # Determine order field and order type for the current request
         params = dict(request.GET.items())
@@ -65,8 +72,9 @@ class SortHeaders:
                 if headers[new_order_field][1] is not None:
                     self.order_field = new_order_field
             except (IndexError, ValueError):
-                pass # Use the default
-        if ORDER_TYPE_VAR in params and params[ORDER_TYPE_VAR] in ('asc', 'desc'):
+                pass  # Use the default
+        if (ORDER_TYPE_VAR in params and
+                params[ORDER_TYPE_VAR] in ('asc', 'desc')):
             self.order_type = params[ORDER_TYPE_VAR]
 
     def headers(self):
@@ -79,15 +87,19 @@ class SortHeaders:
             new_order_type = 'asc'
             if i == self.order_field:
                 th_classes.append('sorted %sending' % self.order_type)
-                new_order_type = {'asc': 'desc', 'desc': 'asc'}[self.order_type]
+                new_order_type = {'asc': 'desc',
+                                  'desc': 'asc'}[self.order_type]
             is_sortable = order_criterion is not None
             if not is_sortable:
                 th_classes.append('sorttable_nosort')
             yield {
                 'text': header,
                 'sortable': is_sortable,
-                'url': self.get_query_string({ORDER_VAR: i, ORDER_TYPE_VAR: new_order_type}),
-                'class_attr': (th_classes and ' class="%s"' % ' '.join(th_classes) or ''),
+                'url': self.get_query_string(
+                    {ORDER_VAR: i, ORDER_TYPE_VAR: new_order_type}
+                ),
+                'class_attr': (th_classes and ' class="%s"'
+                               % ' '.join(th_classes) or ''),
             }
 
     def get_query_string(self, params):
@@ -97,7 +109,7 @@ class SortHeaders:
         always be present.
         """
         all_params = self.request.GET.copy()
-        all_params.update(self.additional_params) # does not overwrite
+        all_params.update(self.additional_params)  # does not overwrite
         for param, value in params.items():
             all_params[param] = value
         return '?%s' % all_params.urlencode()
@@ -112,4 +124,3 @@ class SortHeaders:
             self.order_type == 'desc' and '-' or '',
             self.header_defs[self.order_field][1],
         )
-

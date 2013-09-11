@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User as DjangoUser
 from django.db import models
 
+
 class LegacyUser(models.Model):
     """
     represents a legacy user who can log into this app
@@ -47,4 +48,3 @@ def user_post_save(sender, instance, **kwargs):
     profile, new = UserProfile.objects.get_or_create(user=instance)
 # listen to post-save signal
 models.signals.post_save.connect(user_post_save, DjangoUser)
-

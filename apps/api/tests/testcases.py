@@ -1,5 +1,3 @@
-import random
-
 from django.contrib.auth.models import User
 from django import test
 
@@ -34,7 +32,7 @@ class ProductTestCase(APITestCase):
         # products
         self.products = []
         for i in range(1, 11):
-            name = 'Product-%s-%s' % (i, i%2 and 'odd' or 'even')
+            name = 'Product-%s-%s' % (i, i % 2 and 'odd' or 'even')
             p = Product(name=name)
             p.save()
 
@@ -87,6 +85,5 @@ class UptakeTestCase(LocationTestCase):
                 for l in locs:
                     # make half of them active
                     lmm = LocationMirrorMap(location=l, mirror=m,
-                                            active=(l.id%2))
+                                            active=(l.id % 2))
                     lmm.save()
-

@@ -4,8 +4,9 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 
 
-# basic HTTP auth decorators based on: http://www.djangosnippets.org/snippets/243/
-def logged_in_or_basicauth(realm = ""):
+# basic HTTP auth decorators based on:
+# http://www.djangosnippets.org/snippets/243/
+def logged_in_or_basicauth(realm=""):
     """
     A simple decorator that requires a user to be logged in. If they are not
     logged in the request is examined for a 'authorization' header.
@@ -42,8 +43,8 @@ def logged_in_or_basicauth(realm = ""):
         return wrapper
     return view_decorator
 
-#
-def has_perm_or_basicauth(perm, realm = ""):
+
+def has_perm_or_basicauth(perm, realm=''):
     """
     This is similar to the above decorator 'logged_in_or_basicauth'
     except that it requires the logged in user to have a specific
@@ -64,7 +65,8 @@ def has_perm_or_basicauth(perm, realm = ""):
         return wrapper
     return view_decorator
 
-def is_staff_or_basicauth(realm = ""):
+
+def is_staff_or_basicauth(realm=''):
     """Checks if the user is a staff member, displays basic auth otherwise."""
     def view_decorator(func):
         def wrapper(request, *args, **kwargs):
@@ -74,7 +76,8 @@ def is_staff_or_basicauth(realm = ""):
         return wrapper
     return view_decorator
 
-def _view_or_basicauth(view, request, test_func, realm = "", *args, **kwargs):
+
+def _view_or_basicauth(view, request, test_func, realm='', *args, **kwargs):
     """
     This is a helper function used by both 'logged_in_or_basicauth' and
     'has_perm_or_basicauth' that does the nitty of determining if they
@@ -93,7 +96,7 @@ def _view_or_basicauth(view, request, test_func, realm = "", *args, **kwargs):
         if len(auth) == 2:
             # NOTE: We are only support basic authentication for now.
             #
-            if auth[0].lower() == "basic":
+            if auth[0].lower() == 'basic':
                 uname, passwd = base64.b64decode(auth[1]).split(':')
                 user = authenticate(username=uname, password=passwd)
                 if user is not None:
@@ -110,4 +113,3 @@ def _view_or_basicauth(view, request, test_func, realm = "", *args, **kwargs):
     response.status_code = 401
     response['WWW-Authenticate'] = 'Basic realm="%s"' % realm
     return response
-

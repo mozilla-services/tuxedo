@@ -1,5 +1,6 @@
 import sys
 
+
 def docstring_trim(docstring):
     """Dedent a docstring. Code copied from PEP 257."""
     if not docstring:
@@ -25,4 +26,3 @@ def docstring_trim(docstring):
         trimmed.pop(0)
     # Return a single string:
     return '\n'.join(trimmed)
-
