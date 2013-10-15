@@ -174,13 +174,21 @@ class ProductTest(testcases.ProductTestCase):
     def test_create_update_alias(self):
 
         Product.objects.create(name='MyTestProduct')
-
+        Product.objects.create(name='MyTestProduct2')
+        
         response = self.c.post(reverse('api.views.create_update_alias'),
                                {'alias': 'my-test-alias',
                                 'related_product': 'MyTestProduct'})
 
         self.assertEqual(response.status_code, 200,
                          'Status code should be 200 when alias created')
+        
+        response = self.c.post(reverse('api.views.create_update_alias'),
+                               {'alias': 'my-test-alias',
+                                'related_product': 'MyTestProduct2'})
+        
+        self.assertEqual(response.status_code, 200,
+                         'Updating a product should produce a 200 status code')
 
     def test_create_update_alias_requires_alias_name(self):
         Product.objects.create(name='MyTestProduct')
@@ -224,7 +232,7 @@ class ProductTest(testcases.ProductTestCase):
         Product.objects.create(name='MyTestProduct')
 
         response = self.c.post(reverse('api.views.create_update_alias'),
-                               {'alias': 'myMyTestProduct',
+                               {'alias': 'MyTestProduct',
                                 'related_product': 'MyTestProduct'})
 
         xmldoc = minidom.parseString(response.content)
