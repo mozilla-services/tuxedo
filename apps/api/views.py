@@ -368,7 +368,12 @@ def create_update_alias(request):
 
     xml = XMLRenderer()
 
-    form = ProductAliasForm(request.POST)
+    try:
+        instance = ProductAlias.objects.get(alias=request.POST.get('alias'))
+        form = ProductAliasForm(request.POST, instance=instance)
+    except ProductAlias.DoesNotExist:
+        form = ProductAliasForm(request.POST)
+
     if not form.is_valid():
         if 'alias' in form.errors:
             if 'required' in form.errors['alias'][0]:
