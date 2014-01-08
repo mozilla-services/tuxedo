@@ -1,4 +1,7 @@
 *.pyc
 local_settings.py
+settings.py
 bouncer/php/cfg/config.php
 sentry/sentry.cfg
+.venv
+bouncer/php/cfg/config.php.bak

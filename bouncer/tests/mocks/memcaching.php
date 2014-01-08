@@ -55,11 +55,29 @@ class Memcaching_Mock implements Cache_Interface {
     }
 
     /**
+     * Returns key in the appropriate namespace.
+     * @param string $key memcache key 
+     * @return string Namespaced key
+     */
+     function namespaceKey($key) {
+        $this->namespace = 'ns';
+        return $this->namespace . $key;
+     }
+
+    /**
      * Flush the cache
      * @return bool success
      */
     function flush() {
         return true;
+    }
+
+    /**
+     * Get server statistics.
+     * return array
+     */
+    function getExtendedStats() {
+        return [];
     }
 }
 ?>
