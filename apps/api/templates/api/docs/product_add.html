@@ -14,6 +14,8 @@ Add a new product to the database.
 * ``languages``: Language code for this product. Add this parameter multiple
   times for multiple languages. If undefined or empty, location is is considered
   not language-specific. (Known languages: {{ languages|join:", " }})
+* ``ssl_only``: Use "true" to serve the product over HTTPS only. Any other
+  value is interpreted as false.
 {% endblock %}
 
 {% block errorcodes %}

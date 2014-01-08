@@ -136,6 +136,7 @@ def product_add(request):
     # check languages
     langs = request.POST.getlist('languages')
     locales = product_details.languages.keys()
+    ssl_only = bool(request.POST.get('ssl_only', False) == "true")
     if [l for l in langs if l not in locales]:
         return xml.error('invalid language code(s)', errno=103)
 
@@ -143,7 +144,7 @@ def product_add(request):
     products = Product.objects.filter(name__exact=prodname)
     if not products:
         try:
-            prod = Product(name=prodname)
+            prod = Product(name=prodname, ssl_only=ssl_only)
             prod.save()
             for lang in langs:
                 prod.languages.create(lang=lang)
