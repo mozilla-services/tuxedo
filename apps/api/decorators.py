@@ -97,7 +97,7 @@ def _view_or_basicauth(view, request, test_func, realm='', *args, **kwargs):
             # NOTE: We are only support basic authentication for now.
             #
             if auth[0].lower() == 'basic':
-                uname, passwd = base64.b64decode(auth[1]).split(':')
+                uname, passwd = base64.b64decode(auth[1]).split(':', 1)
                 user = authenticate(username=uname, password=passwd)
                 if user is not None:
                     if user.is_active and test_func(user):
