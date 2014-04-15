@@ -39,7 +39,7 @@ def index(request):
 
     # gravatar
     emailhash = hashlib.md5(request.user.email).hexdigest()
-    data['gravatar'] = 'http://www.gravatar.com/avatar/%s.jpg?'\
+    data['gravatar'] = '//www.gravatar.com/avatar/%s.jpg?'\
                        'd=identicon' % emailhash
 
     # mirror data
