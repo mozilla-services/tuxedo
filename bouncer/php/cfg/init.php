@@ -7,7 +7,6 @@
 require_once('config.php');  // config file that defines constants
 require_once(LIB.'/util.php');  // util file for random functions (no SQL here)
 $start = microtime_float();  // start timer
-require_once(LIB.'/mirror.php');  // user and admin functions for the mirror app (some SQL)
 require_once(LIB.'/db.php');  // core mysql wrappers used in mirror functions
 db_connect(DBHOST,DBUSER,DBPASS);  // open persistent connection to db
 db_select(DBNAME);  // select db
