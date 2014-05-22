@@ -92,9 +92,6 @@ global $results;
 
     }
 
-    echo '<hr />';
-    echo '<p>What are we actually testing? <a href="https://svn.mozilla.org/projects/bouncer/1.0/trunk/php/status.php">Check the source</a>';
-
 // Functions
     /**
      * To use as a general message function, pass two strings
