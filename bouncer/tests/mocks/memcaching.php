@@ -77,7 +77,7 @@ class Memcaching_Mock implements Cache_Interface {
      * return array
      */
     function getExtendedStats() {
-        return [];
+        return array();
     }
 }
 ?>
