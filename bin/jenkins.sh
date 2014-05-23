@@ -5,7 +5,7 @@ set -e
 export FILEPATH="`pwd`/bouncer/php/"
 pushd bouncer/php/cfg
 cp config-dist.php config.php
-sed -i .bak "s%/var/www/download%$FILEPATH%" config.php
+sed -i\.bak "s%/var/www/download%$FILEPATH%" config.php
 popd
 pushd bouncer/tests
 # FIXME replace w/ phpunit
