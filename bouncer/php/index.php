@@ -35,8 +35,15 @@ if (!empty($_GET['product'])) {
         'user' => DBUSER,
         'pass' => DBPASS,
     );
-    $sdo = new SDO2($mc, $dbwrite);
 
+    $dbread = array(
+        'host' => SHADOWDBHOST, 
+        'name' => SHADOWDBNAME,
+        'user' => SHADOWDBUSER,
+        'pass' => SHADOWDBPASS,
+    );
+    $sdo = new SDO2($mc, $dbwrite, $dbread);
+  
 
     // New alias code for bug 863381
     $alias_sql = 'SELECT * FROM mirror_aliases WHERE alias = ?';
