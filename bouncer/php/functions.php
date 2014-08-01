@@ -6,7 +6,7 @@
 function show_no_cache_headers() {
     //header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0, private');
     //header('Pragma: no-cache');
-    header('Cache-Control: max-age=15');
+    header('Cache-Control: max-age=60');
 }
 
 /**
