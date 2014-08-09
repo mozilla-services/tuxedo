@@ -13,14 +13,22 @@ use Net::DNS;
 use URI;
 use Time::HiRes qw(gettimeofday tv_interval);
 
+use constant VERSION   => "1.0";
+
+use constant TIMEOUT     => 10;  # Basic network timeouts for most operations
+use constant KEEPALIVE   => 5;   # The total number of connections to try and keep open with keepalives
+use constant SLOW_MIRROR => 600; # A mirror that exceeds this amount of time for checks is considered failed
+
+use constant AGENT       => "Mozilla Mirror Monitor/" . VERSION;
+
 my $start_timestamp = time;
-my %ua_options      = ( 'keep_alive' => 5 );
+my %ua_options      = ( 'keep_alive' => KEEPALIVE );
 my $ua              = LWP::UserAgent::Determined->new(%ua_options);
-$ua->timeout(10);
-$ua->agent("Mozilla Mirror Monitor/1.0");
+$ua->timeout(TIMEOUT);
+$ua->agent(AGENT);
 
 my $netres = Net::DNS::Resolver->new();
-$netres->tcp_timeout(10);
+$netres->tcp_timeout(TIMEOUT);
 
 my $DEBUG    = 1;
 my %products = ();
@@ -231,7 +239,7 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
     foreach my $location (@locations) {
 
         if (   ( $ARGV[0] eq 'checknow' )
-            && ( ( time - $start_timestamp ) > 360 ) )
+            && ( ( time - $start_timestamp ) > SLOW_MIRROR ) )
         {
             log_this
 "*** $mirror->{baseurl} took longer than 6 minutes to execute file checks ... assuming host is overloaded and pulling it out.\n";
