@@ -1,36 +1,38 @@
 #!/usr/bin/perl
 
+use strict;
+
 # Given a bunch of IP's figure out how fast you can look up their
 #   regions and then determine how good we are at this.
-
 use DBI;
+use POSIX ":sys_wait_h";
 
 my $start_timestamp = time;
 
 my $DEBUG = 1;
 
 # Some db credentials (defaults)
-$host = '';
-$user = '';
-$pass = '';
-$db   = '';
+my $host = '';
+my $user = '';
+my $pass = '';
+my $db   = '';
 
 # default number of children to fork at a time
-$num_children = 16;
+my $num_children = 16;
 
 # load the config
 do "sentry.cfg";
 
 my $dbh = DBI->connect( "DBI:mysql:$db:$host", $user, $pass )
   or die "Connecting : $dbi::errstr\n";
-$mirror_sql =
+my $mirror_sql =
   qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY rating DESC};
 my $mirror_sth = $dbh->prepare($mirror_sql);
 $mirror_sth->execute();
 
 # find sentry directory
 $0 =~ /^(.+[\\\/])[^\\\/]+[\\\/]*$/;
-$cgidir = $1 || "./";
+my $cgidir = $1 || "./";
 
 my $forked_children = 0;    # forked children count
 while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {

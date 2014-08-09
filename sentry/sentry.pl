@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use strict;
+
 # Given a bunch of IP's figure out how fast you can look up their
 #   regions and then determine how good we are at this.
 
@@ -13,7 +15,6 @@ use Net::DNS;
 use URI;
 use Time::HiRes qw(gettimeofday tv_interval);
 
-use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my %ua_options      = ( 'keep_alive' => 5 );
 my $ua              = LWP::UserAgent::Determined->new(%ua_options);
@@ -28,16 +29,16 @@ my %products = ();
 my %oss      = ();
 
 # Some db credentials
-$host = '';
-$user = '';
-$pass = '';
-$db   = $user;
+my $host = '';
+my $user = '';
+my $pass = '';
+my $db   = $user;
 
 # email address to notify of mirror failures
-$email = '';
+my $email = '';
 
 # content types that we need to check
-%content_type = ();
+my %content_type = ();
 
 # load the config
 do "sentry.cfg";
@@ -53,8 +54,11 @@ sub log_this {
     print $_[0] if $DEBUG;
 }
 
+my $location_sql;
+my $mirror_sql;
+
 my $dbh = DBI->connect( "DBI:mysql:$db:$host", $user, $pass )
-  or die "Connecting : $dbi::errstr\n";
+  or die "Connecting : $DBI::errstr\n";
 if ( defined( $ARGV[0] )
     and ( $ARGV[0] eq 'checknow' or $ARGV[0] eq 'checkall' ) )
 {
@@ -90,18 +94,18 @@ qq{SELECT mirror_locations.* FROM mirror_locations INNER JOIN mirror_products ON
     $mirror_sql =
       qq{SELECT * FROM mirror_mirrors WHERE active='1' ORDER BY name};
 }
-$update_sql =
+my $update_sql =
 qq{INSERT INTO mirror_location_mirror_map (location_id, mirror_id, active, healthy) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active=VALUES(active), healthy=VALUES(healthy)};
-$failed_mirror_sql =
+my $failed_mirror_sql =
   qq{UPDATE mirror_location_mirror_map SET healthy='0' WHERE mirror_id=?};
-$log_sql =
+my $log_sql =
 qq{INSERT INTO sentry_log (log_date, mirror_id, mirror_active, mirror_rating, reason) VALUES (FROM_UNIXTIME(?), ?, ?, ?, ?)};
-$getlog_sql =
+my $getlog_sql =
 qq{SELECT mirror_rating, mirror_active FROM sentry_log WHERE mirror_id = ? ORDER BY log_date DESC LIMIT 4};
-$updatelog_sql =
+my $updatelog_sql =
 qq{UPDATE sentry_log SET reason=? WHERE log_date=FROM_UNIXTIME(?) AND mirror_id=?};
-$updaterating_sql = qq{UPDATE mirror_mirrors SET rating = ? WHERE id = ?};
-$logratingchange_sql =
+my $updaterating_sql = qq{UPDATE mirror_mirrors SET rating = ? WHERE id = ?};
+my $logratingchange_sql =
 qq{INSERT INTO django_admin_log (action_time, user_id, content_type_id, object_id, object_repr, action_flag, change_message) VALUES (NOW(), 32, 16, ?, ?, 2, ?)};
 
 my $location_sth        = $dbh->prepare($location_sql);
@@ -127,7 +131,7 @@ if ($DEBUG) {
         $products{ $product->{id} } = $product->{name};
     }
 
-    $oss_sth = $dbh->prepare($oss_sql);
+    my $oss_sth = $dbh->prepare($oss_sql);
     $oss_sth->execute();
 
     while ( my $os = $oss_sth->fetchrow_hashref() ) {
