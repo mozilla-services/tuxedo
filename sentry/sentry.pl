@@ -155,6 +155,11 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         my $answerpacket = $netres->query($domain);
         my @answer = $answerpacket->answer;
         foreach my $line (@answer) {
+            if ('A' eq $line->type) {
+                #Record IPs we find
+                $mirror->{ip} ||= [];
+                push @{$mirror->{ip}}, $line->address;
+            }
             log_this $line->string . "\n";
         }
     }
