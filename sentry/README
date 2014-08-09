@@ -10,4 +10,4 @@ perl-DBI
 perl-libwww-perl
 perl-Net-DNS
 perl-DBD-mysql
-
+perl-Time-HiRes

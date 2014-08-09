@@ -11,6 +11,7 @@ use LWP;
 use LWP::UserAgent::Determined;
 use Net::DNS;
 use URI;
+use Time::HiRes qw(gettimeofday tv_interval);
 
 use vars qw( $dbi::errstr );
 my $start_timestamp = time;
@@ -259,18 +260,22 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         # allow 1 redirect
         $ua->max_redirect(1);
 
+        my $start = [gettimeofday];
         my $res = $ua->request($req);
+        my $elapsed = tv_interval($start);
+
+        my $took = " TOOK=$elapsed";
 
         if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
-            log_this "okay.\n";
+            log_this "okay.$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
         }
         elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
-            log_this "FAILED. rc=" . $res->{_rc} . "\n";
+            log_this "FAILED. rc=" . $res->{_rc} . "$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
-            log_this "FAILED. rc=" . $res->{_rc} . "\n";
+            log_this "FAILED. rc=" . $res->{_rc} . "$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '0');
         }
 
