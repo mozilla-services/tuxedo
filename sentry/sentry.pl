@@ -156,8 +156,25 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         my $answerpacket = $netres->query($domain);
         my @answer = $answerpacket->answer;
         foreach my $line (@answer) {
+            if ('A' eq $line->type) {
+                #Record IPs we find
+                $mirror->{ip} ||= [];
+                push @{$mirror->{ip}}, $line->address;
+            }
             log_this $line->string . "\n";
         }
+    }
+
+    if (exists $mirror->{ip}) {
+        my $ip = $mirror->{ip}[0];
+        log_this"Using first seen IP: $ip for requests\n";
+
+        my $uri = URI->new($mirror->{baseurl});
+        $uri->authority($ip);
+        $mirror->{baseurl} = $uri;
+        $mirror->{host} = $domain;
+
+        log_this "Making base URL $mirror->{baseurl}\n";
     }
 
     # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
@@ -254,8 +271,15 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         } else {
             $filepath =~ s@:lang@en-US@;
         }
-        log_this "[" . strftime("%F %T %z", localtime) . "] $filepath... ";
+
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
+
+        # Explicitely set the Host: header if needed (
+        if ($mirror->{host}) {
+            $req->header("Host" => $mirror->{host} );
+        }
+
+        log_this "[" . strftime("%F %T %z", localtime) . "] " . $req->method . " " . $req->uri . " ... ";
 
         # allow 1 redirect
         $ua->max_redirect(1);
