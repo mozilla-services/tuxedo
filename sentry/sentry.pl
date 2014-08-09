@@ -6,7 +6,7 @@ use strict;
 #   regions and then determine how good we are at this.
 
 use locale;
-use POSIX;
+use POSIX qw(strftime);
 use DBI;
 use Data::Dumper;
 use LWP;
