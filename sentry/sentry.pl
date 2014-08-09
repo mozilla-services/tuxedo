@@ -34,12 +34,6 @@ my $user = '';
 my $pass = '';
 my $db   = $user;
 
-# email address to notify of mirror failures
-my $email = '';
-
-# content types that we need to check
-my %content_type = ();
-
 # load the config
 do "sentry.cfg";
 
@@ -169,15 +163,6 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
         $failed_mirror_sth->execute( $mirror->{id} );
         $log_sth->execute( $start_timestamp, $mirror->{id}, '0',
             $mirror->{rating}, "DNS failed" );
-
-# send email to infra
-#        open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-#        print SENDMAIL "Subject: [bouncer] (" . $mirror->{id} . ") " . $mirror->{name} . " (weight: " . $mirror->{rating} . ") has failed DNS resolution\n";
-#        print SENDMAIL "To: $email\n";
-#        print SENDMAIL "Content-type: text/plain\n\n";
-#        print SENDMAIL "$mirror->{name} failed DNS resolution.  All files for this mirror will be disabled until the next check.";
-#        close(SENDMAIL);
-
         next;
     }
     else {
@@ -242,17 +227,6 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
         }
 
         $updatelog_sth->execute( $output, $start_timestamp, $mirror->{id} );
-
-# send email to infra
-#       open(SENDMAIL, "|/usr/sbin/sendmail -t") or die "Cannot open /usr/sbin/sendmail: $!";
-#       print SENDMAIL "Subject: [bouncer] (" . $mirror->{id} . ") " . $mirror->{name} . " (weight: " . $mirror->{rating} . ") is not responding";
-#       print SENDMAIL " - weight dropped to $newweight" if $dropit;
-#       print SENDMAIL "\n";
-#       print SENDMAIL "To: $email\n";
-#       print SENDMAIL "Content-type: text/plain\n\n";
-#       print SENDMAIL "$mirror->{name} sent no response for its URI: $mirror->{baseurl}.  All files for this mirror will be disabled until the next check.";
-#       close(SENDMAIL);
-
         next;
     }
 
