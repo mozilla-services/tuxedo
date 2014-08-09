@@ -12,13 +12,13 @@ my $start_timestamp = time;
 my $DEBUG = 1;
 
 # Some db credentials (defaults)
-my $host = '';
-my $user = '';
-my $pass = '';
-my $db   = '';
+our $host = '';
+our $user = '';
+our $pass = '';
+our $db   = '';
 
 # default number of children to fork at a time
-my $num_children = 16;
+our $num_children = 16;
 
 # load the config
 do "sentry.cfg";

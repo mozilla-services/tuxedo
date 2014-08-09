@@ -29,10 +29,10 @@ my %products = ();
 my %oss      = ();
 
 # Some db credentials
-my $host = '';
-my $user = '';
-my $pass = '';
-my $db   = $user;
+our $host = '';
+our $user = '';
+our $pass = '';
+our $db   = $user;
 
 # load the config
 do "sentry.cfg";
