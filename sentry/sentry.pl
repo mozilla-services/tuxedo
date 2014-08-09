@@ -8,8 +8,6 @@ use strict;
 use locale;
 use POSIX qw(strftime);
 use DBI;
-use Data::Dumper;
-use LWP;
 use LWP::UserAgent::Determined;
 use Net::DNS;
 use URI;
