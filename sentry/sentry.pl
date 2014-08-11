@@ -290,16 +290,22 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
         my $took = " TOOK=$elapsed";
 
+        my $cache = ":miss:";
+        if (my $xcache = $res->header('X-Cache')) {
+          $cache = lc $xcache;
+        }
+        $cache = " CACHE=$cache";
+
         if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
-            log_this "okay.$took\n";
+            log_this "okay.$cache$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
         }
         elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
-            log_this "FAILED. rc=" . $res->{_rc} . "$took\n";
+            log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
-            log_this "FAILED. rc=" . $res->{_rc} . "$took\n";
+            log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
             $update_sth->execute($location->{id}, $mirror->{id}, '1', '0');
         }
 
