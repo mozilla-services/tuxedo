@@ -13,13 +13,15 @@ use Net::DNS;
 use URI;
 use Time::HiRes qw(gettimeofday tv_interval);
 
-use constant VERSION   => "1.0";
+use constant VERSION => "1.0";
 
-use constant TIMEOUT     => 10;  # Basic network timeouts for most operations
-use constant KEEPALIVE   => 5;   # The total number of connections to try and keep open with keepalives
-use constant SLOW_MIRROR => 600; # A mirror that exceeds this amount of time for checks is considered failed
+use constant TIMEOUT => 10;    # Basic network timeouts for most operations
+use constant KEEPALIVE =>
+  5;    # The total number of connections to try and keep open with keepalives
+use constant SLOW_MIRROR => 600
+  ;  # A mirror that exceeds this amount of time for checks is considered failed
 
-use constant AGENT       => "Mozilla Mirror Monitor/" . VERSION;
+use constant AGENT => "Mozilla Mirror Monitor/" . VERSION;
 
 my $start_timestamp = time;
 my %ua_options      = ( 'keep_alive' => KEEPALIVE );
@@ -175,30 +177,31 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
         my $answerpacket = $netres->query($domain);
         my @answer       = $answerpacket->answer;
         foreach my $line (@answer) {
-            if ('A' eq $line->type) {
+            if ( 'A' eq $line->type ) {
+
                 #Record IPs we find
                 $mirror->{ip} ||= [];
-                push @{$mirror->{ip}}, $line->address;
+                push @{ $mirror->{ip} }, $line->address;
             }
             log_this $line->string . "\n";
         }
     }
 
-    if (exists $mirror->{ip}) {
+    if ( exists $mirror->{ip} ) {
         my $ip = $mirror->{ip}[0];
-        log_this"Using first seen IP: $ip for requests\n";
+        log_this "Using first seen IP: $ip for requests\n";
 
-        my $uri = URI->new($mirror->{baseurl});
+        my $uri = URI->new( $mirror->{baseurl} );
         $uri->authority($ip);
         $mirror->{baseurl} = $uri;
-        $mirror->{host} = $domain;
+        $mirror->{host}    = $domain;
 
         log_this "Making base URL $mirror->{baseurl}\n";
     }
 
-    # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
-    # we do not allow simple_request because the root of a mirror could return a redirect
-    my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
+# test the root of the domain, and mark the mirror as invalid on failure to find anything at root
+# we do not allow simple_request because the root of a mirror could return a redirect
+    my $mirrorReq = HTTP::Request->new( HEAD => $mirror->{baseurl} );
 
     my $mirrorRes = $ua->request($mirrorReq);
 
@@ -299,41 +302,46 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
             $filepath =~ s@:lang@en-US@;
         }
 
-        my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
+        my $req = HTTP::Request->new( HEAD => $mirror->{baseurl} . $filepath );
 
         # Explicitely set the Host: header if needed (
-        if ($mirror->{host}) {
-            $req->header("Host" => $mirror->{host} );
+        if ( $mirror->{host} ) {
+            $req->header( "Host" => $mirror->{host} );
         }
 
-        log_this "[" . strftime("%F %T %z", localtime) . "] " . $req->method . " " . $req->uri . " ... ";
+        log_this "["
+          . strftime( "%F %T %z", localtime ) . "] "
+          . $req->method . " "
+          . $req->uri . " ... ";
 
         # allow 1 redirect
         $ua->max_redirect(1);
 
-        my $start = [gettimeofday];
-        my $res = $ua->request($req);
+        my $start   = [gettimeofday];
+        my $res     = $ua->request($req);
         my $elapsed = tv_interval($start);
 
         my $took = " TOOK=$elapsed";
 
         my $cache = ":miss:";
-        if (my $xcache = $res->header('X-Cache')) {
-          $cache = lc $xcache;
+        if ( my $xcache = $res->header('X-Cache') ) {
+            $cache = lc $xcache;
         }
         $cache = " CACHE=$cache";
 
-        if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
+        if (   ( $res->{_rc} == 200 )
+            && ( $res->{_headers}->{'content-type'} !~ /text\/html/ ) )
+        {
             log_this "okay.$cache$took\n";
-            $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
+            $update_sth->execute( $location->{id}, $mirror->{id}, '1', '1' );
         }
-        elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
+        elsif ( ( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 ) ) {
             log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
-            $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
+            $update_sth->execute( $location->{id}, $mirror->{id}, '0', '0' );
         }
         else {
             log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
-            $update_sth->execute($location->{id}, $mirror->{id}, '1', '0');
+            $update_sth->execute( $location->{id}, $mirror->{id}, '1', '0' );
         }
 
     }
