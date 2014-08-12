@@ -175,13 +175,31 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
         my $answerpacket = $netres->query($domain);
         my @answer       = $answerpacket->answer;
         foreach my $line (@answer) {
+            if ('A' eq $line->type) {
+                #Record IPs we find
+                $mirror->{ip} ||= [];
+                push @{$mirror->{ip}}, $line->address;
+            }
             log_this $line->string . "\n";
         }
     }
 
-# test the root of the domain, and mark the mirror as invalid on failure to find anything at root
-# we do not allow simple_request because the root of a mirror could return a redirect
-    my $mirrorReq = HTTP::Request->new( HEAD => $mirror->{baseurl} );
+    if (exists $mirror->{ip}) {
+        my $ip = $mirror->{ip}[0];
+        log_this"Using first seen IP: $ip for requests\n";
+
+        my $uri = URI->new($mirror->{baseurl});
+        $uri->authority($ip);
+        $mirror->{baseurl} = $uri;
+        $mirror->{host} = $domain;
+
+        log_this "Making base URL $mirror->{baseurl}\n";
+    }
+
+    # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
+    # we do not allow simple_request because the root of a mirror could return a redirect
+    my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
+
     my $mirrorRes = $ua->request($mirrorReq);
 
 # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
@@ -280,8 +298,15 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
         else {
             $filepath =~ s@:lang@en-US@;
         }
-        log_this "[" . strftime( "%F %T %z", localtime ) . "] $filepath... ";
-        my $req = HTTP::Request->new( HEAD => $mirror->{baseurl} . $filepath );
+
+        my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
+
+        # Explicitely set the Host: header if needed (
+        if ($mirror->{host}) {
+            $req->header("Host" => $mirror->{host} );
+        }
+
+        log_this "[" . strftime("%F %T %z", localtime) . "] " . $req->method . " " . $req->uri . " ... ";
 
         # allow 1 redirect
         $ua->max_redirect(1);
@@ -292,22 +317,25 @@ while ( my $mirror = $mirror_sth->fetchrow_hashref() ) {
 
         my $took = " TOOK=$elapsed";
 
-        if (   ( $res->{_rc} == 200 )
-            && ( $res->{_headers}->{'content-type'} !~ /text\/html/ ) )
-        {
-            log_this "okay.\n";
-            $update_sth->execute( $location->{id}, $mirror->{id}, '1', '1' );
+        my $cache = ":miss:";
+        if (my $xcache = $res->header('X-Cache')) {
+          $cache = lc $xcache;
         }
-        elsif ( ( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 ) ) {
-            log_this "FAILED. rc=" . $res->{_rc} . "\n";
-            $update_sth->execute( $location->{id}, $mirror->{id}, '0', '0' );
+        $cache = " CACHE=$cache";
+
+        if (( $res->{_rc} == 200 ) && ( $res->{_headers}->{'content-type'} !~ /text\/html/ )) {
+            log_this "okay.$cache$took\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '1', '1');
+        }
+        elsif (( $res->{_rc} == 404 ) || ( $res->{_rc} == 403 )) {
+            log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '0', '0');
         }
         else {
-            log_this "FAILED. rc=" . $res->{_rc} . "\n";
-            $update_sth->execute( $location->{id}, $mirror->{id}, '1', '0' );
+            log_this "FAILED. rc=" . $res->{_rc} . "$cache$took\n";
+            $update_sth->execute($location->{id}, $mirror->{id}, '1', '0');
         }
 
-        # content-type == text/plain hack here for Mac dmg's
     }
     log_this "Finished. Elapsed time: " . ( time - $start_timestamp ) . ".\n";
     $log_sth->execute( $start_timestamp, $mirror->{id}, '1', $mirror->{rating},
