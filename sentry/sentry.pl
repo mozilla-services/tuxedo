@@ -182,6 +182,12 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
     # we do not allow simple_request because the root of a mirror could return a redirect
     my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
+
+    # Explicitely set the Host: header if needed (
+    if ($mirror->{host}) {
+        $mirrorReq->header("Host" => $mirror->{host} );
+    }
+
     my $mirrorRes = $ua->request($mirrorReq);
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
