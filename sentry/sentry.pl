@@ -13,6 +13,8 @@ use Net::DNS;
 use URI;
 use Time::HiRes qw(gettimeofday tv_interval);
 
+BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 }
+
 use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my %ua_options = ('keep_alive' => 5);
