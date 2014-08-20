@@ -18,7 +18,7 @@ my $start_timestamp = time;
 my %ua_options = ('keep_alive' => 5);
 my $ua = LWP::UserAgent::Determined->new(%ua_options);
 $ua->timeout(10);
-$ua->agent("Mozilla Mirror Monitor/1.0");
+$ua->agent("Mozilla Mirror Monitor/1.0 (@ARGV)");
 
 my $netres = Net::DNS::Resolver->new();
 $netres->tcp_timeout(10);
