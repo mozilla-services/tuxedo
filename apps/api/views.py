@@ -338,6 +338,30 @@ def location_add(request):
 
 @require_POST
 @csrf_exempt
+@has_perm_or_basicauth("mirror.modify_location", HTTP_AUTH_REALM)
+def location_modify(request):
+    xml = XMLRenderer()
+
+    prodname = request.POST.get('product', None)
+    osname = request.POST.get('os', None)
+    path = request.POST.get('path', None)
+
+    try:
+        product = Product.objects.get(name=prodname)
+        os = OS.objects.get(name=osname)
+        location = Location.objects.get(product=product, os=os)
+        location.path = path
+        location.save()
+    except (Product.DoesNotExist, OS.DoesNotExist, Location.DoesNotExist), e:
+        return xml.error(e)
+
+    locations = Location.objects.filter(pk=location.pk)
+    xml.prepare_locations(product, locations)
+    return xml.render()
+
+
+@require_POST
+@csrf_exempt
 @has_perm_or_basicauth("mirror.delete_location", HTTP_AUTH_REALM)
 def location_delete(request):
     """Remove a location from the DB"""
