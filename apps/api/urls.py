@@ -7,6 +7,7 @@ urlpatterns = patterns(
 
     (r'^location_show/?$', 'location_show'),
     (r'^location_add/?$', 'location_add'),
+    (r'^location_modify/?$', 'location_modify'),
     (r'^location_delete/?$', 'location_delete'),
 
     (r'^product_show/?$', 'product_show'),
