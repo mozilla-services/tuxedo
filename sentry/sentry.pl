@@ -269,7 +269,7 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
         elsif ($filepath =~ m!-euballot/!i) {
             $filepath =~ s@:lang@sv-SE@;
         } else {
-            $filepath =~ s@:lang@en-US@;
+            $filepath =~ s@:lang@en-US@g;
         }
 
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
