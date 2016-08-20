@@ -13,12 +13,14 @@ use Net::DNS;
 use URI;
 use Time::HiRes qw(gettimeofday tv_interval);
 
+BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 }
+
 use vars qw( $dbi::errstr );
 my $start_timestamp = time;
 my %ua_options = ('keep_alive' => 5);
 my $ua = LWP::UserAgent::Determined->new(%ua_options);
 $ua->timeout(10);
-$ua->agent("Mozilla Mirror Monitor/1.0");
+$ua->agent("Mozilla Mirror Monitor/1.0 (@ARGV)");
 
 my $netres = Net::DNS::Resolver->new();
 $netres->tcp_timeout(10);
@@ -180,6 +182,12 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
     # test the root of the domain, and mark the mirror as invalid on failure to find anything at root
     # we do not allow simple_request because the root of a mirror could return a redirect
     my $mirrorReq = HTTP::Request->new(HEAD => $mirror->{baseurl});
+
+    # Explicitely set the Host: header if needed (
+    if ($mirror->{host}) {
+        $mirrorReq->header("Host" => $mirror->{host} );
+    }
+
     my $mirrorRes = $ua->request($mirrorReq);
 
     # if the mirror is bad, we should skip to the next mirror and avoid iterating over locations
