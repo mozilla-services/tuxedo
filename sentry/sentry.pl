@@ -241,36 +241,10 @@ while (my $mirror = $mirror_sth->fetchrow_hashref() ) {
             exit;
         }
         my $filepath = $location->{path};
-        if (($filepath =~ m!/firefox/!)
-            && ($filepath !~ m!/namoroka/!)
-            && ($filepath !~ m!/devpreview/!)
-            && ($filepath !~ m!3\.6b1!)
-            && ($filepath !~ m!wince\-arm!)
-            && ($filepath !~ m!EUballot!i)
-        ) {
-            $filepath =~ s@:lang@zh-TW@;
-        }
-        elsif ($filepath =~ m!/thunderbird/!) {
-            if ($filepath =~ m!3\.1a1!) {
-                $filepath =~ s@:lang@tr@;
-            }
-            else {
-                $filepath =~ s@:lang@zh-TW@;
-            }
-        }
-        elsif ($filepath =~ m!/seamonkey/!) {
-            if (($filepath =~ m!2\.0\.5!) || ($filepath =~ m!2\.0\.6!)) {
-                $filepath =~ s@:lang@zh-CN@;
-            }
-            else {
-                $filepath =~ s@:lang@tr@;
-            }
-        }
-        elsif ($filepath =~ m!-euballot/!i) {
-            $filepath =~ s@:lang@sv-SE@;
-        } else {
-            $filepath =~ s@:lang@en-US@g;
-        }
+        # we used to replace ':lang' with the 'last locale' when testing locations,
+        # eg zh-TW, so that volunteer mirrors had time to sync all the files before they
+        # were enabled. This is no longer necessary in the days of CDNs
+        $filepath =~ s@:lang@en-US@g;
 
         my $req = HTTP::Request->new(HEAD => $mirror->{baseurl} . $filepath);
 
