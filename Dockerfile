@@ -16,4 +16,4 @@ EXPOSE 8000
 
 ENV PYTHONPATH="/app/tuxedo:/app/tuxedo/tuxedo/vendor/lib/python:/app/tuxedo/tuxedo/vendor/src"
 
-CMD gunicorn -b 127.0.0.1:8000 -w 24 wsgirunner
+CMD ["/app/tuxedo/tuxedo/bin/start", "-b", "127.0.0.1:8000", "-w", "24", "wsgirunner"]
