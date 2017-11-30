@@ -4,12 +4,12 @@ set -e
 set -u
 
 PID=$$
-/usr/bin/python manage.py update_product_details
+python manage.py update_product_details
 
 (
     sleep 1800
     while true; do
-        /usr/bin/python manage.py update_product_details && \
+        python manage.py update_product_details && \
             kill -s HUP $PID
             sleep 1800
     done
