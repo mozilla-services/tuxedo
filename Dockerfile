@@ -2,6 +2,7 @@ FROM python:2.7
 
 RUN mkdir -p /app
 COPY . /app/tuxedo/tuxedo
+COPY version.json /app/version.json
 
 WORKDIR /app/tuxedo/tuxedo
 
