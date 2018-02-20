@@ -64,31 +64,27 @@ def uptake(request):
         return xml.error('product and/or os are required GET parameters.',
                          errno=101)
 
+    product_names = None
     if product:
         if fuzzy:
             products = Product.objects.filter(name__icontains=product)
         else:
             products = Product.objects.filter(name__exact=product)
-        pids = [p.id for p in products]
-        if not pids:
+        product_names = [p.name for p in products]
+        if not product_names:
             return xml.error('No products found', errno=102)
-    else:
-        pids = None
 
+    os_names = None
     if os:
         if fuzzy:
             oses = OS.objects.filter(name__icontains=os)
         else:
             oses = OS.objects.filter(name__exact=os)
-        osids = [o.id for o in oses]
-        if not osids:
+        os_names = [o.name for o in oses]
+        if not os_names:
             return xml.error('No OSes found', errno=102)
-    else:
-        osids = None
 
-    uptake = Location.get_mirror_uptake(products=pids, oses=osids)
-
-    xml.prepare_uptake(uptake)
+    xml.prepare_uptake_fake(products=product_names, oses=os_names)
     return xml.render()
 
 
@@ -503,6 +499,32 @@ class XMLRenderer(object):
             locnode.setAttribute('os', str(location.os.name))
             locnode.appendChild(self.doc.createTextNode(location.path))
             prodnode.appendChild(locnode)
+
+    def prepare_uptake_fake(self, products, oses):
+        root = self.doc.createElement('mirror_uptake')
+        self.doc.appendChild(root)
+
+        for product in products:
+            for os_name in oses:
+                item = self.doc.createElement('item')
+
+                elem = self.doc.createElement('product')
+                elem.appendChild(self.doc.createTextNode(str(product)))
+                item.appendChild(elem)
+
+                elem = self.doc.createElement('os')
+                elem.appendChild(self.doc.createTextNode(str(os_name)))
+                item.appendChild(elem)
+
+                elem = self.doc.createElement('available')
+                elem.appendChild(self.doc.createTextNode(str(2000000)))
+                item.appendChild(elem)
+
+                elem = self.doc.createElement('total')
+                elem.appendChild(self.doc.createTextNode(str(2000000)))
+                item.appendChild(elem)
+
+                root.appendChild(item)
 
     def prepare_uptake(self, uptake):
         """Product uptake"""
