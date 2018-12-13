@@ -4,4 +4,4 @@ ipaddr==2.1.11
 Markdown==2.0.3
 South>=0.6.2
 python-memcached==1.48
-git+git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+django-mozilla-product-details==0.13
