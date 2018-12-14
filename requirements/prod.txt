@@ -1,3 +1,0 @@
-ipaddr==2.0.0
-git+git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
-Markdown==2.0.3
