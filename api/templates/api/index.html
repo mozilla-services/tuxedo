@@ -1,0 +1,15 @@
+{% extends "api/base_doc.html" %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block doc_text %}
+<h1>Bouncer API</h1>
+
+<p>Available commands:</p>
+<ul>
+    {% for command in commands %}
+    <li><a href="{% url 'api:docs' command=command %}">{{ command }}</a></li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

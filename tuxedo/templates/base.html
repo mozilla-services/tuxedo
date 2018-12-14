@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{% block title %}Bouncer{% endblock %}</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" type="image/png" href="{{ MEDIA_URL}}img/favicon.png" />
+    <link href="{{ MEDIA_URL}}css/tuxedo.css" rel="stylesheet" type="text/css" />
+    {% if use_sorttable %}
+    <script src="{{ MEDIA_URL }}js/sorttable.js"></script>{% endif %}
+    {% block extrahead %}{% endblock %}
+</head>
+
+<body>
+    <div id="header">
+        <div id="logo">
+            <h1><a href="{% url 'index' %}"><span>Bouncer</span> Mirror Management</a></h1>
+        </div>
+        <div id="menu">
+            <ul>
+                {% if user.is_authenticated %}
+                <li class="first"><a href="{% url 'users:profile' %}">User Profile</a></li>
+                {% if user.is_staff %}
+                <li><a href="{% url 'admin:index' %}">Admin</a></li>
+                {% endif %}
+                <li><a href="{% url 'users:logout' %}">Log out</a></li>
+                {% else %}
+                <li class="first"><a href="{% url 'users:login' %}">Log in</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <div id="content">
+        {% block content %}
+        <div id="colOne">
+            {% block main_content %}
+            <h1>Welcome to Bouncer!</h1>
+            {% endblock %}
+        </div>
+        <div id="colTwo">
+            {% block sidebar %}
+            {% endblock %}
+        </div>
+        <div style="clear: both;">&nbsp;</div>
+        {% endblock %}
+    </div>
+    <div id="footer">
+        <p>Copyright &copy; 1998&ndash;{% now "Y" %} Mozilla. Site design based on
+            <a href="http://creativecommons.org/licenses/by/2.5/">CC-by licensed</a>
+            work from <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+    </div>
+</body>
+
+</html>

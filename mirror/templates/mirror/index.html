@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<h2>Welcome to Bouncer!</h2>
+<p>Please <a href="{% url 'users:login' %}">log in</a> to see all available functions.</p>
+{% endblock %}
+
+{% block sidebar %}
+{% include "sidebar_menu.html" %}
+{% endblock %}

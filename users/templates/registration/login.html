@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>{% block title %}Login{% endblock %}</h2>
+
+<form method="post" action="{% url 'users:login' %}">
+    <table class="formtable">
+        {% csrf_token %}
+        {{ form.as_table }}
+    </table>
+
+    <button type="submit">Log in</button>
+    <input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+<p><small><a href="{% url 'users:password-reset' %}">Forgotten your password?</small></p>
+{% endblock %}

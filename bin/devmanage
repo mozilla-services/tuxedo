@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+docker build -t tuxedo-dev -f Dockerfile.dev .
+docker run --rm -it -v $PWD:/tuxedo-dev \
+    -e "TUXEDO_DB_NAME=$TUXEDO_DB_NAME" \
+    -e "TUXEDO_DB_HOST=$TUXEDO_DB_HOST" \
+    -e "TUXEDO_DB_PASSWORD=$TUXEDO_DB_PASSWORD" \
+    -e "TUXEDO_DB_USER=$TUXEDO_DB_USER" \
+    -e "TUXEDO_SECRET_KEY=$TUXEDO_SECRET_KEY" \
+    -p 8000:8000 \
+    tuxedo-dev python /tuxedo-dev/manage.py "$@"
