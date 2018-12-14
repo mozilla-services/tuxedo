@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:3.7
 
 RUN mkdir -p /app
 COPY . /app/tuxedo/tuxedo
@@ -8,7 +8,7 @@ WORKDIR /app/tuxedo/tuxedo
 
 RUN \
     apt-get update && \
-    apt-get install -y -qq python-mysqldb && \
+    apt-get install -y -qq default-libmysqlclient-dev && \
     pip install -r requirements.txt && \
     pip install gunicorn==19.6.0 && \
     cp wsgi/tuxedo.wsgi wsgirunner.py
