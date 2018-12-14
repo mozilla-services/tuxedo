@@ -2,9 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.models import User
 
-from .models import LegacyUser, UserProfile
-
-admin.site.unregister(User)  # remove built-in admin
+from .models import LegacyUser, User
 
 
 @admin.register(LegacyUser)
@@ -13,12 +11,6 @@ class LegacyUserAdmin(admin.ModelAdmin):
     ordering = ('username', )
 
 
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    verbose_name = 'User Profile'
-
-
 @admin.register(User)
-class UserAdmin(DjangoUserAdmin):
-    """subclass for Django's built-in user admin, to include user profile"""
-    inlines = [UserProfileInline]
+class UserAdmin(admin.ModelAdmin):
+    pass

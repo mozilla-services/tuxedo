@@ -5,7 +5,7 @@ import re
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django import http
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from django.template import RequestContext
 
 from lib.sort_headers import SortHeaders
@@ -25,15 +25,10 @@ def index(request):
     """Main index/summary page"""
     # generic front page
     if not request.user.is_authenticated:
-        return render_to_response(
-            'mirror/index.html', context_instance=RequestContext(request))
+        return render(request, 'mirror/index.html')
 
     # personal summary page
     data = {}
-
-    # mirror data
-    mirrors = Mirror.objects.filter(contacts=request.user).order_by('name')
-    data['mirrors'] = mirrors
 
     return render(request, 'mirror/summary.html', data)
 
@@ -59,8 +54,7 @@ def uptake(request):
             'use_sorttable': True,
         })
 
-    return render_to_response(
-        'mirror/uptake.html', data, context_instance=RequestContext(request))
+    return render(request, 'mirror/uptake.html', data)
 
 
 @staff_member_required
@@ -87,5 +81,4 @@ def lstats(request):
             'headers': list(sort_headers.headers()),
             'use_sorttable': True,
         })
-    return render_to_response(
-        'mirror/lstats.html', data, context_instance=RequestContext(request))
+    return render(request, 'mirror/lstats.html', data)

@@ -445,7 +445,8 @@ class XMLRenderer(object):
 
     def render(self, status=200):
         """serve the XML to the user"""
-        return HttpResponse(self.toxml(), mimetype='text/xml', status=status)
+        return HttpResponse(
+            self.toxml(), content_type='text/xml', status=status)
 
     def prepare_products(self, products):
         """Product List"""

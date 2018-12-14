@@ -8,31 +8,44 @@ from mirror.forms import ProductAliasForm
 class ProductAliasAdmin(admin.ModelAdmin):
     list_display = ('alias', 'related_product')
     form = ProductAliasForm
+
+
 admin.site.register(ProductAlias, ProductAliasAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('product', 'os', 'path')
     list_filter = ('product', 'os')
-    ordering = ('product',)
+    ordering = ('product', )
+
+
 admin.site.register(Location, LocationAdmin)
 
 
 class MirrorAdmin(admin.ModelAdmin):
-    exclude = ('count',)
-    list_display = ('active', 'rating', 'name', 'baseurl', 'count',
-                    'admin_contacts')
-    list_display_links = ('name',)
-    list_editable = ('active',)
-    list_filter = ('active',)
-    ordering = ('active',)
+    exclude = ('count', )
+    list_display = (
+        'active',
+        'rating',
+        'name',
+        'baseurl',
+        'count',
+    )
+    list_display_links = ('name', )
+    list_editable = ('active', )
+    list_filter = ('active', )
+    ordering = ('active', )
     search_fields = ['name', 'baseurl']
+
+
 admin.site.register(Mirror, MirrorAdmin)
 
 
 class OSAdmin(admin.ModelAdmin):
     list_display = ('name', 'priority')
-    ordering = ('priority',)
+    ordering = ('priority', )
+
+
 admin.site.register(OS, OSAdmin)
 
 
@@ -45,7 +58,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'priority', 'count', 'active', 'checknow',
                     'ssl_only')
     list_filter = ('active', 'checknow', 'ssl_only')
-    ordering = ('name',)
+    ordering = ('name', )
     actions = ('mark_for_checknow', 'unmark_for_checknow')
     inlines = [ProductLanguageInline]
 
@@ -65,4 +78,6 @@ class ProductAdmin(admin.ModelAdmin):
         'Set Check Now on selected products')
     unmark_for_checknow.short_description = (
         'Remove Check Now on selected products')
+
+
 admin.site.register(Product, ProductAdmin)

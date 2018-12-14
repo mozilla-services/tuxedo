@@ -35,12 +35,15 @@ def logged_in_or_basicauth(realm=""):
 
     You can provide the name of the realm to ask for authentication within.
     """
+
     def view_decorator(func):
         def wrapper(request, *args, **kwargs):
             return _view_or_basicauth(func, request,
-                                      lambda u: u.is_authenticated(),
-                                      realm, *args, **kwargs)
+                                      lambda u: u.is_authenticated, realm,
+                                      *args, **kwargs)
+
         return wrapper
+
     return view_decorator
 
 
@@ -57,23 +60,28 @@ def has_perm_or_basicauth(perm, realm=''):
         ...
 
     """
+
     def view_decorator(func):
         def wrapper(request, *args, **kwargs):
             return _view_or_basicauth(func, request,
-                                      lambda u: u.has_perm(perm),
-                                      realm, *args, **kwargs)
+                                      lambda u: u.has_perm(perm), realm, *args,
+                                      **kwargs)
+
         return wrapper
+
     return view_decorator
 
 
 def is_staff_or_basicauth(realm=''):
     """Checks if the user is a staff member, displays basic auth otherwise."""
+
     def view_decorator(func):
         def wrapper(request, *args, **kwargs):
-            return _view_or_basicauth(func, request,
-                                      lambda u: u.is_staff,
+            return _view_or_basicauth(func, request, lambda u: u.is_staff,
                                       realm, *args, **kwargs)
+
         return wrapper
+
     return view_decorator
 
 

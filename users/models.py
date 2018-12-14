@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 
 
@@ -17,7 +17,7 @@ class LegacyUser(models.Model):
         max_length=255, unique=True, db_column='user_email')
     converted = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.username
 
     class Meta:
@@ -26,29 +26,5 @@ class LegacyUser(models.Model):
         verbose_name = 'Legacy User'
 
 
-class UserProfile(models.Model):
-    """
-    Represents additional data associated with a user account.
-    For example used for mirror admin contact info.
-    """
-    user = models.ForeignKey(DjangoUser, unique=True, on_delete=models.CASCADE)
-
-    # mirror contact info (bug 408677)
-    address = models.TextField(verbose_name='Mailing Address', blank=True)
-    phone_number = models.CharField(
-        max_length=32, verbose_name='Phone Number', blank=True)
-    ircnick = models.CharField(
-        max_length=32,
-        verbose_name='IRC Nick',
-        help_text='Nickname on irc.mozilla.org',
-        blank=True)
-    comments = models.TextField(blank=True)
-
-
-def user_post_save(sender, instance, **kwargs):
-    """Create a user profile whenever a new user is created"""
-    profile, new = UserProfile.objects.get_or_create(user=instance)
-
-
-# listen to post-save signal
-models.signals.post_save.connect(user_post_save, DjangoUser)
+class User(AbstractUser):
+    pass

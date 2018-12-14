@@ -89,7 +89,6 @@ AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
                            'users.auth.backend.ConversionBackend')
 
 # user profile stuff
-AUTH_PROFILE_MODULE = 'users.UserProfile'
 LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'tuxedo.urls'
@@ -110,6 +109,7 @@ INSTALLED_APPS = (
     'lib',
     #'php', # enable this if you want to run tests on the bounce script
     'users',
+    'product_details',
     'south',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -11,9 +11,3 @@
     <li><a href="{% url 'api:doc-index' %}">Documentation</a></li>
 </ul>
 {% endif %}
-{% if perms.users.change_user %}
-<h3>User accounts</h3>
-<ul>
-    <li><a href="{% url 'users:list' %}">User list</a></li>
-</ul>
-{% endif %}

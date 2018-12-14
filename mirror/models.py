@@ -33,29 +33,12 @@ class Mirror(models.Model):
                                 decimal_places=0,
                                 default=0,
                                 db_index=True)
-    contacts = models.ManyToManyField(User,
-                                      verbose_name="Admin Contact",
-                                      blank=True,
-                                      null=True)
 
     class Meta:
         db_table = 'mirror_mirrors'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
-
-    def admin_contacts(self):
-        """get the administrative contacts for this mirror as HTML"""
-        contacts = self.contacts.order_by('last_name', 'first_name')
-        contacts = [
-            '<a href="%s">%s</a>' %
-            (reverse('admin:auth_user_change', args=(c.pk, )),
-             escape('%s: %s' % (c.get_full_name() or c.username, c.email)))
-            for c in contacts
-        ]
-        return '<br/>'.join(contacts) or ''
-
-    admin_contacts.allow_tags = True
 
 
 class OS(models.Model):
@@ -64,7 +47,7 @@ class OS(models.Model):
     name = models.CharField(max_length=32, unique=True)
     priority = models.IntegerField(default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -91,7 +74,7 @@ class Product(models.Model):
                                    verbose_name='Serve Over SSL Only?',
                                    default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -125,7 +108,7 @@ class ProductLanguage(models.Model):
         db_table = 'mirror_product_langs'
         unique_together = ('product', 'lang')
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s (%s)" % (self.product, self.lang)
 
 
@@ -146,7 +129,7 @@ class Location(models.Model):
 
     permissions = (('view_uptake', 'Can view mirror uptake'), )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.path
 
     @staticmethod
@@ -185,7 +168,7 @@ class LocationMirrorMap(models.Model):
     active = models.BooleanField()
     healthy = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         try:
             return u"%s - %s" % (self.location, self.mirror)
         except (Location.DoesNotExist, Mirror.DoesNotExist):
@@ -217,5 +200,5 @@ class LocationMirrorLanguageException(models.Model):
         db_table = 'mirror_lmm_lang_exceptions'
         unique_together = ('lmm', 'lang')
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s (%s)" % (unicode(self.lmm), self.lang)
