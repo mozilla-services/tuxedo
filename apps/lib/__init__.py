@@ -1,4 +1,11 @@
+import requests
 import sys
+
+
+def product_details(item):
+    res = requests.get(
+        'https://product-details.mozilla.org/1.0/%s.json' % item)
+    return res.json()
 
 
 def docstring_trim(docstring):

@@ -4,4 +4,4 @@ ipaddr==2.1.11
 Markdown==2.0.3
 South>=0.6.2
 python-memcached==1.48
-django-mozilla-product-details==0.13
+requests==2.21.0

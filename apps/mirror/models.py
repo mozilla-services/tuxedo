@@ -4,38 +4,37 @@ from django.db import models
 from django.utils.html import escape
 from django.forms import TextInput
 
-from product_details import product_details
-
+from lib import product_details
 
 # get the possible languages from product details
 LANG_CHOICES = [(key, "%s: %s" % (key, value['English']))
-                for key, value in product_details.languages.items()]
+                for key, value in product_details('languages').items()]
 
 
 # This is to get a longer input box when entering locations
 class LongDisplayCharField(models.CharField):
     def formfield(self, **kwargs):
-        kwargs.update(
-            {"widget": TextInput(attrs={'style': 'width: 60em;'})}
-        )
+        kwargs.update({"widget": TextInput(attrs={'style': 'width: 60em;'})})
         return super(LongDisplayCharField, self).formfield(**kwargs)
 
 
 class Mirror(models.Model):
     """A single mirror."""
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=64, unique=True,
-                            verbose_name='Host Name')
-    baseurl = models.CharField(max_length=255, verbose_name='Base URL',
-                               help_text='No trailing slash.')
+    name = models.CharField(
+        max_length=64, unique=True, verbose_name='Host Name')
+    baseurl = models.CharField(
+        max_length=255,
+        verbose_name='Base URL',
+        help_text='No trailing slash.')
     rating = models.IntegerField()
     active = models.BooleanField()
-    count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
-                                db_index=True)
-    regions = models.ManyToManyField('geoip.Region',
-                                     db_table='geoip_mirror_region_map')
-    contacts = models.ManyToManyField(User, verbose_name="Admin Contact",
-                                      blank=True, null=True)
+    count = models.DecimalField(
+        max_digits=20, decimal_places=0, default=0, db_index=True)
+    regions = models.ManyToManyField(
+        'geoip.Region', db_table='geoip_mirror_region_map')
+    contacts = models.ManyToManyField(
+        User, verbose_name="Admin Contact", blank=True, null=True)
 
     class Meta:
         db_table = 'mirror_mirrors'
@@ -46,12 +45,14 @@ class Mirror(models.Model):
     def admin_contacts(self):
         """get the administrative contacts for this mirror as HTML"""
         contacts = self.contacts.order_by('last_name', 'first_name')
-        contacts = ['<a href="%s">%s</a>' % (
-                    reverse('admin:auth_user_change', args=(c.pk,)),
-                    escape('%s: %s' % (c.get_full_name() or c.username,
-                           c.email))
-                    ) for c in contacts]
+        contacts = [
+            '<a href="%s">%s</a>' %
+            (reverse('admin:auth_user_change', args=(c.pk, )),
+             escape('%s: %s' % (c.get_full_name() or c.username, c.email)))
+            for c in contacts
+        ]
         return '<br/>'.join(contacts) or ''
+
     admin_contacts.allow_tags = True
 
 
@@ -72,17 +73,16 @@ class OS(models.Model):
 class Product(models.Model):
     """A single product, e.g., Firefox-3.5.6."""
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True,
-                            verbose_name='Product Name')
+    name = models.CharField(
+        max_length=255, unique=True, verbose_name='Product Name')
     priority = models.IntegerField(default=1)
-    count = models.DecimalField(max_digits=20, decimal_places=0, default=0,
-                                verbose_name='Downloads')
+    count = models.DecimalField(
+        max_digits=20, decimal_places=0, default=0, verbose_name='Downloads')
     active = models.BooleanField(db_index=True, default=True)
-    checknow = models.BooleanField(db_index=True, verbose_name='Check Now?',
-                                   default=True)
-    ssl_only = models.BooleanField(db_index=False,
-                                   verbose_name='Serve Over SSL Only?',
-                                   default=False)
+    checknow = models.BooleanField(
+        db_index=True, verbose_name='Check Now?', default=True)
+    ssl_only = models.BooleanField(
+        db_index=False, verbose_name='Serve Over SSL Only?', default=False)
 
     def __unicode__(self):
         return self.name
@@ -107,8 +107,11 @@ class ProductLanguage(models.Model):
     "all languages" or "not applicable".
     """
     product = models.ForeignKey('Product', related_name='languages')
-    lang = models.CharField(max_length=30, choices=LANG_CHOICES,
-                            db_column='language', verbose_name='Language')
+    lang = models.CharField(
+        max_length=30,
+        choices=LANG_CHOICES,
+        db_column='language',
+        verbose_name='Language')
 
     class Meta:
         db_table = 'mirror_product_langs'
@@ -124,23 +127,23 @@ class Location(models.Model):
     product = models.ForeignKey('Product')
     os = models.ForeignKey('OS', verbose_name='OS')
     path = LongDisplayCharField(
-        max_length=255, help_text=(
-            'Always use a leading slash.<br/>'
-            'The placeholder :lang will be replaced with the requested '
-            'language at download time.'))
+        max_length=255,
+        help_text=('Always use a leading slash.<br/>'
+                   'The placeholder :lang will be replaced with the requested '
+                   'language at download time.'))
 
     class Meta:
         db_table = 'mirror_locations'
         unique_together = ('product', 'os')
-    permissions = (
-        ('view_uptake', 'Can view mirror uptake'),
-    )
+
+    permissions = (('view_uptake', 'Can view mirror uptake'), )
 
     def __unicode__(self):
         return self.path
 
     @staticmethod
-    def get_mirror_uptake(products=None, oses=None,
+    def get_mirror_uptake(products=None,
+                          oses=None,
                           order_by='location__product__name'):
         """
         Given a list of product IDs and/or OS IDs, return a list of these
@@ -193,11 +196,15 @@ class LocationMirrorLanguageException(models.Model):
     serve the respective location in all available languages. Entries in
     this table mark the exceptions from that rule.
     """
-    lmm = models.ForeignKey('LocationMirrorMap',
-                            related_name='lang_exceptions',
-                            db_column='location_mirror_map_id')
-    lang = models.CharField(max_length=30, choices=LANG_CHOICES,
-                            db_column='language', verbose_name='Language')
+    lmm = models.ForeignKey(
+        'LocationMirrorMap',
+        related_name='lang_exceptions',
+        db_column='location_mirror_map_id')
+    lang = models.CharField(
+        max_length=30,
+        choices=LANG_CHOICES,
+        db_column='language',
+        verbose_name='Language')
 
     class Meta:
         db_table = 'mirror_lmm_lang_exceptions'

@@ -13,7 +13,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
 from mirror.models import Location
-from product_details import product_details
+from lib import product_details
 
 
 class BounceTestCase(TestCase):
@@ -34,8 +34,8 @@ class BounceTestCase(TestCase):
         self.conn.request('HEAD', self.parsed_url.path)
         req = self.conn.getresponse()
         self.assertEqual(req.status, 302)
-        self.assertTrue(req.getheader('Location', '').startswith(
-            'http://www.mozilla.com'))
+        self.assertTrue(
+            req.getheader('Location', '').startswith('http://www.mozilla.com'))
 
     def test_defaults(self):
         """
@@ -48,32 +48,34 @@ class BounceTestCase(TestCase):
 
         data = {'product': myprod.name}
 
-        self.conn.request('HEAD', '%s?%s' % (self.parsed_url.path,
-                                             urllib.urlencode(data)))
+        self.conn.request(
+            'HEAD', '%s?%s' % (self.parsed_url.path, urllib.urlencode(data)))
 
         req = self.conn.getresponse()
         self.assertEqual(req.status, 302)
-        self.assertTrue(req.getheader('Location', '').endswith(
-            self._lang_placeholder(myloc.path, 'en-US')))
+        self.assertTrue(
+            req.getheader('Location', '').endswith(
+                self._lang_placeholder(myloc.path, 'en-US')))
 
     def test_languages_and_oses(self):
         """Test all known locations"""
         locs = Location.objects.all()
-        langs = product_details.languages.keys()
+        langs = product_details('languages').keys()
 
         for loc in locs:
             for lang in langs:
-                data = {'product': loc.product.name,
-                        'os': loc.os.name,
-                        'lang': lang}
+                data = {
+                    'product': loc.product.name,
+                    'os': loc.os.name,
+                    'lang': lang
+                }
 
-                self.conn.request('HEAD', '%s?%s' % (self.parsed_url.path,
-                                                     urllib.urlencode(data)))
+                self.conn.request(
+                    'HEAD',
+                    '%s?%s' % (self.parsed_url.path, urllib.urlencode(data)))
                 req = self.conn.getresponse()
-                self.assertEqual(
-                    req.status,
-                    302,
-                    'Require redirect for %s' % str(data)
-                )
-                self.assertTrue(req.getheader('Location', '').endswith(
-                    self._lang_placeholder(loc.path, lang)))
+                self.assertEqual(req.status, 302,
+                                 'Require redirect for %s' % str(data))
+                self.assertTrue(
+                    req.getheader('Location', '').endswith(
+                        self._lang_placeholder(loc.path, lang)))

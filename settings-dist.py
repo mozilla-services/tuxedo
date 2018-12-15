@@ -27,8 +27,8 @@ DATABASES = {
         'PORT': '',
         'OPTIONS': {
             'init_command': 'SET storage_engine=InnoDB',
-            'charset' : 'utf8',
-            'use_unicode' : True,
+            'charset': 'utf8',
+            'use_unicode': True,
         },
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
@@ -85,10 +85,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 # auth backends: uses django first, and converts old Bouncer users as needed
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'users.auth.backend.ConversionBackend'
-)
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',
+                           'users.auth.backend.ConversionBackend')
 
 # user profile stuff
 AUTH_PROFILE_MODULE = 'users.UserProfile'
@@ -100,8 +98,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    path('templates')
-)
+    path('templates'))
 
 # path to mozilla product details
 PROD_DETAILS_DIR = path('inc', 'product-details', 'json')
@@ -113,10 +110,7 @@ INSTALLED_APPS = (
     'lib',
     #'php', # enable this if you want to run tests on the bounce script
     'users',
-
-    'product_details',
     'south',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -139,4 +133,3 @@ try:
     from local_settings import *
 except ImportError, exp:
     pass
-
