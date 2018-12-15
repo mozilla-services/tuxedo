@@ -9,6 +9,6 @@ mkdir -p /static/media
 mkdir -p /static/admin-media
 
 cp -R media/* /static/media/
-cp -R vendor/lib/python/django/contrib/admin/static/* /static/admin-media/
+cp -R /usr/local/django/contrib/admin/media/* /static/admin-media/
 
 exec gunicorn "$@"
