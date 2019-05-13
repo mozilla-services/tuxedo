@@ -32,6 +32,7 @@ jobs:
     docker:
       - image: docker:18.02.0-ce
     steps:
+      - checkout
       - setup_remote_docker
       - run:
           name: Create a version.json
